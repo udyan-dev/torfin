@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "570041739875",
+    "project_id": "app-torfin",
+    "storage_bucket": "app-torfin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570041739875:android:7dae1814bf0e9f3505e656",
+        "android_client_info": {
+          "package_name": "com.ironfist.torfin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWhoAohqyfyk82zgi45Y3Ph-9XOXGCgHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
