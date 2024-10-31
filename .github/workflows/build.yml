@@ -1,0 +1,201 @@
+name: Flutter CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.24.4'
+  JAVA_VERSION: '17'
+
+jobs:
+  flutter_job:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ ubuntu-latest ]
+        pubCachePath: [ '$HOME/.pub-cache' ]
+
+    steps:
+      - name: 📝 Log build information
+        run: |
+          echo "🚀 Starting Flutter build pipeline"
+          echo "📌 Runner: ${{ matrix.runner }}"
+          echo "📌 Flutter version: ${{ env.FLUTTER_VERSION }}"
+          echo "📌 Java version: ${{ env.JAVA_VERSION }}"
+          echo "📌 Build number: ${{ github.run_number }}"
+          echo "📌 Commit SHA: ${{ github.sha }}"
+
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: 🔄 Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: ☕ Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+          cache-dependency-path: |
+            **/*.gradle*
+            **/gradle-wrapper.properties
+
+      - name: 🔧 Export JAVA_HOME and update PATH
+        run: |
+          echo "📝 Setting JAVA_HOME and updating PATH"
+          echo "JAVA_HOME=${{ env.JAVA_HOME_17_X64 }}" >> $GITHUB_ENV
+          echo "${{ env.JAVA_HOME_17_X64 }}/bin" >> $GITHUB_PATH
+
+      - name: 🎯 Set up Flutter with caching
+        uses: hrishikesh-kadam/setup-flutter@v1
+        with:
+          ref: ${{ env.FLUTTER_VERSION }}
+          actionsCacheKey: 'flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}'
+          setPubCachePath: ${{ matrix.pubCachePath }}
+          addPubCacheBinToPath: 'true'
+          flutterPrecache: 'true'
+
+      - name: 📥 Install dependencies
+        run: |
+          echo "📝 Installing Flutter dependencies..."
+          flutter pub get
+          echo "✅ Dependencies installed successfully"
+
+      - name: 🔍 Analyze project
+        run: |
+          echo "📝 Running Flutter analyze..."
+          flutter analyze
+          echo "✅ Analysis completed"
+
+      - name: 🔐 Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'upload-keystore.jks'
+          fileDir: 'android/app/'
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      - name: 📝 Create key.properties
+        run: |
+          echo "📝 Creating key.properties file..."
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+          echo "✅ key.properties created successfully"
+
+      - name: 💾 Cache build outputs
+        uses: actions/cache@v3
+        with:
+          path: |
+            build/
+            .dart_tool/
+            .pub-cache/
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: 📦 Build appBundle
+        run: |
+          echo "🏗️ Building app bundle..."
+          flutter build appbundle \
+            --release \
+            --split-debug-info=build/app/outputs/symbols \
+            --target-platform=android-arm64 \
+            --dart-define=BUILD_NUMBER=${{ github.run_number }} \
+            --dart-define=COMMIT_SHA=${{ github.sha }}
+          echo "✅ App bundle built successfully"
+
+      - name: 📱 Build APK
+        run: |
+          echo "🏗️ Building APK..."
+          flutter build apk \
+            --release \
+            --split-debug-info=build/app/outputs/symbols \
+            --target-platform=android-arm64 \
+            --dart-define=BUILD_NUMBER=${{ github.run_number }} \
+            --dart-define=COMMIT_SHA=${{ github.sha }}
+          echo "✅ APK built successfully"
+
+      - name: 🔥 Upload APK to Firebase Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: flutter
+          file: build/app/outputs/flutter-apk/app-release.apk
+          releaseNotes: |
+            Build Number: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref }}
+
+      - name: 📤 Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Releases-${{ github.run_number }}
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: 📝 Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          echo "📝 Extracting version from pubspec.yaml..."
+          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "✅ Extracted version: $version"
+
+      - name: 🏷️ Check if Tag Exists
+        id: check_tag
+        run: |
+          echo "🔍 Checking if tag v${{ env.VERSION }} exists..."
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+            echo "⚠️ Tag already exists"
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+            echo "✅ Tag is available"
+          fi
+
+      - name: 🔄 Modify Tag
+        if: env.TAG_EXISTS == 'true'
+        id: modify_tag
+        run: |
+          echo "🔄 Modifying tag due to conflict..."
+          new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
+          echo "VERSION=$new_version" >> $GITHUB_ENV
+          echo "✅ New version: $new_version"
+
+      - name: 📦 Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab"
+          tag: v${{ env.VERSION }}
+          token: ${{ secrets.TOKEN }}
+          generateReleaseNotes: true
+          body: |
+            🚀 Release v${{ env.VERSION }}
+            
+            📱 Build Information:
+            - Build Number: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref }}
+            
+            📦 Artifacts:
+            - Release APK
+            - Release App Bundle
