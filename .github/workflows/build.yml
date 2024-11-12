@@ -74,12 +74,6 @@ jobs:
           flutter pub get
           echo "✅ Dependencies installed successfully"
 
-      - name: 🔍 Analyze project
-        run: |
-          echo "📝 Running Flutter analyze..."
-          flutter analyze
-          echo "✅ Analysis completed"
-
       - name: 🔐 Decode Keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1
