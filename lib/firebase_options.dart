@@ -59,4 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'app-torfin',
     storageBucket: 'app-torfin.appspot.com',
   );
+
 }
