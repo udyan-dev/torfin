@@ -7,5 +7,5 @@ sealed class AppStyles {
       fontSize: 18,
       fontWeight: FontWeight.w700,
       letterSpacing: 1.2,
-      color: AppColors.white);
+      color: AppColors.black);
 }

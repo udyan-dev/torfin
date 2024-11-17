@@ -5,6 +5,6 @@ sealed class AppThemes {
   static get buildTheme => ThemeData(
         fontFamily: 'gg',
         fontFamilyFallback: ['gg'],
-        scaffoldBackgroundColor: AppColors.black,
+        scaffoldBackgroundColor: AppColors.grayLightest,
       );
 }
