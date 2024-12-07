@@ -26,7 +26,9 @@ Future<void> main() async {
   };
   await inject();
   unawaited(MobileAds.instance.initialize());
-  runApp(const MyApp());
+  runApp(const MyApp(
+    key: ValueKey("my_app"),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -35,11 +37,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: ValueKey("_torfin_"),
       title: 'Torfin',
       navigatorKey: DynamicRouteWidget.navigatorKey,
-      theme: AppThemes.buildTheme,
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: NetworkScreen(),
+      home: const NetworkScreen(
+        key: ValueKey("_network_screen_"),
+      ),
     );
   }
 }

@@ -16,22 +16,10 @@ class NetworkScreen extends StatefulWidget {
 }
 
 class _NetworkScreenState extends State<NetworkScreen> {
-  final _oopsImage = Flexible(child: SvgPicture.asset(AppAssets.oops));
-
-  final _networkImage =
-      Flexible(flex: 3, child: SvgPicture.asset(AppAssets.network));
-
-  get _offlineScreen => PopScope(
+  get _offlineScreen => const PopScope(
+        key: ValueKey("_offline_screen_"),
         canPop: false,
-        child: Scaffold(
-          body: Column(
-            children: [
-              SizedBox(height: kToolbarHeight),
-              _oopsImage,
-              _networkImage,
-            ],
-          ),
-        ),
+        child: OfflineScreen(),
       );
 
   @override
@@ -54,8 +42,23 @@ class _NetworkScreenState extends State<NetworkScreen> {
             );
           }
         },
-        child: BaseScreen(),
+        child: const BaseScreen(
+          key: ValueKey("_base_screen_"),
+        ),
       ),
+    );
+  }
+}
+
+class OfflineScreen extends StatelessWidget {
+  const OfflineScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+          key: ValueKey(AppAssets.network),
+          child: SvgPicture.asset(AppAssets.network)),
     );
   }
 }
