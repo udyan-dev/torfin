@@ -3,10 +3,12 @@ import 'package:torfin/core/utils/app_text.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final Widget? action;
 
   const AppBarWidget({
     super.key,
     required this.title,
+    required this.action,
   });
 
   @override
@@ -18,6 +20,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       key: ValueKey(title),
       child: AppBar(
         title: AppText.header(title),
+        actions: [if (action != null) action!],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:torfin/src/injection.dart';
 
 class DynamicRouteWidget<T> extends PageRouteBuilder<T> {
   static final navigatorKey = GlobalKey<NavigatorState>();
@@ -31,12 +32,17 @@ class DynamicRouteWidget<T> extends PageRouteBuilder<T> {
           },
         );
 
-  static Future<T?> push<T>(BuildContext context, Widget page) {
-    return Navigator.of(navigatorKey.currentContext!)
+  static Future<T?> push<T>(Widget page) {
+    return Navigator.of(navigationContext)
         .push(DynamicRouteWidget<T>(builder: (_) => page));
   }
 
-  static void pop<T>(BuildContext context, [T? result]) {
-    Navigator.of(navigatorKey.currentContext!).pop(result);
+  static Future<T?> pushReplace<T>(Widget page) {
+    return Navigator.of(navigationContext)
+        .pushReplacement(DynamicRouteWidget<T>(builder: (_) => page));
+  }
+
+  static void pop<T>([T? result]) {
+    Navigator.of(navigationContext).pop(result);
   }
 }

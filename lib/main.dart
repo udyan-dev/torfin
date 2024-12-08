@@ -5,7 +5,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:torfin/core/router/dynamic_route.dart';
 import 'package:torfin/core/theme/app_themes.dart';
 import 'package:torfin/src/injection.dart';
 
@@ -39,7 +38,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       key: ValueKey("_torfin_"),
       title: 'Torfin',
-      navigatorKey: DynamicRouteWidget.navigatorKey,
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,
       themeMode: ThemeMode.system,
