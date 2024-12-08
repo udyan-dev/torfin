@@ -7,21 +7,26 @@ sealed class AppThemes {
   static get lightTheme => ThemeData(
         fontFamily: 'gg',
         colorScheme: const ColorScheme.light(),
-        scaffoldBackgroundColor: AppColors.appWhite,
+        scaffoldBackgroundColor: AppColors.white.s80,
         highlightColor: Colors.transparent,
         splashColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
+        tabBarTheme: const TabBarTheme(
+          splashFactory: NoSplash.splashFactory,
+          dividerColor: Colors.transparent,
+          overlayColor: WidgetStatePropertyAll(Colors.transparent),
+        ),
         appBarTheme: const AppBarTheme(
-            backgroundColor: AppColors.appWhite,
+            backgroundColor: Colors.transparent,
             systemOverlayStyle: SystemUiOverlayStyle(
-              systemNavigationBarColor: AppColors.purpleA,
-              systemNavigationBarDividerColor: AppColors.purpleA,
+              systemNavigationBarColor: AppColors.appWhite,
+              systemNavigationBarDividerColor: AppColors.appWhite,
               systemNavigationBarIconBrightness: Brightness.dark,
             )),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           showUnselectedLabels: false,
           showSelectedLabels: false,
-          backgroundColor: AppColors.purpleA,
+          backgroundColor: AppColors.appWhite,
           type: BottomNavigationBarType.fixed,
         ),
       );
@@ -29,21 +34,26 @@ sealed class AppThemes {
   static get darkTheme => ThemeData(
         fontFamily: 'gg',
         colorScheme: const ColorScheme.dark(),
-        scaffoldBackgroundColor: AppColors.appBlack,
+        scaffoldBackgroundColor: AppColors.black.s40,
         highlightColor: Colors.transparent,
         splashColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
+        tabBarTheme: const TabBarTheme(
+          splashFactory: NoSplash.splashFactory,
+          dividerColor: Colors.transparent,
+          overlayColor: WidgetStatePropertyAll(Colors.transparent),
+        ),
         appBarTheme: const AppBarTheme(
-            backgroundColor: AppColors.appBlack,
+            backgroundColor: Colors.transparent,
             systemOverlayStyle: SystemUiOverlayStyle(
-              systemNavigationBarColor: AppColors.purpleB,
-              systemNavigationBarDividerColor: AppColors.purpleB,
+              systemNavigationBarColor: AppColors.appBlack,
+              systemNavigationBarDividerColor: AppColors.appBlack,
               systemNavigationBarIconBrightness: Brightness.dark,
             )),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           showUnselectedLabels: false,
           showSelectedLabels: false,
-          backgroundColor: AppColors.purpleB,
+          backgroundColor: AppColors.appBlack,
           type: BottomNavigationBarType.fixed,
         ),
       );

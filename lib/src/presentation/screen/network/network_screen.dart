@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:torfin/core/utils/app_extensions.dart';
 import 'package:torfin/src/presentation/screen/network/bloc/network_bloc.dart';
 
 import '../../../../core/router/dynamic_route.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../injection.dart';
-import '../base/base_screen.dart';
+import '../splash/splash_screen.dart';
 
 class NetworkScreen extends StatefulWidget {
   const NetworkScreen({super.key});
@@ -36,14 +37,18 @@ class _NetworkScreenState extends State<NetworkScreen> {
               Navigator.of(navigationContext).pop();
             }
           } else if (state.status == NetworkEnum.offline) {
-            DynamicRouteWidget.push(
-              navigationContext,
-              _offlineScreen,
-            );
+            DynamicRouteWidget.push(_offlineScreen);
           }
         },
-        child: const BaseScreen(
-          key: ValueKey("_base_screen_"),
+        child: Navigator(
+          key: DynamicRouteWidget.navigatorKey,
+          onGenerateRoute: (settings) {
+            return MaterialPageRoute(
+              builder: (context) => SplashScreen(
+                key: ValueKey("_base_screen_"),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -56,6 +61,7 @@ class OfflineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.bg,
       body: Center(
           key: ValueKey(AppAssets.network),
           child: SvgPicture.asset(AppAssets.network)),

@@ -8,13 +8,15 @@ extension ColorFilterExtension on Color {
 extension ColorExtension on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
 
-  Color get iconActive => isDark ? AppColors.appBlack : AppColors.appWhite;
+  Color get iconActive => isDark ? AppColors.blueB : AppColors.primary;
 
   Color get iconInActive => isDark ? AppColors.white.s40 : AppColors.black.s40;
 
-  Color get textPrimary => isDark ? AppColors.white.s80 : AppColors.black.s80;
+  Color get textPrimary => isDark ? AppColors.appWhite : AppColors.appBlack;
 
   Color get purple => isDark ? AppColors.purpleB : AppColors.purpleA;
+
+  Color get bg => isDark ? AppColors.appBlack : AppColors.appWhite;
 }
 
 extension StylesExtension on Color {
@@ -22,6 +24,12 @@ extension StylesExtension on Color {
         fontSize: 24,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.2,
+        color: this,
+      );
+
+  TextStyle get tabBar => TextStyle(
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.0,
         color: this,
       );
 }

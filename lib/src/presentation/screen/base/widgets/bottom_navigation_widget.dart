@@ -29,6 +29,12 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
   }
 
   @override
+  void dispose() {
+    _currentIndex.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       key: ValueKey("_bottom_navigation_widget_"),
