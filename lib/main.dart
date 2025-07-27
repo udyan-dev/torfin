@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 
 import 'core/services/firebase_service.dart';
+import 'core/utils/extensions.dart';
 import 'core/utils/string_constants.dart';
 
 void main() {
@@ -34,9 +35,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      home: Scaffold(
+        backgroundColor: context.colors.background,
+        body: Center(
+          child: Text(appName, style: context.styles.label02.textPrimary),
+        ),
+      ),
     );
   }
 }

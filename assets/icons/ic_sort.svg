@@ -1,0 +1,5 @@
+<svg fill="none" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+    <rect style="mix-blend-mode:multiply" fill="white" fill-opacity="0.01" height="16" width="16" />
+    <path d="M8 14L4.5 10.5L5.205 9.795L8 12.585L10.795 9.795L11.5 10.5L8 14Z" fill="#161616" />
+    <path d="M8 2L11.5 5.5L10.795 6.205L8 3.415L5.205 6.205L4.5 5.5L8 2Z" fill="#161616" />
+</svg>

@@ -13,6 +13,7 @@ dependencies:
   firebase_analytics: ^11.5.2
   firebase_crashlytics: ^4.3.9
   firebase_performance: ^0.10.1+9
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +23,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/images/
