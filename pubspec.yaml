@@ -4,22 +4,33 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^3.15.1
-  firebase_analytics: ^11.5.2
-  firebase_crashlytics: ^4.3.9
-  firebase_performance: ^0.10.1+9
-  google_fonts: ^6.2.1
+  firebase_core: ^4.0.0
+  firebase_analytics: ^12.0.0
+  firebase_crashlytics: ^5.0.0
+  firebase_performance: ^0.11.0
+  flutter_svg: ^2.2.0
+  collection: ^1.19.1
+  get_it: ^8.1.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+  flutter_bloc: ^9.1.1
+  dio: ^5.8.0+1
+  shared_preferences: ^2.5.3
+  uuid: ^4.5.1
+  connectivity_plus: ^6.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  flutter_native_splash: ^2.4.6
+  build_runner: ^2.6.0
+  freezed: ^3.2.0
+  json_serializable: ^6.10.0
 
 flutter:
   uses-material-design: true
@@ -27,3 +38,18 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/fonts/
+
+  fonts:
+    - family: IBM Plex Mono
+      fonts:
+        - asset: assets/fonts/IBMPlexMono-Regular.ttf
+          weight: 400
+    - family: IBM Plex Sans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans-light.ttf
+          weight: 300
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSans-SemiBold.ttf
+          weight: 600

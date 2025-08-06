@@ -125,7 +125,7 @@ class AppColors {
   static const Color _lightFocusInset = Color(0xFFFFFFFF);
   static const Color _lightFocusInverse = Color(0xFFFFFFFF);
 
-  static const Color _lightSkeletonBackground = Color(0xFFE8E8E8);
+  static const Color _lightSkeletonBackground = Color(0xFFE5E5E5);
   static const Color _lightSkeletonElement = Color(0xFFC6C6C6);
 
   static const Color _lightInteractive = Color(0xFF0F62FE);

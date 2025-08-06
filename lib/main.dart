@@ -4,10 +4,12 @@ import 'dart:developer' show log;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
+import 'package:torfin/core/theme/app_theme.dart';
 
+import 'core/bindings/di.dart' as di;
 import 'core/services/firebase_service.dart';
-import 'core/utils/extensions.dart';
 import 'core/utils/string_constants.dart';
+import 'src/presentation/home/home_screen.dart';
 
 void main() {
   runZonedGuarded(
@@ -20,6 +22,7 @@ void main() {
           DeviceOrientation.portraitDown,
         ]),
         FirebaseService.init,
+        di.init,
       ], eagerError: true);
 
       runApp(const MainApp());
@@ -37,12 +40,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: context.colors.background,
-        body: Center(
-          child: Text(appName, style: context.styles.label02.textPrimary),
-        ),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      home: const HomeScreen(),
     );
   }
 }

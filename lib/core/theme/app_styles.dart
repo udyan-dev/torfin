@@ -1,261 +1,878 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import 'app_colors.dart';
+import '../utils/extensions.dart';
+import '../utils/string_constants.dart';
 
-class AppStyles {
-  final AppColors _colors;
+class AppText extends StatelessWidget {
+  final String data;
+  final TextStyle _baseStyle;
+  final Color? color;
+  final TextAlign? textAlign;
+  final TextDirection? textDirection;
+  final Locale? locale;
+  final bool? softWrap;
+  final TextOverflow? overflow;
+  final TextScaler? textScaler;
+  final int? maxLines;
+  final String? semanticsLabel;
+  final TextWidthBasis? textWidthBasis;
+  final TextHeightBehavior? textHeightBehavior;
+  final Color? selectionColor;
 
-  const AppStyles._(this._colors);
+  const AppText._(
+    this.data,
+    this._baseStyle, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.softWrap,
+    this.overflow,
+    this.textScaler,
+    this.maxLines,
+    this.semanticsLabel,
+    this.textWidthBasis,
+    this.textHeightBehavior,
+    this.selectionColor,
+  });
 
-  factory AppStyles.fromColors(AppColors colors) => AppStyles._(colors);
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      data,
+      key: key,
+      style: _baseStyle.copyWith(color: color ?? context.colors.textPrimary),
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      semanticsLabel: semanticsLabel,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionColor: selectionColor,
+    );
+  }
 
-  // Utility Styles
+  const AppText.code01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexMono,
+           fontSize: 12,
+           height: 16 / 12,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.32,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get code01 => AppTextStyle._(
-    GoogleFonts.ibmPlexMono(
-      fontSize: 12,
-      height: 16 / 12,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.32,
-    ),
-    _colors,
-  );
+  const AppText.code02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexMono,
+           fontSize: 14,
+           height: 20 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.32,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get code02 => AppTextStyle._(
-    GoogleFonts.ibmPlexMono(
-      fontSize: 14,
-      height: 20 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.32,
-    ),
-    _colors,
-  );
+  const AppText.label01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 12,
+           height: 16 / 12,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.32,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get label01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 12,
-      height: 16 / 12,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.32,
-    ),
-    _colors,
-  );
+  const AppText.label02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 18 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get label02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 18 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.helperText01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 12,
+           height: 16 / 12,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.32,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get helperText01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 12,
-      height: 16 / 12,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.32,
-    ),
-    _colors,
-  );
+  const AppText.helperText02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 18 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get helperText02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 18 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.legal01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 12,
+           height: 16 / 12,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.32,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get legal01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 12,
-      height: 16 / 12,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.32,
-    ),
-    _colors,
-  );
+  const AppText.legal02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 18 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get legal02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 18 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.bodyCompact01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 18 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  // Body Styles
+  const AppText.bodyCompact02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 16,
+           height: 22 / 16,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get bodyCompact01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 18 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.body01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 20 / 14,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get bodyCompact02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 16,
-      height: 22 / 16,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
+  const AppText.body02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 16,
+           height: 24 / 16,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get body01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 20 / 14,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.headingCompact01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 18 / 14,
+           fontWeight: FontWeight.w600,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get body02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 16,
-      height: 24 / 16,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
+  const AppText.headingCompact02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 16,
+           height: 22 / 16,
+           fontWeight: FontWeight.w600,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  // Fixed Heading Styles
+  const AppText.heading01(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 14,
+           height: 20 / 14,
+           fontWeight: FontWeight.w600,
+           letterSpacing: 0.16,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get headingCompact01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 18 / 14,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.heading02(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 16,
+           height: 24 / 16,
+           fontWeight: FontWeight.w600,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get headingCompact02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 16,
-      height: 22 / 16,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
+  const AppText.heading03(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 20,
+           height: 28 / 20,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get heading01 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 14,
-      height: 20 / 14,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.16,
-    ),
-    _colors,
-  );
+  const AppText.heading04(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 28,
+           height: 36 / 28,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get heading02 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 16,
-      height: 24 / 16,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
+  const AppText.heading05(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 32,
+           height: 40 / 32,
+           fontWeight: FontWeight.w400,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get heading03 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 20,
-      height: 28 / 20,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
+  const AppText.heading06(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 42,
+           height: 50 / 42,
+           fontWeight: FontWeight.w300,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 
-  AppTextStyle get heading04 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 28,
-      height: 36 / 28,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
-
-  AppTextStyle get heading05 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 32,
-      height: 40 / 32,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
-
-  AppTextStyle get heading06 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 42,
-      height: 50 / 42,
-      fontWeight: FontWeight.w300,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
-
-  AppTextStyle get heading07 => AppTextStyle._(
-    GoogleFonts.ibmPlexSans(
-      fontSize: 54,
-      height: 64 / 54,
-      fontWeight: FontWeight.w300,
-      letterSpacing: 0,
-    ),
-    _colors,
-  );
-}
-
-class AppTextStyle extends TextStyle {
-  final AppColors colors;
-
-  AppTextStyle._(TextStyle baseStyle, this.colors)
-    : super(
-        inherit: baseStyle.inherit,
-        color: colors.textPrimary,
-        backgroundColor: baseStyle.backgroundColor,
-        fontSize: baseStyle.fontSize,
-        fontWeight: baseStyle.fontWeight,
-        fontStyle: baseStyle.fontStyle,
-        letterSpacing: baseStyle.letterSpacing,
-        wordSpacing: baseStyle.wordSpacing,
-        textBaseline: baseStyle.textBaseline,
-        height: baseStyle.height,
-        leadingDistribution: baseStyle.leadingDistribution,
-        locale: baseStyle.locale,
-        foreground: baseStyle.foreground,
-        background: baseStyle.background,
-        shadows: baseStyle.shadows,
-        fontFeatures: baseStyle.fontFeatures,
-        fontVariations: baseStyle.fontVariations,
-        decoration: baseStyle.decoration,
-        decorationColor: baseStyle.decorationColor,
-        decorationStyle: baseStyle.decorationStyle,
-        decorationThickness: baseStyle.decorationThickness,
-        debugLabel: baseStyle.debugLabel,
-        fontFamily: baseStyle.fontFamily,
-        fontFamilyFallback: baseStyle.fontFamilyFallback,
-        overflow: baseStyle.overflow,
-      );
+  const AppText.heading07(
+    String data, {
+    Key? key,
+    Color? color,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
+    Locale? locale,
+    bool? softWrap,
+    TextOverflow? overflow,
+    TextScaler? textScaler,
+    int? maxLines,
+    String? semanticsLabel,
+    TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
+    Color? selectionColor,
+  }) : this._(
+         data,
+         const TextStyle(
+           fontFamily: ibmPlexSans,
+           fontSize: 54,
+           height: 64 / 54,
+           fontWeight: FontWeight.w300,
+           letterSpacing: 0,
+         ),
+         key: key,
+         color: color,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         locale: locale,
+         softWrap: softWrap,
+         overflow: overflow,
+         textScaler: textScaler,
+         maxLines: maxLines,
+         semanticsLabel: semanticsLabel,
+         textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior,
+         selectionColor: selectionColor,
+       );
 }
