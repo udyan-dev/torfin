@@ -111,3 +111,4 @@ const String leecher = 'Leecher';
 const String size = 'Size';
 const String age = 'Age';
 const String loadingMore = 'Loading more...';
+const String trending = 'Trending';

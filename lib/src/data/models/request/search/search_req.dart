@@ -5,6 +5,7 @@ part 'search_req.g.dart';
 
 @freezed
 abstract class SearchReq with _$SearchReq {
+  const SearchReq._();
 
   const factory SearchReq({
     required String token,
@@ -14,7 +15,6 @@ abstract class SearchReq with _$SearchReq {
     required String search,
     required int page,
   }) = _SearchReq;
-  const SearchReq._();
 
   factory SearchReq.fromJson(Map<String, Object?> json) =>
       _$SearchReqFromJson(json);

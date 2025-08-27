@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:torfin/src/data/models/request/search/search_req.dart';
+import 'package:torfin/src/data/models/request/trending/trending_req.dart';
 import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
 
 import '../../../core/bindings/env.dart';
@@ -99,6 +100,18 @@ class TorrentRepositoryImpl extends BaseRepository
   }) => getStateOf(
     request: () async => await _dioService.getString(
       endpoint: Routes.autoComplete(search: search),
+      cancelToken: cancelToken,
+    ),
+  );
+
+  @override
+  Future<DataState<List<TorrentRes>>> trending({
+    required TrendingReq trendingReq,
+    required CancelToken cancelToken,
+  }) => getStateOf(
+    request: () async => await _dioService.getCollection<TorrentRes>(
+      endpoint: Routes.trending(trendingReq: trendingReq),
+      queryParams: queryTimeStamp,
       cancelToken: cancelToken,
     ),
   );
