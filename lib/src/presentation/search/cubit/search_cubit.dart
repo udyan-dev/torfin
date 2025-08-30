@@ -14,6 +14,7 @@ import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/auto_complete_use_case.dart';
+import '../../../domain/usecases/favorite_use_case.dart';
 
 part 'search_cubit.freezed.dart';
 part 'search_state.dart';
@@ -22,14 +23,17 @@ class SearchCubit extends Cubit<SearchState> {
   SearchCubit({
     required SearchTorrentUseCase searchTorrentUseCase,
     required AutoCompleteUseCase autoCompleteUseCase,
+    required FavoriteUseCase favoriteUseCase,
     ConnectivityService? connectivity,
   }) : _searchTorrentUseCase = searchTorrentUseCase,
        _autoCompleteUseCase = autoCompleteUseCase,
+       _favoriteUseCase = favoriteUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const SearchState());
 
   final SearchTorrentUseCase _searchTorrentUseCase;
   final AutoCompleteUseCase _autoCompleteUseCase;
+  final FavoriteUseCase _favoriteUseCase;
   final ConnectivityService _connectivity;
   CancelToken? _token;
   CancelToken? _suggestionToken;
@@ -49,6 +53,8 @@ class SearchCubit extends Cubit<SearchState> {
     bool isRefresh = false,
   }) async {
     if (isClosed) return;
+
+    if (state.favoriteKeys.isEmpty) await _syncFavorites();
 
     final newSearch = (search ?? state.search).trim();
     final newSortType = sortType ?? state.sortType;
@@ -573,5 +579,46 @@ class SearchCubit extends Cubit<SearchState> {
     } catch (_) {
       return const <String>[];
     }
+  }
+
+  Future<void> _syncFavorites() async {
+    final res = await _favoriteUseCase(
+      const FavoriteParams(mode: FavoriteMode.getAll),
+      cancelToken: CancelToken(),
+    );
+    res.when(
+      success: (data) {
+        final set = <String>{};
+        if (data.isNotEmpty) {
+          for (int i = 0; i < data.length; i++) {
+            set.add(data[i].identityKey);
+          }
+        }
+        emit(state.copyWith(favoriteKeys: set));
+      },
+    );
+  }
+
+  Future<void> toggleFavorite(TorrentRes torrent) async {
+    final k = torrent.identityKey;
+    final next = state.favoriteKeys.contains(k)
+        ? (state.favoriteKeys.toSet()..remove(k))
+        : (state.favoriteKeys.toSet()..add(k));
+    emit(state.copyWith(favoriteKeys: next));
+    final res = await _favoriteUseCase(
+      FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
+      cancelToken: CancelToken(),
+    );
+    res.when(
+      success: (data) {
+        final set = <String>{};
+        if (data.isNotEmpty) {
+          for (int i = 0; i < data.length; i++) {
+            set.add(data[i].identityKey);
+          }
+        }
+        emit(state.copyWith(favoriteKeys: set));
+      },
+    );
   }
 }

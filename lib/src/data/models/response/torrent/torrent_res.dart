@@ -25,6 +25,14 @@ abstract class TorrentRes with _$TorrentRes {
       _$TorrentResFromJson(json);
 }
 
+extension TorrentIdentity on TorrentRes {
+  String get identityKey {
+    if (magnet.isNotEmpty) return 'm:$magnet';
+    if (url.isNotEmpty) return 'u:$url';
+    return 'n:$name|$size';
+  }
+}
+
 enum SortType {
   none('Relevance', 'NONE'),
   age('Recent', 'DATE'),

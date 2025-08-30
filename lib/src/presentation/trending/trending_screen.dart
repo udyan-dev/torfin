@@ -10,7 +10,7 @@ import '../widgets/app_bar_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/content_switcher_widget.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/shimmer.dart';
+import '../widgets/shimmer_list_widget.dart';
 import '../widgets/sort_widget.dart';
 import '../widgets/torrent_widget.dart';
 import 'cubit/trending_cubit.dart';
@@ -36,21 +36,6 @@ class _TrendingScreenState extends State<TrendingScreen> {
   void dispose() {
     if (!_cubit.isClosed) _cubit.close();
     super.dispose();
-  }
-
-  Widget _buildShimmerList(BuildContext context) {
-    return Shimmer(
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: 25,
-        itemBuilder: (context, index) => const TorrentWidget(isLoading: true),
-        separatorBuilder: (context, index) => Divider(
-          height: 1,
-          thickness: 1,
-          color: context.colors.borderSubtle00,
-        ),
-      ),
-    );
   }
 
   @override
@@ -79,8 +64,10 @@ class _TrendingScreenState extends State<TrendingScreen> {
                 p.categoriesRaw != c.categoriesRaw ||
                 p.selectedCategoryRaw != c.selectedCategoryRaw,
             builder: (context, state) {
-              if (state.isShimmer || state.status != TrendingStatus.success || state.categoriesRaw.isEmpty) {
-                return const SizedBox.shrink();
+              if (state.isShimmer ||
+                  state.status != TrendingStatus.success ||
+                  state.categoriesRaw.isEmpty) {
+                return emptyBox;
               }
               return CategoryWidget(
                 categories: state.categoriesRaw,
@@ -101,7 +88,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                 switch (state.status) {
                   case TrendingStatus.initial:
                   case TrendingStatus.loading:
-                    return _buildShimmerList(context);
+                    return const ShimmerListWidget();
                   case TrendingStatus.success:
                     if (state.isEmpty) {
                       return EmptyStateWidget(
@@ -125,8 +112,14 @@ class _TrendingScreenState extends State<TrendingScreen> {
                       child: ListView.separated(
                         physics: const AlwaysScrollableScrollPhysics(),
                         itemCount: state.torrents.length,
-                        itemBuilder: (context, index) =>
-                            TorrentWidget(torrent: state.torrents[index]),
+                        itemBuilder: (context, index) {
+                          final torrent = state.torrents[index];
+                          return TorrentWidget(
+                            torrent: torrent,
+                            isFavorite: state.isFavorite(torrent),
+                            onSave: () => _cubit.toggleFavorite(torrent),
+                          );
+                        },
                         separatorBuilder: (_, i) => Divider(
                           height: 1,
                           thickness: 1,

@@ -12,8 +12,10 @@ import '../../src/domain/usecases/auto_complete_use_case.dart';
 import '../../src/domain/usecases/get_token_use_case.dart';
 import '../../src/domain/usecases/search_torrent_use_case.dart';
 import '../../src/domain/usecases/trending_torrent_use_case.dart';
+import '../../src/domain/usecases/favorite_use_case.dart';
 import '../../src/presentation/home/cubit/home_cubit.dart';
 import '../../src/presentation/search/cubit/search_cubit.dart';
+import '../../src/presentation/favorite/cubit/favorite_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
 import '../utils/string_constants.dart';
 
@@ -48,10 +50,24 @@ Future<void> get init async {
       uuid: di(),
     ),
   );
+  di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
+  di.registerFactory(() => FavoriteCubit(favoriteUseCase: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
-  di.registerLazySingleton(() => TrendingTorrentUseCase(torrentRepository: di(), storageRepository: di()));
+  di.registerLazySingleton(
+    () => TrendingTorrentUseCase(
+      torrentRepository: di(),
+      storageRepository: di(),
+    ),
+  );
   di.registerFactory(() => HomeCubit(getTokenUseCase: di(), cancelToken: di()));
-  di.registerFactory(() =>
-      SearchCubit(searchTorrentUseCase: di(), autoCompleteUseCase: di()));
-  di.registerFactory(() => TrendingCubit(trendingUseCase: di()));
+  di.registerFactory(
+    () => SearchCubit(
+      searchTorrentUseCase: di(),
+      autoCompleteUseCase: di(),
+      favoriteUseCase: di(),
+    ),
+  );
+  di.registerFactory(
+    () => TrendingCubit(trendingUseCase: di(), favoriteUseCase: di()),
+  );
 }

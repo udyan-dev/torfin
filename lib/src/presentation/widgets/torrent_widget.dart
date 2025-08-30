@@ -6,103 +6,163 @@ import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/string_constants.dart';
+import 'button_widget.dart';
 import 'shimmer.dart';
 
 class TorrentWidget extends StatelessWidget {
   final bool isLoading;
+  final bool isFavorite;
   final TorrentRes? torrent;
+  final VoidCallback? onSave;
 
-  const TorrentWidget({super.key, this.torrent, this.isLoading = false});
+  const TorrentWidget({
+    super.key,
+    this.torrent,
+    this.isLoading = false,
+    this.isFavorite = false,
+    this.onSave,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return ColoredBox(
+    return Material(
       color: colors.background,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
-          spacing: 8,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            isLoading
-                ? const _ShimmerLine(height: 14)
-                : AppText.headingCompact01(
-                    torrent?.name ?? emptyString,
-                    textAlign: TextAlign.center,
-                    color: colors.textPrimary,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            barrierColor: colors.overlay,
+            context: context,
+            builder: (context) => Dialog(
+              backgroundColor: colors.layer01,
+              elevation: 0,
+              shape: LinearBorder.none,
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: AppText.heading03(torrent?.name ?? emptyString),
                   ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isLoading ? 24.0 : 0,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: isLoading
-                          ? CrossAxisAlignment.stretch
-                          : CrossAxisAlignment.start,
-                      spacing: 4,
-                      children: [
-                        isLoading
-                            ? const _ShimmerLine(height: 12)
-                            : _InfoWidget(
-                                iconAsset: AppAssets.icTime,
-                                text: "$age : ${torrent?.age ?? emptyString}",
-                                textColor: colors.tagColorCyan,
-                              ),
-                        isLoading
-                            ? const _ShimmerLine(height: 12)
-                            : _InfoWidget(
-                                iconAsset: AppAssets.icSize,
-                                text: "$size : ${torrent?.size ?? emptyString}",
-                                textColor: colors.tagColorPurple,
-                              ),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ButtonWidget(
+                          backgroundColor: context.colors.buttonSecondary,
+                          buttonText: isFavorite ? remove : save,
+                          onTap: (){
+                            onSave?.call();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: ButtonWidget(
+                          backgroundColor: context.colors.buttonPrimary,
+                          buttonText: download,
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isLoading ? 24.0 : 0,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: isLoading
-                          ? CrossAxisAlignment.stretch
-                          : CrossAxisAlignment.start,
-                      spacing: 4,
-                      children: [
-                        isLoading
-                            ? const _ShimmerLine(height: 12)
-                            : _InfoWidget(
-                                iconAsset: AppAssets.icArrowDown,
-                                text:
-                                    "$seeder : ${torrent?.seeder ?? emptyString}",
-                                textColor: colors.tagColorGreen,
-                              ),
-                        isLoading
-                            ? const _ShimmerLine(height: 12)
-                            : _InfoWidget(
-                                iconAsset: AppAssets.icArrowUp,
-                                text:
-                                    "$leecher : ${torrent?.leecher ?? emptyString}",
-                                textColor: colors.tagColorRed,
-                              ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Column(
+            spacing: 8,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              isLoading
+                  ? const _ShimmerLine(height: 14)
+                  : AppText.headingCompact01(
+                      torrent?.name ?? emptyString,
+                      textAlign: TextAlign.center,
+                      color: colors.textPrimary,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isLoading ? 24.0 : 0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: isLoading
+                            ? CrossAxisAlignment.stretch
+                            : CrossAxisAlignment.start,
+                        spacing: 4,
+                        children: [
+                          isLoading
+                              ? const _ShimmerLine(height: 12)
+                              : _InfoWidget(
+                                  iconAsset: AppAssets.icTime,
+                                  text: "$age : ${torrent?.age ?? emptyString}",
+                                  textColor: colors.tagColorCyan,
+                                ),
+                          isLoading
+                              ? const _ShimmerLine(height: 12)
+                              : _InfoWidget(
+                                  iconAsset: AppAssets.icSize,
+                                  text:
+                                      "$size : ${torrent?.size ?? emptyString}",
+                                  textColor: colors.tagColorPurple,
+                                ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isLoading ? 24.0 : 0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: isLoading
+                            ? CrossAxisAlignment.stretch
+                            : CrossAxisAlignment.start,
+                        spacing: 4,
+                        children: [
+                          isLoading
+                              ? const _ShimmerLine(height: 12)
+                              : _InfoWidget(
+                                  iconAsset: AppAssets.icArrowDown,
+                                  text:
+                                      "$seeder : ${torrent?.seeder ?? emptyString}",
+                                  textColor: colors.tagColorGreen,
+                                ),
+                          isLoading
+                              ? const _ShimmerLine(height: 12)
+                              : _InfoWidget(
+                                  iconAsset: AppAssets.icArrowUp,
+                                  text:
+                                      "$leecher : ${torrent?.leecher ?? emptyString}",
+                                  textColor: colors.tagColorRed,
+                                ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

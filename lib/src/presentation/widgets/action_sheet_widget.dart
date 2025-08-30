@@ -62,101 +62,104 @@ class _ActionSheetWidgetState extends State<ActionSheetWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: context.colors.background,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ..._actions.asMap().entries.map((actionEntry) {
-            final actionIndex = actionEntry.key;
-            final action = actionEntry.value;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: AppText.headingCompact01(
-                    action.actionTitle,
-                    color: context.colors.textPrimary,
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: context.colors.borderSubtle00,
-                ),
-                ListView.separated(
-                  itemCount: action.actionItems.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, itemIndex) => InkWell(
-                    onTap: () => _updateSelection(actionIndex, itemIndex),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 13.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          AppText.bodyCompact01(
-                            action.actionItems[itemIndex].title,
-                            color: context.colors.textPrimary,
-                          ),
-                          SvgPicture.asset(
-                            (selectedActionIndex == actionIndex &&
-                                    selectedItemIndex == itemIndex)
-                                ? AppAssets.icCheckBoxFilled
-                                : AppAssets.icCheckBox,
-                            width: 20,
-                            height: 20,
-                            colorFilter: context.colors.iconPrimary.colorFilter,
-                          ),
-                        ],
-                      ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ColoredBox(
+        color: context.colors.background,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ..._actions.asMap().entries.map((actionEntry) {
+              final actionIndex = actionEntry.key;
+              final action = actionEntry.value;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: AppText.headingCompact01(
+                      action.actionTitle,
+                      color: context.colors.textPrimary,
                     ),
                   ),
-                  separatorBuilder: (context, separatorIndex) => Divider(
+                  Divider(
                     height: 1,
                     thickness: 1,
                     color: context.colors.borderSubtle00,
                   ),
+                  ListView.separated(
+                    itemCount: action.actionItems.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, itemIndex) => InkWell(
+                      onTap: () => _updateSelection(actionIndex, itemIndex),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 13.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            AppText.bodyCompact01(
+                              action.actionItems[itemIndex].title,
+                              color: context.colors.textPrimary,
+                            ),
+                            SvgPicture.asset(
+                              (selectedActionIndex == actionIndex &&
+                                      selectedItemIndex == itemIndex)
+                                  ? AppAssets.icCheckBoxFilled
+                                  : AppAssets.icCheckBox,
+                              width: 20,
+                              height: 20,
+                              colorFilter: context.colors.iconPrimary.colorFilter,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    separatorBuilder: (context, separatorIndex) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: context.colors.borderSubtle00,
+                    ),
+                  ),
+                ],
+              );
+            }),
+            Row(
+              children: [
+                Expanded(
+                  child: ButtonWidget(
+                    backgroundColor: context.colors.buttonSecondary,
+                    buttonText: cancel,
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ButtonWidget(
+                    backgroundColor: context.colors.buttonPrimary,
+                    buttonText: apply,
+                    onTap: () {
+                      final actionIndex = selectedActionIndex;
+                      final itemIndex = selectedItemIndex;
+                      if (actionIndex != null && itemIndex != null) {
+                        widget.onTap.call(
+                          _actions[actionIndex].actionItems[itemIndex],
+                        );
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
               ],
-            );
-          }),
-          Row(
-            children: [
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonSecondary,
-                  buttonText: cancel,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonPrimary,
-                  buttonText: apply,
-                  onTap: () {
-                    final actionIndex = selectedActionIndex;
-                    final itemIndex = selectedItemIndex;
-                    if (actionIndex != null && itemIndex != null) {
-                      widget.onTap.call(
-                        _actions[actionIndex].actionItems[itemIndex],
-                      );
-                    }
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

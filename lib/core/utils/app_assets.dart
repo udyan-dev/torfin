@@ -23,4 +23,5 @@ class AppAssets {
   static const icNoNetwork = '${icons}ic_no_network.svg';
   static const icNoResultFound = '${icons}ic_no_result_found.svg';
   static const icLink = '${icons}ic_link.svg';
+  static const icAddFavorite = '${icons}ic_add_favorite.svg';
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:torfin/core/utils/extensions.dart';
-import 'package:torfin/src/presentation/widgets/shimmer.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/utils/app_assets.dart';
@@ -11,6 +10,7 @@ import '../widgets/app_bar_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/search_bar_widget.dart';
+import '../widgets/shimmer_list_widget.dart';
 import '../widgets/sort_widget.dart';
 import '../widgets/status_widget.dart';
 import '../widgets/torrent_widget.dart';
@@ -25,34 +25,34 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   late final ScrollController _scrollController;
-  late final SearchCubit _searchCubit;
+  late final SearchCubit _cubit;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
-    _searchCubit = di<SearchCubit>();
+    _cubit = di<SearchCubit>();
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    if (!_searchCubit.isClosed) {
-      _searchCubit.close();
+    if (!_cubit.isClosed) {
+      _cubit.close();
     }
     super.dispose();
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients || _searchCubit.isClosed) return;
+    if (!_scrollController.hasClients || _cubit.isClosed) return;
 
     final position = _scrollController.position;
     if (position.pixels < position.maxScrollExtent - 100) return;
 
-    final state = _searchCubit.state;
+    final state = _cubit.state;
     if (state.canLoadMore && !state.isPaginating && !state.isAutoLoadingMore) {
-      _searchCubit.loadMore();
+      _cubit.loadMore();
     }
   }
 
@@ -65,11 +65,11 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_searchCubit.isClosed || !_scrollController.hasClients) return;
+      if (_cubit.isClosed || !_scrollController.hasClients) return;
 
       final position = _scrollController.position;
       if (position.maxScrollExtent <= 0 && state.canLoadMore) {
-        _searchCubit.loadMore();
+        _cubit.loadMore();
       }
     });
   }
@@ -88,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
           description: noResultsFoundDescription,
           buttonText: retry,
         ),
-        onTap: () => _searchCubit.onRetry(),
+        onTap: _cubit.onRetry,
       );
     }
 
@@ -97,31 +97,16 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildTorrentList(BuildContext context, SearchState state) {
     if (_shouldShowShimmer(state)) {
-      return _buildShimmerList(context);
+      return const ShimmerListWidget();
     }
     return RefreshIndicator(
       color: context.colors.interactive,
       backgroundColor: context.colors.background,
       onRefresh: () {
-        _searchCubit.search(search: state.search, isRefresh: true);
+        _cubit.search(search: state.search, isRefresh: true);
         return Future.value();
       },
       child: _buildActualList(context, state),
-    );
-  }
-
-  Widget _buildShimmerList(BuildContext context) {
-    return Shimmer(
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: 25,
-        itemBuilder: (context, index) => const TorrentWidget(isLoading: true),
-        separatorBuilder: (context, index) => Divider(
-          height: 1,
-          thickness: 1,
-          color: context.colors.borderSubtle00,
-        ),
-      ),
     );
   }
 
@@ -142,11 +127,16 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           );
         }
-        return TorrentWidget(torrent: state.torrents[index]);
+        final torrent = state.torrents[index];
+        return TorrentWidget(
+          torrent: torrent,
+          isFavorite: state.isFavorite(torrent),
+          onSave: () => _cubit.toggleFavorite(torrent),
+        );
       },
       separatorBuilder: (context, index) {
         if (index == state.torrents.length - 1 && state.showLoadingMore) {
-          return const SizedBox.shrink();
+          return emptyBox;
         }
         return Divider(
           height: 1,
@@ -160,20 +150,20 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: _searchCubit,
+      value: _cubit,
       child: Column(
         children: [
           AppBarWidget(
             title: search,
             actions: [
               SortWidget(
-                onSort: (sortType) => _searchCubit.search(sortType: sortType),
+                onSort: (sortType) => _cubit.search(sortType: sortType),
               ),
             ],
           ),
           SearchBarWidget(
-            onSearch: (searchText) => _searchCubit.search(search: searchText),
-            onFetchSuggestions: (query) => _searchCubit.fetchSuggestions(query),
+            onSearch: (searchText) => _cubit.search(search: searchText),
+            onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
           ),
           BlocBuilder<SearchCubit, SearchState>(
             buildWhen: (p, c) =>
@@ -183,7 +173,7 @@ class _SearchScreenState extends State<SearchScreen> {
               return CategoryWidget(
                 categories: state.categoriesRaw,
                 selectedRaw: state.selectedCategoryRaw,
-                onCategoryChange: (raw) => _searchCubit.search(category: raw),
+                onCategoryChange: (raw) => _cubit.search(category: raw),
               );
             },
           ),
@@ -220,7 +210,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       return EmptyStateWidget(
                         emptyState: state.emptyState,
                         iconColor: context.colors.supportError,
-                        onTap: _searchCubit.onRetry,
+                        onTap: _cubit.onRetry,
                       );
                   }
                 },

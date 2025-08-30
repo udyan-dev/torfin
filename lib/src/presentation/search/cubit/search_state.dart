@@ -19,10 +19,11 @@ sealed class SearchState with _$SearchState {
     @Default(false) bool isShimmer,
     String? currentRequestId,
     @Default(false) bool isAutoLoadingMore,
+    @Default(<String>{}) Set<String> favoriteKeys,
   }) = _SearchState;
 }
 
-extension SearchStateX on SearchState {
+extension SearchStateEx on SearchState {
   bool get isEmpty {
     if (torrents.isNotEmpty || status != SearchStatus.success) return false;
     return !isShimmer &&
@@ -42,4 +43,6 @@ extension SearchStateX on SearchState {
   }
 
   bool get showLoadingMore => isPaginating && torrents.isNotEmpty;
+
+  bool isFavorite(TorrentRes t) => favoriteKeys.contains(t.identityKey);
 }

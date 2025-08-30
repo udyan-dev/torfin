@@ -35,6 +35,7 @@ const String unsupportedTypeError = 'Unsupported Type Error !';
 const String tokenKey = 'token';
 const String themeKey = 'theme';
 const String nsfwKey = 'nsfw';
+const String favoritesKey = 'favorites';
 const String storageExceptionPrefix = 'StorageException: ';
 
 const String userAgentHeader = 'user-agent';
@@ -112,3 +113,9 @@ const String size = 'Size';
 const String age = 'Age';
 const String loadingMore = 'Loading more...';
 const String trending = 'Trending';
+const String save = 'Save';
+const String remove = 'Remove';
+const String download = 'Download';
+const String favorite = 'Favorite';
+const String saveYourFavoriteTorrents = 'Save your favorite torrents !';
+const String addTorrentsToYourFavorites = 'Add torrents to your favorites list to quickly find and download them later.';

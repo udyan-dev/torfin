@@ -12,6 +12,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../../domain/usecases/favorite_use_case.dart';
 
 part 'trending_cubit.freezed.dart';
 
@@ -20,12 +21,15 @@ part 'trending_state.dart';
 class TrendingCubit extends Cubit<TrendingState> {
   TrendingCubit({
     required TrendingTorrentUseCase trendingUseCase,
+    required FavoriteUseCase favoriteUseCase,
     ConnectivityService? connectivity,
   }) : _trendingUseCase = trendingUseCase,
+       _favoriteUseCase = favoriteUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const TrendingState());
 
   final TrendingTorrentUseCase _trendingUseCase;
+  final FavoriteUseCase _favoriteUseCase;
   final ConnectivityService _connectivity;
   CancelToken? _token;
 
@@ -42,6 +46,8 @@ class TrendingCubit extends Cubit<TrendingState> {
     bool isRefresh = false,
   }) async {
     if (isClosed) return;
+
+    if (state.favoriteKeys.isEmpty) await _syncFavorites();
 
     final newType = type ?? state.trendingType;
     final newSort = sortType ?? state.sortType;
@@ -280,5 +286,46 @@ class TrendingCubit extends Cubit<TrendingState> {
       if (list[i].type.trim() == cr) out.add(list[i]);
     }
     return out;
+  }
+
+  Future<void> _syncFavorites() async {
+    final res = await _favoriteUseCase(
+      const FavoriteParams(mode: FavoriteMode.getAll),
+      cancelToken: CancelToken(),
+    );
+    res.when(
+      success: (data) {
+        final set = <String>{};
+        if (data.isNotEmpty) {
+          for (int i = 0; i < data.length; i++) {
+            set.add(data[i].identityKey);
+          }
+        }
+        emit(state.copyWith(favoriteKeys: set));
+      },
+    );
+  }
+
+  Future<void> toggleFavorite(TorrentRes torrent) async {
+    final k = torrent.identityKey;
+    final next = state.favoriteKeys.contains(k)
+        ? (state.favoriteKeys.toSet()..remove(k))
+        : (state.favoriteKeys.toSet()..add(k));
+    emit(state.copyWith(favoriteKeys: next));
+    final res = await _favoriteUseCase(
+      FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
+      cancelToken: CancelToken(),
+    );
+    res.when(
+      success: (data) {
+        final set = <String>{};
+        if (data.isNotEmpty) {
+          for (int i = 0; i < data.length; i++) {
+            set.add(data[i].identityKey);
+          }
+        }
+        emit(state.copyWith(favoriteKeys: set));
+      },
+    );
   }
 }

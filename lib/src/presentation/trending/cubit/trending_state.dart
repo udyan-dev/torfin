@@ -16,6 +16,7 @@ sealed class TrendingState with _$TrendingState {
     @Default(TrendingType.day) TrendingType trendingType,
     @Default(<TrendingType, List<TorrentRes>>{})
     Map<TrendingType, List<TorrentRes>> cacheByType,
+    @Default(<String>{}) Set<String> favoriteKeys,
   }) = _TrendingState;
 }
 
@@ -33,4 +34,8 @@ enum TrendingType {
 extension TrendingStateX on TrendingState {
   bool get isEmpty =>
       status == TrendingStatus.success && torrents.isEmpty && !isShimmer;
+}
+
+extension TrendingFavoritesX on TrendingState {
+  bool isFavorite(TorrentRes t) => favoriteKeys.contains(t.identityKey);
 }
