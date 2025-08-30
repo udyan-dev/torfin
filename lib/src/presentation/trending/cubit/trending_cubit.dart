@@ -13,6 +13,7 @@ import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
+import '../../widgets/notification_widget.dart';
 
 part 'trending_cubit.freezed.dart';
 
@@ -308,15 +309,16 @@ class TrendingCubit extends Cubit<TrendingState> {
 
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
-    final next = state.favoriteKeys.contains(k)
-        ? (state.favoriteKeys.toSet()..remove(k))
-        : (state.favoriteKeys.toSet()..add(k));
+    final wasAdded = !state.favoriteKeys.contains(k);
+    final next = wasAdded
+        ? (state.favoriteKeys.toSet()..add(k))
+        : (state.favoriteKeys.toSet()..remove(k));
     emit(state.copyWith(favoriteKeys: next));
-    final res = await _favoriteUseCase(
+    final response = await _favoriteUseCase(
       FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
       cancelToken: CancelToken(),
     );
-    res.when(
+    response.when(
       success: (data) {
         final set = <String>{};
         if (data.isNotEmpty) {
@@ -324,7 +326,18 @@ class TrendingCubit extends Cubit<TrendingState> {
             set.add(data[i].identityKey);
           }
         }
-        emit(state.copyWith(favoriteKeys: set));
+        emit(
+          state.copyWith(
+            favoriteKeys: set,
+            notification: AppNotification(
+              title: torrent.name,
+              type: wasAdded
+                  ? NotificationType.favoriteAdded
+                  : NotificationType.favoriteRemoved,
+              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
+            ),
+          ),
+        );
       },
     );
   }

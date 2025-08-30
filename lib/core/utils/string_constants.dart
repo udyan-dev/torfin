@@ -118,4 +118,7 @@ const String remove = 'Remove';
 const String download = 'Download';
 const String favorite = 'Favorite';
 const String saveYourFavoriteTorrents = 'Save your favorite torrents !';
-const String addTorrentsToYourFavorites = 'Add torrents to your favorites list to quickly find and download them later.';
+const String addTorrentsToYourFavorites =
+    'Add torrents to your favorites list to quickly find and download them later.';
+const String wasAddedToFavorites = 'Was added to favorites';
+const String wasRemovedFromFavorites = 'Was removed from favorites';

@@ -51,7 +51,6 @@ Future<void> get init async {
     ),
   );
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
-  di.registerFactory(() => FavoriteCubit(favoriteUseCase: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
   di.registerLazySingleton(
     () => TrendingTorrentUseCase(
@@ -70,4 +69,5 @@ Future<void> get init async {
   di.registerFactory(
     () => TrendingCubit(trendingUseCase: di(), favoriteUseCase: di()),
   );
+  di.registerFactory(() => FavoriteCubit(favoriteUseCase: di()));
 }

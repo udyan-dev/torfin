@@ -12,9 +12,10 @@ sealed class FavoriteState with _$FavoriteState {
     @Default('') String query,
     @Default(false) bool isShimmer,
     @Default(<String>{}) Set<String> favoriteKeys,
+    AppNotification? notification,
   }) = _FavoriteState;
 }
 
-extension FavoriteStateX on FavoriteState {
+extension FavoriteStateEx on FavoriteState {
   bool isFavorite(TorrentRes t) => favoriteKeys.contains(t.identityKey);
 }

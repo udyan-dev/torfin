@@ -9,6 +9,7 @@ import '../../data/models/response/empty_state/empty_state.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/notification_widget.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/shimmer_list_widget.dart';
 import '../widgets/sort_widget.dart';
@@ -151,73 +152,81 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _cubit,
-      child: Column(
-        children: [
-          AppBarWidget(
-            title: search,
-            actions: [
-              SortWidget(
-                onSort: (sortType) => _cubit.search(sortType: sortType),
-              ),
-            ],
-          ),
-          SearchBarWidget(
-            onSearch: (searchText) => _cubit.search(search: searchText),
-            onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
-          ),
-          BlocBuilder<SearchCubit, SearchState>(
-            buildWhen: (p, c) =>
-                p.categoriesRaw != c.categoriesRaw ||
-                p.selectedCategoryRaw != c.selectedCategoryRaw,
-            builder: (context, state) {
-              return CategoryWidget(
-                categories: state.categoriesRaw,
-                selectedRaw: state.selectedCategoryRaw,
-                onCategoryChange: (raw) => _cubit.search(category: raw),
-              );
-            },
-          ),
-          Expanded(
-            child: BlocListener<SearchCubit, SearchState>(
-              listenWhen: (p, c) =>
-                  c.status == SearchStatus.success && c.canLoadMore,
-              listener: (context, state) => _checkAutoLoadMore(state),
-              child: BlocBuilder<SearchCubit, SearchState>(
-                buildWhen: (previous, current) =>
-                    previous.status != current.status ||
-                    previous.selectedCategoryRaw !=
-                        current.selectedCategoryRaw ||
-                    previous.torrents.length != current.torrents.length ||
-                    previous.isShimmer != current.isShimmer ||
-                    previous.isPaginating != current.isPaginating ||
-                    previous.isAutoLoadingMore != current.isAutoLoadingMore ||
-                    !identical(previous.torrents, current.torrents),
-                builder: (context, state) {
-                  switch (state.status) {
-                    case SearchStatus.initial:
-                      return EmptyStateWidget(
-                        iconColor: context.colors.interactive,
-                        emptyState: const EmptyState(
-                          stateIcon: AppAssets.icStartSearch,
-                          title: searchTorrentsTitle,
-                          description: searchTorrentsDescription,
-                        ),
-                      );
-                    case SearchStatus.loading:
-                    case SearchStatus.success:
-                      return _buildTorrents(context, state);
-                    case SearchStatus.error:
-                      return EmptyStateWidget(
-                        emptyState: state.emptyState,
-                        iconColor: context.colors.supportError,
-                        onTap: _cubit.onRetry,
-                      );
-                  }
-                },
+      child: BlocListener<SearchCubit, SearchState>(
+        listenWhen: (p, c) => p.notification != c.notification,
+        listener: (context, state) {
+          if (state.notification != null) {
+            NotificationWidget.notify(context, state.notification!);
+          }
+        },
+        child: Column(
+          children: [
+            AppBarWidget(
+              title: search,
+              actions: [
+                SortWidget(
+                  onSort: (sortType) => _cubit.search(sortType: sortType),
+                ),
+              ],
+            ),
+            SearchBarWidget(
+              onSearch: (searchText) => _cubit.search(search: searchText),
+              onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
+            ),
+            BlocBuilder<SearchCubit, SearchState>(
+              buildWhen: (p, c) =>
+                  p.categoriesRaw != c.categoriesRaw ||
+                  p.selectedCategoryRaw != c.selectedCategoryRaw,
+              builder: (context, state) {
+                return CategoryWidget(
+                  categories: state.categoriesRaw,
+                  selectedRaw: state.selectedCategoryRaw,
+                  onCategoryChange: (raw) => _cubit.search(category: raw),
+                );
+              },
+            ),
+            Expanded(
+              child: BlocListener<SearchCubit, SearchState>(
+                listenWhen: (p, c) =>
+                    c.status == SearchStatus.success && c.canLoadMore,
+                listener: (context, state) => _checkAutoLoadMore(state),
+                child: BlocBuilder<SearchCubit, SearchState>(
+                  buildWhen: (previous, current) =>
+                      previous.status != current.status ||
+                      previous.selectedCategoryRaw !=
+                          current.selectedCategoryRaw ||
+                      previous.torrents.length != current.torrents.length ||
+                      previous.isShimmer != current.isShimmer ||
+                      previous.isPaginating != current.isPaginating ||
+                      previous.isAutoLoadingMore != current.isAutoLoadingMore ||
+                      !identical(previous.torrents, current.torrents),
+                  builder: (context, state) {
+                    switch (state.status) {
+                      case SearchStatus.initial:
+                        return EmptyStateWidget(
+                          iconColor: context.colors.interactive,
+                          emptyState: const EmptyState(
+                            stateIcon: AppAssets.icStartSearch,
+                            title: searchTorrentsTitle,
+                            description: searchTorrentsDescription,
+                          ),
+                        );
+                      case SearchStatus.loading:
+                      case SearchStatus.success:
+                        return _buildTorrents(context, state);
+                      case SearchStatus.error:
+                        return EmptyStateWidget(
+                          emptyState: state.emptyState,
+                          iconColor: context.colors.supportError,
+                          onTap: _cubit.onRetry,
+                        );
+                    }
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

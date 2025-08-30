@@ -20,6 +20,7 @@ sealed class SearchState with _$SearchState {
     String? currentRequestId,
     @Default(false) bool isAutoLoadingMore,
     @Default(<String>{}) Set<String> favoriteKeys,
+    AppNotification? notification,
   }) = _SearchState;
 }
 

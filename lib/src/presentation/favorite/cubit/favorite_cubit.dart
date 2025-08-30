@@ -8,6 +8,7 @@ import '../../../../core/helpers/data_state.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../widgets/notification_widget.dart';
 
 part 'favorite_cubit.freezed.dart';
 
@@ -84,9 +85,10 @@ class FavoriteCubit extends Cubit<FavoriteState> {
 
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
-    final next = state.favoriteKeys.contains(k)
-        ? (state.favoriteKeys.toSet()..remove(k))
-        : (state.favoriteKeys.toSet()..add(k));
+    final wasAdded = !state.favoriteKeys.contains(k);
+    final next = wasAdded
+        ? (state.favoriteKeys.toSet()..add(k))
+        : (state.favoriteKeys.toSet()..remove(k));
     emit(state.copyWith(favoriteKeys: next));
 
     final response = await _favoriteUseCase(
@@ -128,6 +130,13 @@ class FavoriteCubit extends Cubit<FavoriteState> {
             isShimmer: false,
             favoriteKeys: set,
             emptyState: emptyState,
+            notification: AppNotification(
+              title: torrent.name,
+              type: wasAdded
+                  ? NotificationType.favoriteAdded
+                  : NotificationType.favoriteRemoved,
+              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
+            ),
           ),
         );
       },

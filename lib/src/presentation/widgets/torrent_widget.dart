@@ -55,7 +55,7 @@ class TorrentWidget extends StatelessWidget {
                         child: ButtonWidget(
                           backgroundColor: context.colors.buttonSecondary,
                           buttonText: isFavorite ? remove : save,
-                          onTap: (){
+                          onTap: () {
                             onSave?.call();
                             Navigator.of(context).pop();
                           },

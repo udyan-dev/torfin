@@ -23,6 +23,10 @@ dependencies:
   shared_preferences: ^2.5.3
   uuid: ^4.5.1
   connectivity_plus: ^6.1.5
+#  flutter_torrent:
+#    git:
+#      url: git@github.com:udyan-dev/flutter_torrent.git
+#      ref: eb7f9b20dd87d419b78dc4ba50d918f48f71568e
 
 dev_dependencies:
   flutter_test:

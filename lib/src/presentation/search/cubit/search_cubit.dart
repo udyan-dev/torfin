@@ -15,6 +15,7 @@ import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/auto_complete_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
+import '../../widgets/notification_widget.dart';
 
 part 'search_cubit.freezed.dart';
 part 'search_state.dart';
@@ -601,9 +602,10 @@ class SearchCubit extends Cubit<SearchState> {
 
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
-    final next = state.favoriteKeys.contains(k)
-        ? (state.favoriteKeys.toSet()..remove(k))
-        : (state.favoriteKeys.toSet()..add(k));
+    final wasAdded = !state.favoriteKeys.contains(k);
+    final next = wasAdded
+        ? (state.favoriteKeys.toSet()..add(k))
+        : (state.favoriteKeys.toSet()..remove(k));
     emit(state.copyWith(favoriteKeys: next));
     final res = await _favoriteUseCase(
       FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
@@ -617,7 +619,18 @@ class SearchCubit extends Cubit<SearchState> {
             set.add(data[i].identityKey);
           }
         }
-        emit(state.copyWith(favoriteKeys: set));
+        emit(
+          state.copyWith(
+            favoriteKeys: set,
+            notification: AppNotification(
+              title: torrent.name,
+              type: wasAdded
+                  ? NotificationType.favoriteAdded
+                  : NotificationType.favoriteRemoved,
+              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
+            ),
+          ),
+        );
       },
     );
   }
