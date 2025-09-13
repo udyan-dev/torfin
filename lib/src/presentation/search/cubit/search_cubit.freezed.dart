@@ -14,7 +14,39 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SearchState {
 
- SearchStatus get status; EmptyState get emptyState; List<TorrentRes> get torrents; List<TorrentRes> get rawTorrentList; String get search; int get page; bool get hasMore; SortType get sortType; List<String> get categoriesRaw; String? get selectedCategoryRaw; bool get isPaginating; bool get isShimmer; String? get currentRequestId; bool get isAutoLoadingMore; Set<String> get favoriteKeys; AppNotification? get notification;
+  SearchStatus get status;
+
+  EmptyState get emptyState;
+
+  List<TorrentRes> get torrents;
+
+  List<TorrentRes> get rawTorrentList;
+
+  String get search;
+
+  int get page;
+
+  bool get hasMore;
+
+  SortType get sortType;
+
+  List<String> get categoriesRaw;
+
+  String? get selectedCategoryRaw;
+
+  bool get isPaginating;
+
+  bool get isShimmer;
+
+  String? get currentRequestId;
+
+  bool get isAutoLoadingMore;
+
+  Set<String> get favoriteKeys;
+
+  AppNotification? get notification;
+
+  String? get fetchingMagnetForKey;
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +57,64 @@ $SearchStateCopyWith<SearchState> get copyWith => _$SearchStateCopyWithImpl<Sear
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other.torrents, torrents)&&const DeepCollectionEquality().equals(other.rawTorrentList, rawTorrentList)&&(identical(other.search, search) || other.search == search)&&(identical(other.page, page) || other.page == page)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&const DeepCollectionEquality().equals(other.categoriesRaw, categoriesRaw)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw)&&(identical(other.isPaginating, isPaginating) || other.isPaginating == isPaginating)&&(identical(other.isShimmer, isShimmer) || other.isShimmer == isShimmer)&&(identical(other.currentRequestId, currentRequestId) || other.currentRequestId == currentRequestId)&&(identical(other.isAutoLoadingMore, isAutoLoadingMore) || other.isAutoLoadingMore == isAutoLoadingMore)&&const DeepCollectionEquality().equals(other.favoriteKeys, favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification));
+  return identical(this, other) ||
+      (other.runtimeType == runtimeType && other is SearchState &&
+          (identical(other.status, status) || other.status == status) &&
+          (identical(other.emptyState, emptyState) ||
+              other.emptyState == emptyState) &&
+          const DeepCollectionEquality().equals(other.torrents, torrents) &&
+          const DeepCollectionEquality().equals(
+              other.rawTorrentList, rawTorrentList) &&
+          (identical(other.search, search) || other.search == search) &&
+          (identical(other.page, page) || other.page == page) &&
+          (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
+          (identical(other.sortType, sortType) || other.sortType == sortType) &&
+          const DeepCollectionEquality().equals(
+              other.categoriesRaw, categoriesRaw) &&
+          (identical(other.selectedCategoryRaw, selectedCategoryRaw) ||
+              other.selectedCategoryRaw == selectedCategoryRaw) &&
+          (identical(other.isPaginating, isPaginating) ||
+              other.isPaginating == isPaginating) &&
+          (identical(other.isShimmer, isShimmer) ||
+              other.isShimmer == isShimmer) &&
+          (identical(other.currentRequestId, currentRequestId) ||
+              other.currentRequestId == currentRequestId) &&
+          (identical(other.isAutoLoadingMore, isAutoLoadingMore) ||
+              other.isAutoLoadingMore == isAutoLoadingMore) &&
+          const DeepCollectionEquality().equals(
+              other.favoriteKeys, favoriteKeys) &&
+          (identical(other.notification, notification) ||
+              other.notification == notification) &&
+          (identical(other.fetchingMagnetForKey, fetchingMagnetForKey) ||
+              other.fetchingMagnetForKey == fetchingMagnetForKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(torrents),const DeepCollectionEquality().hash(rawTorrentList),search,page,hasMore,sortType,const DeepCollectionEquality().hash(categoriesRaw),selectedCategoryRaw,isPaginating,isShimmer,currentRequestId,isAutoLoadingMore,const DeepCollectionEquality().hash(favoriteKeys),notification);
+int get hashCode =>
+    Object.hash(
+        runtimeType,
+        status,
+        emptyState,
+        const DeepCollectionEquality().hash(torrents),
+        const DeepCollectionEquality().hash(rawTorrentList),
+        search,
+        page,
+        hasMore,
+        sortType,
+        const DeepCollectionEquality().hash(categoriesRaw),
+        selectedCategoryRaw,
+        isPaginating,
+        isShimmer,
+        currentRequestId,
+        isAutoLoadingMore,
+        const DeepCollectionEquality().hash(favoriteKeys),
+        notification,
+        fetchingMagnetForKey);
 
 @override
 String toString() {
-  return 'SearchState(status: $status, emptyState: $emptyState, torrents: $torrents, rawTorrentList: $rawTorrentList, search: $search, page: $page, hasMore: $hasMore, sortType: $sortType, categoriesRaw: $categoriesRaw, selectedCategoryRaw: $selectedCategoryRaw, isPaginating: $isPaginating, isShimmer: $isShimmer, currentRequestId: $currentRequestId, isAutoLoadingMore: $isAutoLoadingMore, favoriteKeys: $favoriteKeys, notification: $notification)';
+  return 'SearchState(status: $status, emptyState: $emptyState, torrents: $torrents, rawTorrentList: $rawTorrentList, search: $search, page: $page, hasMore: $hasMore, sortType: $sortType, categoriesRaw: $categoriesRaw, selectedCategoryRaw: $selectedCategoryRaw, isPaginating: $isPaginating, isShimmer: $isShimmer, currentRequestId: $currentRequestId, isAutoLoadingMore: $isAutoLoadingMore, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey)';
 }
 
 
@@ -45,7 +125,10 @@ abstract mixin class $SearchStateCopyWith<$Res>  {
   factory $SearchStateCopyWith(SearchState value, $Res Function(SearchState) _then) = _$SearchStateCopyWithImpl;
 @useResult
 $Res call({
- SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<String> favoriteKeys, AppNotification? notification
+  SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<
+      TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<
+      String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<
+      String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey
 });
 
 
@@ -62,7 +145,10 @@ class _$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? rawTorrentList = null,Object? search = null,Object? page = null,Object? hasMore = null,Object? sortType = null,Object? categoriesRaw = null,Object? selectedCategoryRaw = freezed,Object? isPaginating = null,Object? isShimmer = null,Object? currentRequestId = freezed,Object? isAutoLoadingMore = null,Object? favoriteKeys = null,Object? notification = freezed,}) {
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call(
+      {Object? status = null, Object? emptyState = null, Object? torrents = null, Object? rawTorrentList = null, Object? search = null, Object? page = null, Object? hasMore = null, Object? sortType = null, Object? categoriesRaw = null, Object? selectedCategoryRaw = freezed, Object? isPaginating = null, Object? isShimmer = null, Object? currentRequestId = freezed, Object? isAutoLoadingMore = null, Object? favoriteKeys = null, Object? notification = freezed, Object? fetchingMagnetForKey = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
@@ -80,7 +166,11 @@ as bool,currentRequestId: freezed == currentRequestId ? _self.currentRequestId :
 as String?,isAutoLoadingMore: null == isAutoLoadingMore ? _self.isAutoLoadingMore : isAutoLoadingMore // ignore: cast_nullable_to_non_nullable
 as bool,favoriteKeys: null == favoriteKeys ? _self.favoriteKeys : favoriteKeys // ignore: cast_nullable_to_non_nullable
 as Set<String>,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
-as AppNotification?,
+  as AppNotification?,
+    fetchingMagnetForKey: freezed == fetchingMagnetForKey
+        ? _self.fetchingMagnetForKey
+        : fetchingMagnetForKey // ignore: cast_nullable_to_non_nullable
+    as String?,
   ));
 }
 /// Create a copy of SearchState
@@ -171,10 +261,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> rawTorrentList,  String search,  int page,  bool hasMore,  SortType sortType,  List<String> categoriesRaw,  String? selectedCategoryRaw,  bool isPaginating,  bool isShimmer,  String? currentRequestId,  bool isAutoLoadingMore,  Set<String> favoriteKeys,  AppNotification? notification)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification);case _:
+return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);case _:
   return orElse();
 
 }
@@ -192,10 +282,10 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentLis
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> rawTorrentList,  String search,  int page,  bool hasMore,  SortType sortType,  List<String> categoriesRaw,  String? selectedCategoryRaw,  bool isPaginating,  bool isShimmer,  String? currentRequestId,  bool isAutoLoadingMore,  Set<String> favoriteKeys,  AppNotification? notification)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey) $default,) {final _that = this;
 switch (_that) {
 case _SearchState():
-return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification);}
+return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -209,10 +299,10 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentLis
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> rawTorrentList,  String search,  int page,  bool hasMore,  SortType sortType,  List<String> categoriesRaw,  String? selectedCategoryRaw,  bool isPaginating,  bool isShimmer,  String? currentRequestId,  bool isAutoLoadingMore,  Set<String> favoriteKeys,  AppNotification? notification)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey)? $default,) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification);case _:
+return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentList,_that.search,_that.page,_that.hasMore,_that.sortType,_that.categoriesRaw,_that.selectedCategoryRaw,_that.isPaginating,_that.isShimmer,_that.currentRequestId,_that.isAutoLoadingMore,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);case _:
   return null;
 
 }
@@ -224,7 +314,19 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.rawTorrentLis
 
 
 class _SearchState implements SearchState {
-  const _SearchState({this.status = SearchStatus.initial, this.emptyState = const EmptyState(), final  List<TorrentRes> torrents = const [], final  List<TorrentRes> rawTorrentList = const [], this.search = "", this.page = 0, this.hasMore = true, this.sortType = SortType.none, final  List<String> categoriesRaw = const <String>[], this.selectedCategoryRaw, this.isPaginating = false, this.isShimmer = false, this.currentRequestId, this.isAutoLoadingMore = false, final  Set<String> favoriteKeys = const <String>{}, this.notification}): _torrents = torrents,_rawTorrentList = rawTorrentList,_categoriesRaw = categoriesRaw,_favoriteKeys = favoriteKeys;
+  const _SearchState({this.status = SearchStatus
+      .initial, this.emptyState = const EmptyState(), final List<
+      TorrentRes> torrents = const [], final List<
+      TorrentRes> rawTorrentList = const [
+  ], this.search = "", this.page = 0, this.hasMore = true, this.sortType = SortType
+      .none, final List<String> categoriesRaw = const <String>[
+  ], this.selectedCategoryRaw, this.isPaginating = false, this.isShimmer = false, this.currentRequestId, this.isAutoLoadingMore = false, final Set<
+      String> favoriteKeys = const <String>{
+  }, this.notification, this.fetchingMagnetForKey})
+      : _torrents = torrents,
+        _rawTorrentList = rawTorrentList,
+        _categoriesRaw = categoriesRaw,
+        _favoriteKeys = favoriteKeys;
   
 
 @override@JsonKey() final  SearchStatus status;
@@ -267,6 +369,7 @@ class _SearchState implements SearchState {
 }
 
 @override final  AppNotification? notification;
+  @override final String? fetchingMagnetForKey;
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
@@ -278,16 +381,64 @@ _$SearchStateCopyWith<_SearchState> get copyWith => __$SearchStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other._torrents, _torrents)&&const DeepCollectionEquality().equals(other._rawTorrentList, _rawTorrentList)&&(identical(other.search, search) || other.search == search)&&(identical(other.page, page) || other.page == page)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&const DeepCollectionEquality().equals(other._categoriesRaw, _categoriesRaw)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw)&&(identical(other.isPaginating, isPaginating) || other.isPaginating == isPaginating)&&(identical(other.isShimmer, isShimmer) || other.isShimmer == isShimmer)&&(identical(other.currentRequestId, currentRequestId) || other.currentRequestId == currentRequestId)&&(identical(other.isAutoLoadingMore, isAutoLoadingMore) || other.isAutoLoadingMore == isAutoLoadingMore)&&const DeepCollectionEquality().equals(other._favoriteKeys, _favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification));
+  return identical(this, other) ||
+      (other.runtimeType == runtimeType && other is _SearchState &&
+          (identical(other.status, status) || other.status == status) &&
+          (identical(other.emptyState, emptyState) ||
+              other.emptyState == emptyState) &&
+          const DeepCollectionEquality().equals(other._torrents, _torrents) &&
+          const DeepCollectionEquality().equals(
+              other._rawTorrentList, _rawTorrentList) &&
+          (identical(other.search, search) || other.search == search) &&
+          (identical(other.page, page) || other.page == page) &&
+          (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
+          (identical(other.sortType, sortType) || other.sortType == sortType) &&
+          const DeepCollectionEquality().equals(
+              other._categoriesRaw, _categoriesRaw) &&
+          (identical(other.selectedCategoryRaw, selectedCategoryRaw) ||
+              other.selectedCategoryRaw == selectedCategoryRaw) &&
+          (identical(other.isPaginating, isPaginating) ||
+              other.isPaginating == isPaginating) &&
+          (identical(other.isShimmer, isShimmer) ||
+              other.isShimmer == isShimmer) &&
+          (identical(other.currentRequestId, currentRequestId) ||
+              other.currentRequestId == currentRequestId) &&
+          (identical(other.isAutoLoadingMore, isAutoLoadingMore) ||
+              other.isAutoLoadingMore == isAutoLoadingMore) &&
+          const DeepCollectionEquality().equals(
+              other._favoriteKeys, _favoriteKeys) &&
+          (identical(other.notification, notification) ||
+              other.notification == notification) &&
+          (identical(other.fetchingMagnetForKey, fetchingMagnetForKey) ||
+              other.fetchingMagnetForKey == fetchingMagnetForKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(_torrents),const DeepCollectionEquality().hash(_rawTorrentList),search,page,hasMore,sortType,const DeepCollectionEquality().hash(_categoriesRaw),selectedCategoryRaw,isPaginating,isShimmer,currentRequestId,isAutoLoadingMore,const DeepCollectionEquality().hash(_favoriteKeys),notification);
+int get hashCode =>
+    Object.hash(
+        runtimeType,
+        status,
+        emptyState,
+        const DeepCollectionEquality().hash(_torrents),
+        const DeepCollectionEquality().hash(_rawTorrentList),
+        search,
+        page,
+        hasMore,
+        sortType,
+        const DeepCollectionEquality().hash(_categoriesRaw),
+        selectedCategoryRaw,
+        isPaginating,
+        isShimmer,
+        currentRequestId,
+        isAutoLoadingMore,
+        const DeepCollectionEquality().hash(_favoriteKeys),
+        notification,
+        fetchingMagnetForKey);
 
 @override
 String toString() {
-  return 'SearchState(status: $status, emptyState: $emptyState, torrents: $torrents, rawTorrentList: $rawTorrentList, search: $search, page: $page, hasMore: $hasMore, sortType: $sortType, categoriesRaw: $categoriesRaw, selectedCategoryRaw: $selectedCategoryRaw, isPaginating: $isPaginating, isShimmer: $isShimmer, currentRequestId: $currentRequestId, isAutoLoadingMore: $isAutoLoadingMore, favoriteKeys: $favoriteKeys, notification: $notification)';
+  return 'SearchState(status: $status, emptyState: $emptyState, torrents: $torrents, rawTorrentList: $rawTorrentList, search: $search, page: $page, hasMore: $hasMore, sortType: $sortType, categoriesRaw: $categoriesRaw, selectedCategoryRaw: $selectedCategoryRaw, isPaginating: $isPaginating, isShimmer: $isShimmer, currentRequestId: $currentRequestId, isAutoLoadingMore: $isAutoLoadingMore, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey)';
 }
 
 
@@ -298,7 +449,10 @@ abstract mixin class _$SearchStateCopyWith<$Res> implements $SearchStateCopyWith
   factory _$SearchStateCopyWith(_SearchState value, $Res Function(_SearchState) _then) = __$SearchStateCopyWithImpl;
 @override @useResult
 $Res call({
- SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<String> favoriteKeys, AppNotification? notification
+  SearchStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<
+      TorrentRes> rawTorrentList, String search, int page, bool hasMore, SortType sortType, List<
+      String> categoriesRaw, String? selectedCategoryRaw, bool isPaginating, bool isShimmer, String? currentRequestId, bool isAutoLoadingMore, Set<
+      String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey
 });
 
 
@@ -315,7 +469,10 @@ class __$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? rawTorrentList = null,Object? search = null,Object? page = null,Object? hasMore = null,Object? sortType = null,Object? categoriesRaw = null,Object? selectedCategoryRaw = freezed,Object? isPaginating = null,Object? isShimmer = null,Object? currentRequestId = freezed,Object? isAutoLoadingMore = null,Object? favoriteKeys = null,Object? notification = freezed,}) {
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call(
+      {Object? status = null, Object? emptyState = null, Object? torrents = null, Object? rawTorrentList = null, Object? search = null, Object? page = null, Object? hasMore = null, Object? sortType = null, Object? categoriesRaw = null, Object? selectedCategoryRaw = freezed, Object? isPaginating = null, Object? isShimmer = null, Object? currentRequestId = freezed, Object? isAutoLoadingMore = null, Object? favoriteKeys = null, Object? notification = freezed, Object? fetchingMagnetForKey = freezed,}) {
   return _then(_SearchState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
@@ -333,7 +490,11 @@ as bool,currentRequestId: freezed == currentRequestId ? _self.currentRequestId :
 as String?,isAutoLoadingMore: null == isAutoLoadingMore ? _self.isAutoLoadingMore : isAutoLoadingMore // ignore: cast_nullable_to_non_nullable
 as bool,favoriteKeys: null == favoriteKeys ? _self._favoriteKeys : favoriteKeys // ignore: cast_nullable_to_non_nullable
 as Set<String>,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
-as AppNotification?,
+  as AppNotification?,
+    fetchingMagnetForKey: freezed == fetchingMagnetForKey
+        ? _self.fetchingMagnetForKey
+        : fetchingMagnetForKey // ignore: cast_nullable_to_non_nullable
+    as String?,
   ));
 }
 

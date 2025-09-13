@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
+import '../../../../core/bindings/env.dart';
 import '../../../../core/helpers/base_exception.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../models/response/torrent/torrent_res.dart';
@@ -47,7 +48,7 @@ class DioService {
     CancelToken? cancelToken,
   }) => _executeRequest<List<String>>(
     request: () => _dio.get<String>(
-      endpoint,
+      '${Env.proxyUrl}$endpoint',
       queryParameters: queryParams,
       cancelToken: cancelToken,
     ),
@@ -120,7 +121,9 @@ class DioService {
         }
       }
 
-      log('JSON_PARSE: received=${jsonData.length} parsed=${result.length} skipped=$skippedCount');
+      log(
+        'JSON_PARSE: received=${jsonData.length} parsed=${result.length} skipped=$skippedCount',
+      );
       return result;
     } catch (e) {
       throw BaseException(

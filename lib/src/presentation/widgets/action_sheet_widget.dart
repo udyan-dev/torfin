@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
-import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/action/action.dart';
 import 'button_widget.dart';
+import 'checkbox_widget.dart';
 
 class ActionSheetWidget extends StatefulWidget {
   final List<ActionModel> actions;
@@ -107,14 +106,16 @@ class _ActionSheetWidgetState extends State<ActionSheetWidget> {
                               action.actionItems[itemIndex].title,
                               color: context.colors.textPrimary,
                             ),
-                            SvgPicture.asset(
-                              (selectedActionIndex == actionIndex &&
-                                      selectedItemIndex == itemIndex)
-                                  ? AppAssets.icCheckBoxFilled
-                                  : AppAssets.icCheckBox,
-                              width: 20,
-                              height: 20,
-                              colorFilter: context.colors.iconPrimary.colorFilter,
+                            CheckBoxWidget(
+                              value:
+                                  (selectedActionIndex == actionIndex &&
+                                  selectedItemIndex == itemIndex),
+                              side: BorderSide(
+                                color: context.colors.iconPrimary,
+                              ),
+                              activeColor: context.colors.iconPrimary,
+                              onChanged: (_) =>
+                                  _updateSelection(actionIndex, itemIndex),
                             ),
                           ],
                         ),

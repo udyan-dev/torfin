@@ -1,6 +1,6 @@
 import java.util.Properties
 
-apply(from = "secrets.gradle.kts")
+apply(from = "../../secrets.gradle.kts")
 
 plugins {
     id("com.android.application")

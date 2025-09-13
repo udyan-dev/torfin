@@ -51,3 +51,4 @@ key.properties
 upload-keystore
 secrets.env
 firebase.json
+/upload-keystore.jks

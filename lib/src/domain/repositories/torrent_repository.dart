@@ -22,4 +22,9 @@ abstract class TorrentRepository {
     required TrendingReq trendingReq,
     required CancelToken cancelToken,
   });
+
+  Future<DataState<List<String>>> getMagnetLinks({
+    required String site,
+    required CancelToken cancelToken,
+  });
 }

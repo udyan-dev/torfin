@@ -115,4 +115,15 @@ class TorrentRepositoryImpl extends BaseRepository
       cancelToken: cancelToken,
     ),
   );
+
+  @override
+  Future<DataState<List<String>>> getMagnetLinks({
+    required String site,
+    required CancelToken cancelToken,
+  }) => getStateOf(
+    request: () async => await _dioService.getMagnetLinks(
+      endpoint: site,
+      cancelToken: cancelToken,
+    ),
+  );
 }

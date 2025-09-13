@@ -18,4 +18,7 @@ abstract class StorageRepository {
 
   Future<DataState<List<TorrentRes>>> getFavorites();
   Future<DataState<bool>> setFavorites(List<TorrentRes> list);
+
+  Future<DataState<String>> getTorrentFolder();
+  Future<DataState<bool>> setTorrentFolder(String folderPath);
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,8 +12,10 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/auto_complete_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
+import '../../../domain/usecases/get_magnet_use_case.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'search_cubit.freezed.dart';
@@ -25,25 +26,34 @@ class SearchCubit extends Cubit<SearchState> {
     required SearchTorrentUseCase searchTorrentUseCase,
     required AutoCompleteUseCase autoCompleteUseCase,
     required FavoriteUseCase favoriteUseCase,
+    required AddTorrentUseCase addTorrentUseCase,
+    required GetMagnetUseCase getMagnetUseCase,
     ConnectivityService? connectivity,
   }) : _searchTorrentUseCase = searchTorrentUseCase,
        _autoCompleteUseCase = autoCompleteUseCase,
        _favoriteUseCase = favoriteUseCase,
+       _addTorrentUseCase = addTorrentUseCase,
+        _getMagnetUseCase = getMagnetUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const SearchState());
 
   final SearchTorrentUseCase _searchTorrentUseCase;
   final AutoCompleteUseCase _autoCompleteUseCase;
   final FavoriteUseCase _favoriteUseCase;
+  final AddTorrentUseCase _addTorrentUseCase;
+  final GetMagnetUseCase _getMagnetUseCase;
   final ConnectivityService _connectivity;
   CancelToken? _token;
   CancelToken? _suggestionToken;
   bool _isProcessingRequest = false;
+  CancelToken? _magnetCancelToken;
+
 
   @override
   Future<void> close() {
     _token?.cancel();
     _suggestionToken?.cancel();
+    _magnetCancelToken?.cancel();
     return super.close();
   }
 
@@ -61,9 +71,6 @@ class SearchCubit extends Cubit<SearchState> {
     final newSortType = sortType ?? state.sortType;
     final newCategory = category ?? state.selectedCategoryRaw;
 
-    log(
-      'SEARCH: query="$newSearch" sort=$newSortType category=$newCategory refresh=$isRefresh',
-    );
 
     if (newSearch.isEmpty) {
       _cancelCurrentRequest();
@@ -118,9 +125,6 @@ class SearchCubit extends Cubit<SearchState> {
     _cancelCurrentRequest();
     final requestId = _generateRequestId();
 
-    log(
-      'FRESH_SEARCH: start query="$search" sort=$sortType category=$category id=$requestId',
-    );
 
     emit(
       state.copyWith(
@@ -149,16 +153,12 @@ class SearchCubit extends Cubit<SearchState> {
     _cancelCurrentRequest();
 
     if (state.status == SearchStatus.error || state.rawTorrentList.isEmpty) {
-      log('CATEGORY_CHANGE: no_data - performing fresh search');
       return _performFreshSearch(state.search, sortType, category);
     }
 
     final filteredTorrents = _filterTorrentsByRaw(
       state.rawTorrentList,
       category,
-    );
-    log(
-      'CATEGORY_CHANGE: raw="$category" filtered=${filteredTorrents.length}/${state.rawTorrentList.length}',
     );
 
     emit(
@@ -197,9 +197,6 @@ class SearchCubit extends Cubit<SearchState> {
 
       _isProcessingRequest = true;
       final requestId = _generateRequestId();
-      log(
-        'CATEGORY_CHANGE: auto_load start page=${state.page + 1} id=$requestId',
-      );
 
       emit(
         state.copyWith(
@@ -219,9 +216,6 @@ class SearchCubit extends Cubit<SearchState> {
         !state.canLoadMore ||
         _isProcessingRequest ||
         state.currentRequestId == null) {
-      log(
-        'LOAD_MORE: blocked - closed=$isClosed canLoad=${state.canLoadMore} processing=$_isProcessingRequest',
-      );
       return;
     }
 
@@ -246,7 +240,6 @@ class SearchCubit extends Cubit<SearchState> {
     }
 
     _isProcessingRequest = true;
-    log('LOAD_MORE: start page=${state.page + 1} id=${state.currentRequestId}');
 
     emit(
       state.copyWith(
@@ -286,7 +279,6 @@ class SearchCubit extends Cubit<SearchState> {
     }
 
     _isProcessingRequest = true;
-    log('AUTO_LOAD: start page=${state.page + 1} id=${state.currentRequestId}');
 
     emit(
       state.copyWith(
@@ -305,9 +297,6 @@ class SearchCubit extends Cubit<SearchState> {
       return;
     }
 
-    log(
-      'API_CALL: page=$page id=$requestId query="${state.search}" sort=${state.sortType.value}',
-    );
 
     try {
       final response = await _searchTorrentUseCase.call(
@@ -325,9 +314,6 @@ class SearchCubit extends Cubit<SearchState> {
       }
 
       if (state.currentRequestId != requestId) {
-        log(
-          'API_RESPONSE: ignored - stale request current=${state.currentRequestId} received=$requestId',
-        );
         _isProcessingRequest = false;
         return;
       }
@@ -338,7 +324,6 @@ class SearchCubit extends Cubit<SearchState> {
       );
     } catch (e) {
       _isProcessingRequest = false;
-      log('API_CALL: exception - $e');
       rethrow;
     }
   }
@@ -353,9 +338,6 @@ class SearchCubit extends Cubit<SearchState> {
     if (isClosed) return;
 
     if (state.currentRequestId != requestId) {
-      log(
-        'API_SUCCESS: ignored - request mismatch current=${state.currentRequestId} received=$requestId',
-      );
       return;
     }
 
@@ -432,9 +414,6 @@ class SearchCubit extends Cubit<SearchState> {
         ? firstCategory
         : (oldSelPresent ? oldSel : (keepOldSelForNextPages ? oldSel : null));
 
-    log(
-      'API_SUCCESS: page=$page new=${newTorrents.length} raw=${state.rawTorrentList.length}->${merged.length} filtered=${filtered.length} hasMore=$hasMoreData',
-    );
 
     final willAutoLoad =
         filtered.isEmpty && hasMoreData && newSelectedRaw != null;
@@ -455,7 +434,6 @@ class SearchCubit extends Cubit<SearchState> {
     );
 
     if (willAutoLoad) {
-      log('API_SUCCESS: triggering auto-load');
       _autoLoadMore();
     }
   }
@@ -464,14 +442,10 @@ class SearchCubit extends Cubit<SearchState> {
     _isProcessingRequest = false;
 
     if (isClosed || error.type == BaseExceptionType.cancel) {
-      log('API_FAILURE: ignored - closed=$isClosed type=${error.type}');
       return;
     }
 
     final hasExistingTorrents = state.torrents.isNotEmpty;
-    log(
-      'API_FAILURE: error="${error.message}" type=${error.type} hasData=$hasExistingTorrents',
-    );
 
     final stopPagination = error.type != BaseExceptionType.cancel;
 
@@ -538,7 +512,6 @@ class SearchCubit extends Cubit<SearchState> {
       return;
     }
 
-    log('RETRY: query="${state.search}"');
 
     if (state.search.isNotEmpty) {
       search(
@@ -628,6 +601,132 @@ class SearchCubit extends Cubit<SearchState> {
                   ? NotificationType.favoriteAdded
                   : NotificationType.favoriteRemoved,
               message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+  void cancelMagnetFetch() {
+    _magnetCancelToken?.cancel('Dialog dismissed');
+    _magnetCancelToken = null;
+    if (!isClosed && state.fetchingMagnetForKey != null) {
+      emit(state.copyWith(fetchingMagnetForKey: null));
+    }
+  }
+
+  Future<void> downloadTorrent(TorrentRes torrent) async {
+    final key = torrent.identityKey;
+    if (torrent.magnet.isEmpty) {
+      emit(state.copyWith(fetchingMagnetForKey: key));
+
+      _magnetCancelToken = CancelToken();
+      final res = await _getMagnetUseCase.call(
+        torrent.url,
+        cancelToken: _magnetCancelToken!,
+      );
+
+      if (isClosed) return;
+
+      String? magnet;
+      res.when(
+        success: (links) {
+          if (links.isNotEmpty) magnet = links.first;
+        },
+        failure: (error) {
+          _magnetCancelToken = null;
+          emit(
+            state.copyWith(
+              fetchingMagnetForKey: null,
+              notification: AppNotification(
+                title: torrent.name,
+                type: NotificationType.error,
+                message: error.message,
+              ),
+            ),
+          );
+        },
+      );
+
+      if (magnet == null || magnet!.isEmpty) {
+        _magnetCancelToken = null;
+        emit(
+          state.copyWith(
+            fetchingMagnetForKey: null,
+            notification: AppNotification(
+              title: torrent.name,
+              type: NotificationType.error,
+              message: magnetLinkNotFound,
+            ),
+          ),
+        );
+        return;
+      }
+
+      final addRes = await _addTorrentUseCase.call(
+        AddTorrentUseCaseParams(magnetLink: magnet!),
+        cancelToken: CancelToken(),
+      );
+
+      addRes.when(
+        success: (_) {
+          _magnetCancelToken = null;
+          emit(
+            state.copyWith(
+              fetchingMagnetForKey: null,
+              notification: AppNotification(
+                title: torrent.name,
+                type: NotificationType.downloadStarted,
+                message: downloadStartedSuccessfully,
+              ),
+            ),
+          );
+        },
+        failure: (error) {
+          _magnetCancelToken = null;
+          emit(
+            state.copyWith(
+              fetchingMagnetForKey: null,
+              notification: AppNotification(
+                title: torrent.name,
+                type: NotificationType.error,
+                message: '$failedToStartDownloadPrefix${error.message}',
+              ),
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    final response = await _addTorrentUseCase.call(
+      AddTorrentUseCaseParams(
+        magnetLink: torrent.magnet,
+      ),
+      cancelToken: CancelToken(),
+    );
+
+    response.when(
+      success: (_) {
+        emit(
+          state.copyWith(
+            notification: AppNotification(
+              title: torrent.name,
+              type: NotificationType.downloadStarted,
+              message: downloadStartedSuccessfully,
+            ),
+          ),
+        );
+      },
+      failure: (error) {
+        emit(
+          state.copyWith(
+            notification: AppNotification(
+              title: torrent.name,
+              type: NotificationType.error,
+              message: '$failedToStartDownloadPrefix${error.message}',
             ),
           ),
         );

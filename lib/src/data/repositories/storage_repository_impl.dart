@@ -18,8 +18,9 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<String>> getToken() => getStateOf(
-    request: () async =>
-        await _storageService.get<String>(tokenKey) ?? emptyString,
+    request: () => _storageService
+        .get<String>(tokenKey)
+        .then((value) => value ?? emptyString),
   );
 
   @override
@@ -32,12 +33,13 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<ThemeMode>> getTheme() => getStateOf(
-    request: () async {
-      final index = await _storageService.get<int>(themeKey);
-      return index == null
-          ? ThemeMode.system
-          : ThemeMode.values[index.clamp(0, ThemeMode.values.length - 1)];
-    },
+    request: () => _storageService
+        .get<int>(themeKey)
+        .then(
+          (index) => index == null
+              ? ThemeMode.system
+              : ThemeMode.values[index.clamp(0, ThemeMode.values.length - 1)],
+        ),
   );
 
   @override
@@ -46,7 +48,8 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<String>> getNsfw() => getStateOf(
-    request: () async => await _storageService.get<String>(nsfwKey) ?? "0",
+    request: () =>
+        _storageService.get<String>(nsfwKey).then((value) => value ?? "0"),
   );
 
   @override
@@ -59,27 +62,41 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<List<TorrentRes>>> getFavorites() => getStateOf(
-    request: () async {
-      final list = await _storageService.get<List<String>>(favoritesKey) ?? [];
-      if (list.isEmpty) return <TorrentRes>[];
+    request: () => _storageService.get<List<String>>(favoritesKey).then((list) {
+      final items = list ?? [];
+      if (items.isEmpty) return <TorrentRes>[];
       final out = <TorrentRes>[];
-      for (int i = 0; i < list.length; i++) {
+      for (int i = 0; i < items.length; i++) {
         try {
-          out.add(TorrentRes.fromJson(jsonDecode(list[i]) as Map<String, dynamic>));
+          out.add(
+            TorrentRes.fromJson(jsonDecode(items[i]) as Map<String, dynamic>),
+          );
         } catch (_) {}
       }
       return out;
-    },
+    }),
   );
 
   @override
   Future<DataState<bool>> setFavorites(List<TorrentRes> list) => getStateOf(
-    request: () async {
+    request: () {
       final serialized = <String>[];
       for (int i = 0; i < list.length; i++) {
         serialized.add(jsonEncode(list[i].toJson()));
       }
       return _storageService.set<List<String>>(favoritesKey, serialized);
     },
+  );
+
+  @override
+  Future<DataState<String>> getTorrentFolder() => getStateOf(
+    request: () => _storageService
+        .get<String>(downloadLocationKey)
+        .then((value) => value ?? emptyString),
+  );
+
+  @override
+  Future<DataState<bool>> setTorrentFolder(String folderPath) => getStateOf(
+    request: () => _storageService.set(downloadLocationKey, folderPath),
   );
 }

@@ -18,6 +18,7 @@ sealed class TrendingState with _$TrendingState {
     Map<TrendingType, List<TorrentRes>> cacheByType,
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
+    String? fetchingMagnetForKey,
   }) = _TrendingState;
 }
 

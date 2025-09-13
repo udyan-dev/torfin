@@ -6,76 +6,50 @@ import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/string_constants.dart';
-import 'button_widget.dart';
 import 'shimmer.dart';
 
 class TorrentWidget extends StatelessWidget {
   final bool isLoading;
   final bool isFavorite;
-  final TorrentRes? torrent;
+  final TorrentRes torrent;
   final VoidCallback? onSave;
+  final VoidCallback? onDownload;
+  final VoidCallback? onDialogClosed;
+  final Widget Function(
+    BuildContext parentContext,
+    BuildContext dialogContext,
+    TorrentRes torrent,
+  )
+  dialogBuilder;
 
   const TorrentWidget({
     super.key,
-    this.torrent,
+    required this.torrent,
     this.isLoading = false,
     this.isFavorite = false,
     this.onSave,
+    this.onDownload,
+    this.onDialogClosed,
+    required this.dialogBuilder,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
+    return ColoredBox(
       color: colors.background,
       child: InkWell(
         onTap: () {
+          final parentContext = context;
           showDialog(
             barrierColor: colors.overlay,
-            context: context,
-            builder: (context) => Dialog(
-              backgroundColor: colors.layer01,
-              elevation: 0,
-              shape: LinearBorder.none,
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: AppText.heading03(torrent?.name ?? emptyString),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ButtonWidget(
-                          backgroundColor: context.colors.buttonSecondary,
-                          buttonText: isFavorite ? remove : save,
-                          onTap: () {
-                            onSave?.call();
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: ButtonWidget(
-                          backgroundColor: context.colors.buttonPrimary,
-                          buttonText: download,
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
+            context: parentContext,
+            useRootNavigator: false,
+            builder: (dialogContext) =>
+                dialogBuilder(parentContext, dialogContext, torrent),
+          ).whenComplete(() {
+            onDialogClosed?.call();
+          });
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -87,7 +61,7 @@ class TorrentWidget extends StatelessWidget {
               isLoading
                   ? const _ShimmerLine(height: 14)
                   : AppText.headingCompact01(
-                      torrent?.name ?? emptyString,
+                      torrent.name,
                       textAlign: TextAlign.center,
                       color: colors.textPrimary,
                       maxLines: 3,
@@ -112,15 +86,14 @@ class TorrentWidget extends StatelessWidget {
                               ? const _ShimmerLine(height: 12)
                               : _InfoWidget(
                                   iconAsset: AppAssets.icTime,
-                                  text: "$age : ${torrent?.age ?? emptyString}",
+                                  text: "$age : ${torrent.age}",
                                   textColor: colors.tagColorCyan,
                                 ),
                           isLoading
                               ? const _ShimmerLine(height: 12)
                               : _InfoWidget(
                                   iconAsset: AppAssets.icSize,
-                                  text:
-                                      "$size : ${torrent?.size ?? emptyString}",
+                                  text: "$size : ${torrent.size}",
                                   textColor: colors.tagColorPurple,
                                 ),
                         ],
@@ -143,16 +116,14 @@ class TorrentWidget extends StatelessWidget {
                               ? const _ShimmerLine(height: 12)
                               : _InfoWidget(
                                   iconAsset: AppAssets.icArrowDown,
-                                  text:
-                                      "$seeder : ${torrent?.seeder ?? emptyString}",
+                                  text: "$seeder : ${torrent.seeder}",
                                   textColor: colors.tagColorGreen,
                                 ),
                           isLoading
                               ? const _ShimmerLine(height: 12)
                               : _InfoWidget(
                                   iconAsset: AppAssets.icArrowUp,
-                                  text:
-                                      "$leecher : ${torrent?.leecher ?? emptyString}",
+                                  text: "$leecher : ${torrent.leecher}",
                                   textColor: colors.tagColorRed,
                                 ),
                         ],

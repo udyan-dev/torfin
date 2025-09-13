@@ -8,13 +8,19 @@ import '../../../core/utils/string_constants.dart';
 
 enum NotificationType {
   favoriteAdded,
-  favoriteRemoved;
+  favoriteRemoved,
+  downloadStarted,
+  error;
 
   String get icon {
     switch (this) {
       case NotificationType.favoriteAdded:
         return AppAssets.icCheckmark;
       case NotificationType.favoriteRemoved:
+        return AppAssets.icError;
+      case NotificationType.downloadStarted:
+        return AppAssets.icCheckmark;
+      case NotificationType.error:
         return AppAssets.icError;
     }
   }
@@ -25,6 +31,10 @@ enum NotificationType {
         return context.colors.notificationBackgroundSuccess;
       case NotificationType.favoriteRemoved:
         return context.colors.notificationBackgroundError;
+      case NotificationType.downloadStarted:
+        return context.colors.notificationBackgroundSuccess;
+      case NotificationType.error:
+        return context.colors.notificationBackgroundError;
     }
   }
 
@@ -33,6 +43,10 @@ enum NotificationType {
       case NotificationType.favoriteAdded:
         return context.colors.supportSuccess;
       case NotificationType.favoriteRemoved:
+        return context.colors.supportError;
+      case NotificationType.downloadStarted:
+        return context.colors.supportSuccess;
+      case NotificationType.error:
         return context.colors.supportError;
     }
   }

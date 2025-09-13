@@ -2,20 +2,25 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../src/data/engine/engine.dart';
+import '../../src/data/engine/transmission/transmission.dart';
 import '../../src/data/repositories/storage_repository_impl.dart';
 import '../../src/data/repositories/torrent_repository_impl.dart';
 import '../../src/data/sources/local/storage_service.dart';
 import '../../src/data/sources/remote/dio_service.dart';
 import '../../src/domain/repositories/storage_repository.dart';
 import '../../src/domain/repositories/torrent_repository.dart';
+import '../../src/domain/usecases/add_torrent_use_case.dart';
 import '../../src/domain/usecases/auto_complete_use_case.dart';
+import '../../src/domain/usecases/favorite_use_case.dart';
+import '../../src/domain/usecases/get_magnet_use_case.dart';
 import '../../src/domain/usecases/get_token_use_case.dart';
 import '../../src/domain/usecases/search_torrent_use_case.dart';
 import '../../src/domain/usecases/trending_torrent_use_case.dart';
-import '../../src/domain/usecases/favorite_use_case.dart';
+import '../../src/presentation/download/cubit/download_cubit.dart';
+import '../../src/presentation/favorite/cubit/favorite_cubit.dart';
 import '../../src/presentation/home/cubit/home_cubit.dart';
 import '../../src/presentation/search/cubit/search_cubit.dart';
-import '../../src/presentation/favorite/cubit/favorite_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
 import '../utils/string_constants.dart';
 
@@ -52,22 +57,46 @@ Future<void> get init async {
   );
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
+  di.registerLazySingleton(() => AddTorrentUseCase(engine: di()));
   di.registerLazySingleton(
     () => TrendingTorrentUseCase(
       torrentRepository: di(),
       storageRepository: di(),
     ),
   );
+  di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
   di.registerFactory(() => HomeCubit(getTokenUseCase: di(), cancelToken: di()));
   di.registerFactory(
     () => SearchCubit(
       searchTorrentUseCase: di(),
       autoCompleteUseCase: di(),
       favoriteUseCase: di(),
+      addTorrentUseCase: di(),
+      getMagnetUseCase: di(),
     ),
   );
   di.registerFactory(
-    () => TrendingCubit(trendingUseCase: di(), favoriteUseCase: di()),
+    () => TrendingCubit(
+      trendingUseCase: di(),
+      favoriteUseCase: di(),
+      addTorrentUseCase: di(),
+      getMagnetUseCase: di(),
+    ),
   );
-  di.registerFactory(() => FavoriteCubit(favoriteUseCase: di()));
+  di.registerFactory(
+    () => FavoriteCubit(
+      favoriteUseCase: di(),
+      addTorrentUseCase: di(),
+      getMagnetUseCase: di(),
+    ),
+  );
+  di.registerFactory(
+    () => DownloadCubit(engine: di(), addTorrentUseCase: di()),
+  );
+  di.registerSingletonAsync<Engine>(() async {
+    final e = TransmissionEngine();
+    await e.init();
+    await e.restoreTorrentsResumeStatus();
+    return e;
+  }, dispose: (e) => e.dispose());
 }

@@ -2,19 +2,20 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-val userHome = System.getProperty("user.home")
 val repoUrl = "git@github.com:udyan-dev/secrets.git"
-val repoClonePath = File(userHome, "AppData/Local/Temp/secrets")
-val appDir = File(rootDir, "app")
-val libDir = File(rootDir.parentFile, "lib").apply { mkdirs() }
+val androidDir = rootDir
+val projectDir = androidDir.parentFile
+val repoClonePath = File(projectDir.parentFile, "secrets")
+val appDir = File(androidDir, "app")
+val libDir = File(projectDir, "lib").apply { mkdirs() }
 
 val filesToCopy = listOf(
-    "torfin/key.properties" to File(rootDir, "key.properties"),
+    "torfin/key.properties" to File(androidDir, "key.properties"),
     "torfin/google-services.json" to File(appDir, "google-services.json"),
-    "torfin/upload-keystore.jks" to File(appDir, "upload-keystore.jks"),
+    "torfin/upload-keystore.jks" to File(projectDir, "upload-keystore.jks"),
     "torfin/firebase_options.dart" to File(libDir, "firebase_options.dart"),
-    "torfin/secrets.env" to File(rootDir.parentFile, "secrets.env"),
-    "torfin/firebase.json" to File(rootDir.parentFile, "firebase.json")
+    "torfin/secrets.env" to File(projectDir, "secrets.env"),
+    "torfin/firebase.json" to File(projectDir, "firebase.json")
 )
 
 fun copySecret(src: File, dest: File, label: String) {

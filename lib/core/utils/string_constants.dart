@@ -36,8 +36,12 @@ const String tokenKey = 'token';
 const String themeKey = 'theme';
 const String nsfwKey = 'nsfw';
 const String favoritesKey = 'favorites';
+const String termsOfUseAcceptedKey = 'termsOfUseAccepted';
+const String checkForUpdateKey = 'checkForUpdate';
+const String sortKey = 'sort';
+const String reverseSortKey = 'reverseSort';
+const String localeKey = 'locale';
 const String storageExceptionPrefix = 'StorageException: ';
-
 const String userAgentHeader = 'user-agent';
 const String acceptHeader = 'accept';
 const String acceptLanguageHeader = 'accept-language';
@@ -51,7 +55,6 @@ const String secFetchDestHeader = 'sec-fetch-dest';
 const String secFetchModeHeader = 'sec-fetch-mode';
 const String secFetchSiteHeader = 'sec-fetch-site';
 const String xRequestedWithHeader = 'x-requested-with';
-
 const String userAgentValue = 'Mozilla/5.0 (Linux; Android ';
 const String acceptValue = 'application/json, text/javascript, */*; q=0.01';
 const String acceptLanguageValue = 'en-US,en;q=0.9,en-IN;q=0.8';
@@ -116,9 +119,65 @@ const String trending = 'Trending';
 const String save = 'Save';
 const String remove = 'Remove';
 const String download = 'Download';
+const String downloads = 'Downloads';
 const String favorite = 'Favorite';
 const String saveYourFavoriteTorrents = 'Save your favorite torrents !';
 const String addTorrentsToYourFavorites =
     'Add torrents to your favorites list to quickly find and download them later.';
 const String wasAddedToFavorites = 'Was added to favorites';
 const String wasRemovedFromFavorites = 'Was removed from favorites';
+const String storagePermissionNotGranted = 'Storage permission not granted';
+const String downloadLocationKey = 'downloadLocation';
+const String pleaseGrantStoragePermission =
+    'Please grant storage permission to download torrents';
+const String somethingWentWrong = 'Something went wrong !';
+
+// Download/magnet messages
+const String magnetLinkNotFound = 'Magnet link not found';
+const String downloadStartedSuccessfully = 'Download started successfully';
+const String failedToStartDownloadPrefix = 'Failed to start download: ';
+
+// Download filter titles
+const String allTitle = 'All';
+const String downloadingTitle = 'Downloading';
+const String completedTitle = 'Completed';
+const String queuedTitle = 'Queued';
+const String stoppedTitle = 'Stopped';
+const String selectAll = 'Select All';
+const String files = 'Files';
+const String details = 'Details';
+const String error = 'Error';
+
+// Torrent details labels
+const String nameLabel = 'Name';
+const String idLabel = 'ID';
+const String labelsLabel = 'Labels';
+const String statusLabel = 'Status';
+const String progressLabel = 'Progress';
+const String downloadedLabel = 'Downloaded';
+const String uploadedLabel = 'Uploaded';
+const String downloadRateLabel = 'Download rate';
+const String uploadRateLabel = 'Upload rate';
+const String remainingTimeLabel = 'Remaining time';
+const String locationLabel = 'Location';
+const String privateLabel = 'Private';
+const String addedDateLabel = 'Added date';
+const String creatorLabel = 'Creator';
+const String commentLabel = 'Comment';
+const String peersConnectedLabel = 'Peers connected';
+const String sequentialDownloadLabel = 'Sequential download';
+const String fileCountLabel = 'File count';
+const String pieceCountLabel = 'Piece count';
+const String pieceSizeLabel = 'Piece size';
+const String piecesLabel = 'Pieces';
+const String yesLabel = 'Yes';
+const String noLabel = 'No';
+const String dash = '-';
+const String commaSeparator = ', ';
+const String perSecondSuffix = '/s';
+const String percentSuffix = '%';
+const String delete = 'Delete';
+const String deleteConfirmationMessage =
+    'Are you sure you want to delete this torrent ?';
+const String keepFilesAndRemoveTorrentOnly =
+    'Keep files and remove torrent only';

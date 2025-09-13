@@ -13,6 +13,7 @@ sealed class FavoriteState with _$FavoriteState {
     @Default(false) bool isShimmer,
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
+    String? fetchingMagnetForKey,
   }) = _FavoriteState;
 }
 

@@ -21,6 +21,7 @@ sealed class SearchState with _$SearchState {
     @Default(false) bool isAutoLoadingMore,
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
+    String? fetchingMagnetForKey,
   }) = _SearchState;
 }
 

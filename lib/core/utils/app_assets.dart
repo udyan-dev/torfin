@@ -6,7 +6,6 @@ class AppAssets {
   static const icArrowUp = '${icons}ic_arrow_up.svg';
   static const icCheckmark = '${icons}ic_checkmark.svg';
   static const icDownload = '${icons}ic_download.svg';
-  static const icRefresh = '${icons}ic_refresh.svg';
   static const icSort = '${icons}ic_sort.svg';
   static const icError = '${icons}ic_error.svg';
   static const icSearch = '${icons}ic_search.svg';
@@ -22,6 +21,13 @@ class AppAssets {
   static const icStartSearch = '${icons}ic_start_search.svg';
   static const icNoNetwork = '${icons}ic_no_network.svg';
   static const icNoResultFound = '${icons}ic_no_result_found.svg';
-  static const icLink = '${icons}ic_link.svg';
   static const icAddFavorite = '${icons}ic_add_favorite.svg';
+  static const icChevronDown = '${icons}ic_chevron_down.svg';
+  static const icChevronUp = '${icons}ic_chevron_up.svg';
+  static const icPause = '${icons}ic_pause.svg';
+  static const icComplete = '${icons}ic_complete.svg';
+  static const icContinue = '${icons}ic_continue.svg';
+  static const icStop = '${icons}ic_stop.svg';
+  static const icQueue = '${icons}ic_queue.svg';
+  static const icDelete = '${icons}ic_delete.svg';
 }
