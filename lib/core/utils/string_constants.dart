@@ -124,6 +124,13 @@ const String favorite = 'Favorite';
 const String saveYourFavoriteTorrents = 'Save your favorite torrents !';
 const String addTorrentsToYourFavorites =
     'Add torrents to your favorites list to quickly find and download them later.';
+const String noDownloadsYet = 'No Downloads Yet !';
+const String startDownloadingTorrents =
+    'Your downloads will appear here once you start. Search for torrents and add them to begin downloading.';
+const String nothingDownloading = 'No Torrents Downloading !';
+const String nothingCompleted = 'No Torrents Completed !';
+const String nothingQueued = 'No Torrents Queued !';
+const String nothingStopped = 'No Torrents Stopped !';
 const String wasAddedToFavorites = 'Was added to favorites';
 const String wasRemovedFromFavorites = 'Was removed from favorites';
 const String storagePermissionNotGranted = 'Storage permission not granted';

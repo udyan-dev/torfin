@@ -33,7 +33,7 @@ class SearchCubit extends Cubit<SearchState> {
        _autoCompleteUseCase = autoCompleteUseCase,
        _favoriteUseCase = favoriteUseCase,
        _addTorrentUseCase = addTorrentUseCase,
-        _getMagnetUseCase = getMagnetUseCase,
+       _getMagnetUseCase = getMagnetUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const SearchState());
 
@@ -48,13 +48,16 @@ class SearchCubit extends Cubit<SearchState> {
   bool _isProcessingRequest = false;
   CancelToken? _magnetCancelToken;
 
-
   @override
   Future<void> close() {
     _token?.cancel();
     _suggestionToken?.cancel();
     _magnetCancelToken?.cancel();
     return super.close();
+  }
+
+  void initializeWithAnimation() {
+    emit(state.copyWith(status: SearchStatus.success));
   }
 
   Future<void> search({
@@ -70,7 +73,6 @@ class SearchCubit extends Cubit<SearchState> {
     final newSearch = (search ?? state.search).trim();
     final newSortType = sortType ?? state.sortType;
     final newCategory = category ?? state.selectedCategoryRaw;
-
 
     if (newSearch.isEmpty) {
       _cancelCurrentRequest();
@@ -124,7 +126,6 @@ class SearchCubit extends Cubit<SearchState> {
     _isProcessingRequest = true;
     _cancelCurrentRequest();
     final requestId = _generateRequestId();
-
 
     emit(
       state.copyWith(
@@ -297,7 +298,6 @@ class SearchCubit extends Cubit<SearchState> {
       return;
     }
 
-
     try {
       final response = await _searchTorrentUseCase.call(
         SearchTorrentUseCaseParams(
@@ -414,7 +414,6 @@ class SearchCubit extends Cubit<SearchState> {
         ? firstCategory
         : (oldSelPresent ? oldSel : (keepOldSelForNextPages ? oldSel : null));
 
-
     final willAutoLoad =
         filtered.isEmpty && hasMoreData && newSelectedRaw != null;
 
@@ -491,7 +490,7 @@ class SearchCubit extends Cubit<SearchState> {
   }
 
   SearchState _getInitialState(SortType sortType) {
-    return SearchState(sortType: sortType);
+    return SearchState(sortType: sortType, status: SearchStatus.success);
   }
 
   Future<void> onRetry() async {
@@ -511,7 +510,6 @@ class SearchCubit extends Cubit<SearchState> {
       );
       return;
     }
-
 
     if (state.search.isNotEmpty) {
       search(
@@ -608,7 +606,6 @@ class SearchCubit extends Cubit<SearchState> {
     );
   }
 
-
   void cancelMagnetFetch() {
     _magnetCancelToken?.cancel('Dialog dismissed');
     _magnetCancelToken = null;
@@ -702,9 +699,7 @@ class SearchCubit extends Cubit<SearchState> {
     }
 
     final response = await _addTorrentUseCase.call(
-      AddTorrentUseCaseParams(
-        magnetLink: torrent.magnet,
-      ),
+      AddTorrentUseCaseParams(magnetLink: torrent.magnet),
       cancelToken: CancelToken(),
     );
 

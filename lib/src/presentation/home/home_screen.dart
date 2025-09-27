@@ -10,6 +10,7 @@ import '../favorite/favorite_screen.dart';
 import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 import '../trending/trending_screen.dart';
+import '../widgets/animated_switcher_widget.dart';
 import '../widgets/body_widget.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import '../widgets/empty_state_widget.dart';
@@ -43,29 +44,31 @@ class HomeScreen extends StatelessWidget {
             },
             child: BodyWidget(
               child: BlocBuilder<HomeCubit, HomeState>(
-                builder: (context, state) => switch (state.status) {
-                  DataStatus.initial ||
-                  DataStatus.loading => const StatusWidget(
-                    type: StatusType.loading,
-                    statusMessage: connectingToServer,
-                  ),
-                  DataStatus.success => const TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      SearchScreen(),
-                      TrendingScreen(),
-                      DownloadScreen(),
-                      FavoriteScreen(),
-                      SettingsScreen(),
-                    ],
-                  ),
-                  DataStatus.error => EmptyStateWidget(
-                    center: true,
-                    emptyState: state.emptyState,
-                    iconColor: context.colors.supportError,
-                    onTap: () => context.read<HomeCubit>().getToken(),
-                  ),
-                },
+                builder: (context, state) => AnimatedSwitcherWidget(
+                  child: switch (state.status) {
+                    DataStatus.initial ||
+                    DataStatus.loading => const StatusWidget(
+                      type: StatusType.loading,
+                      statusMessage: connectingToServer,
+                    ),
+                    DataStatus.success => const TabBarView(
+                      physics: NeverScrollableScrollPhysics(),
+                      children: [
+                        SearchScreen(),
+                        TrendingScreen(),
+                        DownloadScreen(),
+                        FavoriteScreen(),
+                        SettingsScreen(),
+                      ],
+                    ),
+                    DataStatus.error => EmptyStateWidget(
+                      center: true,
+                      emptyState: state.emptyState,
+                      iconColor: context.colors.supportError,
+                      onTap: () => context.read<HomeCubit>().getToken(),
+                    ),
+                  },
+                ),
               ),
             ),
           ),

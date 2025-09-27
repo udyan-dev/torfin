@@ -7,6 +7,7 @@ import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/empty_state/empty_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
+import '../widgets/animated_switcher_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/button_widget.dart';
 import '../widgets/category_widget.dart';
@@ -37,15 +38,17 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _cubit = di<SearchCubit>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cubit.initializeWithAnimation();
+    });
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    if (!_cubit.isClosed) {
-      _cubit.close();
-    }
+    _cubit.close();
     super.dispose();
   }
 
@@ -115,56 +118,58 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildTorrentItem(BuildContext context, SearchState state,
-      TorrentRes torrent) {
+  Widget _buildTorrentItem(
+    BuildContext context,
+    SearchState state,
+    TorrentRes torrent,
+  ) {
     return TorrentWidget(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
       onSave: () => _cubit.toggleFavorite(torrent),
       onDownload: () => _cubit.downloadTorrent(torrent),
       onDialogClosed: _cubit.cancelMagnetFetch,
-      dialogBuilder: (parentContext, dialogContext, t) =>
-          BlocProvider.value(
-            value: _cubit,
-            child: DialogWidget(
-              title: t.name,
-              actions: Row(
-                children: [
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonSecondary,
-                      buttonText: state.isFavorite(torrent) ? remove : save,
-                      onTap: () {
-                        _cubit.toggleFavorite(torrent);
-                        Navigator.of(dialogContext).maybePop();
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonPrimary,
-                      buttonText: download,
-                      onTap: () {
-                        _cubit.downloadTorrent(t);
-                        if (t.magnet.isNotEmpty) {
-                          Navigator.of(dialogContext).maybePop();
-                        }
-                      },
-                      trailing: BlocBuilder<SearchCubit, SearchState>(
-                        buildWhen: (p, c) =>
-                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
-                        builder: (context, s) {
-                          return s.fetchingMagnetForKey == t.identityKey
-                              ? const LoadingWidget()
-                              : const SizedBox.shrink();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+      dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
+        value: _cubit,
+        child: DialogWidget(
+          title: t.name,
+          actions: Row(
+            children: [
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonSecondary,
+                  buttonText: state.isFavorite(torrent) ? remove : save,
+                  onTap: () {
+                    _cubit.toggleFavorite(torrent);
+                    Navigator.of(dialogContext).maybePop();
+                  },
+                ),
               ),
-            ),
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonPrimary,
+                  buttonText: download,
+                  onTap: () {
+                    _cubit.downloadTorrent(t);
+                    if (t.magnet.isNotEmpty) {
+                      Navigator.of(dialogContext).maybePop();
+                    }
+                  },
+                  trailing: BlocBuilder<SearchCubit, SearchState>(
+                    buildWhen: (p, c) =>
+                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
+                    builder: (context, s) {
+                      return s.fetchingMagnetForKey == t.identityKey
+                          ? const LoadingWidget()
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
@@ -214,7 +219,7 @@ class _SearchScreenState extends State<SearchScreen> {
         },
         child: BlocListener<SearchCubit, SearchState>(
           listenWhen: (p, c) =>
-          p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
+              p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
           listener: (context, _) => Navigator.of(context).maybePop(),
           child: Column(
             children: [
@@ -232,7 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               BlocBuilder<SearchCubit, SearchState>(
                 buildWhen: (p, c) =>
-                p.categoriesRaw != c.categoriesRaw ||
+                    p.categoriesRaw != c.categoriesRaw ||
                     p.selectedCategoryRaw != c.selectedCategoryRaw,
                 builder: (context, state) {
                   return CategoryWidget(
@@ -245,11 +250,11 @@ class _SearchScreenState extends State<SearchScreen> {
               Expanded(
                 child: BlocListener<SearchCubit, SearchState>(
                   listenWhen: (p, c) =>
-                  c.status == SearchStatus.success && c.canLoadMore,
+                      c.status == SearchStatus.success && c.canLoadMore,
                   listener: (context, state) => _checkAutoLoadMore(state),
                   child: BlocBuilder<SearchCubit, SearchState>(
                     buildWhen: (previous, current) =>
-                    previous.status != current.status ||
+                        previous.status != current.status ||
                         previous.selectedCategoryRaw !=
                             current.selectedCategoryRaw ||
                         previous.torrents.length != current.torrents.length ||
@@ -258,28 +263,28 @@ class _SearchScreenState extends State<SearchScreen> {
                         previous.isAutoLoadingMore !=
                             current.isAutoLoadingMore ||
                         !identical(previous.torrents, current.torrents),
-                    builder: (context, state) {
-                      switch (state.status) {
-                        case SearchStatus.initial:
-                          return EmptyStateWidget(
-                            iconColor: context.colors.interactive,
-                            emptyState: const EmptyState(
-                              stateIcon: AppAssets.icStartSearch,
-                              title: searchTorrentsTitle,
-                              description: searchTorrentsDescription,
-                            ),
-                          );
-                        case SearchStatus.loading:
-                        case SearchStatus.success:
-                          return _buildTorrents(context, state);
-                        case SearchStatus.error:
-                          return EmptyStateWidget(
-                            emptyState: state.emptyState,
-                            iconColor: context.colors.supportError,
-                            onTap: _cubit.onRetry,
-                          );
-                      }
-                    },
+                    builder: (context, state) => AnimatedSwitcherWidget(
+                      child: switch (state.status) {
+                        SearchStatus.initial => emptyBox,
+                        SearchStatus.loading => _buildTorrents(context, state),
+                        SearchStatus.success =>
+                          state.search.isEmpty && state.torrents.isEmpty
+                              ? EmptyStateWidget(
+                                  iconColor: context.colors.interactive,
+                                  emptyState: const EmptyState(
+                                    stateIcon: AppAssets.icStartSearch,
+                                    title: searchTorrentsTitle,
+                                    description: searchTorrentsDescription,
+                                  ),
+                                )
+                              : _buildTorrents(context, state),
+                        SearchStatus.error => EmptyStateWidget(
+                          emptyState: state.emptyState,
+                          iconColor: context.colors.supportError,
+                          onTap: _cubit.onRetry,
+                        ),
+                      },
+                    ),
                   ),
                 ),
               ),

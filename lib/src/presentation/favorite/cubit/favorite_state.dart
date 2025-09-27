@@ -1,6 +1,6 @@
 part of 'favorite_cubit.dart';
 
-enum FavoriteStatus { initial, loading, success, error }
+enum FavoriteStatus { initial, success, error }
 
 @freezed
 sealed class FavoriteState with _$FavoriteState {
@@ -10,7 +10,6 @@ sealed class FavoriteState with _$FavoriteState {
     @Default(<TorrentRes>[]) List<TorrentRes> torrents,
     @Default(<TorrentRes>[]) List<TorrentRes> all,
     @Default('') String query,
-    @Default(false) bool isShimmer,
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
     String? fetchingMagnetForKey,

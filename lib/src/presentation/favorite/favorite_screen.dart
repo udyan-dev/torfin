@@ -5,6 +5,7 @@ import 'package:torfin/core/utils/extensions.dart';
 import '../../../core/bindings/di.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
+import '../widgets/animated_switcher_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/button_widget.dart';
 import '../widgets/dialog_widget.dart';
@@ -12,7 +13,6 @@ import '../widgets/empty_state_widget.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/notification_widget.dart';
 import '../widgets/search_bar_widget.dart';
-import '../widgets/shimmer_list_widget.dart';
 import '../widgets/torrent_widget.dart';
 import 'cubit/favorite_cubit.dart';
 
@@ -54,69 +54,69 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           final torrent = state.torrents[index];
           return _buildTorrentItem(context, state, torrent);
         },
-        separatorBuilder: (_, i) =>
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: context.colors.borderSubtle00,
-            ),
+        separatorBuilder: (_, i) => Divider(
+          height: 1,
+          thickness: 1,
+          color: context.colors.borderSubtle00,
+        ),
       ),
     );
   }
 
-  Widget _buildTorrentItem(BuildContext context, FavoriteState state,
-      TorrentRes torrent) {
+  Widget _buildTorrentItem(
+    BuildContext context,
+    FavoriteState state,
+    TorrentRes torrent,
+  ) {
     return TorrentWidget(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
       onSave: () => _cubit.toggleFavorite(torrent),
       onDownload: () => _cubit.downloadTorrent(torrent),
       onDialogClosed: _cubit.cancelMagnetFetch,
-      dialogBuilder: (parentContext, dialogContext, t) =>
-          BlocProvider.value(
-            value: _cubit,
-            child: DialogWidget(
-              title: t.name,
-              actions: Row(
-                children: [
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonSecondary,
-                      buttonText: state.isFavorite(torrent) ? remove : save,
-                      onTap: () {
-                        _cubit.toggleFavorite(torrent);
-                        Navigator.of(dialogContext).maybePop();
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonPrimary,
-                      buttonText: download,
-                      onTap: () {
-                        _cubit.downloadTorrent(t);
-                        if (t.magnet.isNotEmpty) {
-                          Navigator.of(dialogContext).maybePop();
-                        }
-                      },
-                      trailing: BlocBuilder<FavoriteCubit, FavoriteState>(
-                        buildWhen: (p, c) =>
-                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
-                        builder: (context, s) {
-                          return s.fetchingMagnetForKey == t.identityKey
-                              ? const LoadingWidget()
-                              : const SizedBox.shrink();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+      dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
+        value: _cubit,
+        child: DialogWidget(
+          title: t.name,
+          actions: Row(
+            children: [
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonSecondary,
+                  buttonText: state.isFavorite(torrent) ? remove : save,
+                  onTap: () {
+                    _cubit.toggleFavorite(torrent);
+                    Navigator.of(dialogContext).maybePop();
+                  },
+                ),
               ),
-            ),
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonPrimary,
+                  buttonText: download,
+                  onTap: () {
+                    _cubit.downloadTorrent(t);
+                    if (t.magnet.isNotEmpty) {
+                      Navigator.of(dialogContext).maybePop();
+                    }
+                  },
+                  trailing: BlocBuilder<FavoriteCubit, FavoriteState>(
+                    buildWhen: (p, c) =>
+                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
+                    builder: (context, s) {
+                      return s.fetchingMagnetForKey == t.identityKey
+                          ? const LoadingWidget()
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         },
         child: BlocListener<FavoriteCubit, FavoriteState>(
           listenWhen: (p, c) =>
-          p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
+              p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
           listener: (context, _) => Navigator.of(context).maybePop(),
           child: Column(
             children: [
@@ -143,34 +143,30 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               Expanded(
                 child: BlocBuilder<FavoriteCubit, FavoriteState>(
                   buildWhen: (p, c) =>
-                  p.status != c.status ||
-                      p.isShimmer != c.isShimmer ||
+                      p.status != c.status ||
                       p.query != c.query ||
                       p.torrents.length != c.torrents.length ||
                       !identical(p.torrents, c.torrents),
                   builder: (context, state) {
-                    switch (state.status) {
-                      case FavoriteStatus.initial:
-                      case FavoriteStatus.loading:
-                        return const ShimmerListWidget();
-                      case FavoriteStatus.success:
-                        if (state.torrents.isEmpty) {
-                          return EmptyStateWidget(
-                            iconColor: state.query.isEmpty
-                                ? context.colors.tagColorPurple
-                                : context.colors.supportCautionMajor,
-                            emptyState: state.emptyState,
-                            onTap: () => _cubit.load(query: state.query),
-                          );
-                        }
-                        return _buildList(context, state);
-                      case FavoriteStatus.error:
-                        return EmptyStateWidget(
-                          emptyState: state.emptyState,
-                          iconColor: context.colors.supportError,
-                          onTap: () => _cubit.load(query: state.query),
-                        );
-                    }
+                    final child = switch (state.status) {
+                      FavoriteStatus.initial => emptyBox,
+                      FavoriteStatus.success =>
+                        (state.torrents.isEmpty)
+                            ? EmptyStateWidget(
+                                iconColor: state.query.isEmpty
+                                    ? context.colors.tagColorPurple
+                                    : context.colors.supportCautionMajor,
+                                emptyState: state.emptyState,
+                                onTap: () => _cubit.load(query: state.query),
+                              )
+                            : _buildList(context, state),
+                      FavoriteStatus.error => EmptyStateWidget(
+                        emptyState: state.emptyState,
+                        iconColor: context.colors.supportError,
+                        onTap: () => _cubit.load(query: state.query),
+                      ),
+                    };
+                    return AnimatedSwitcherWidget(child: child);
                   },
                 ),
               ),

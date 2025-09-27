@@ -22,6 +22,7 @@ class AppAssets {
   static const icNoNetwork = '${icons}ic_no_network.svg';
   static const icNoResultFound = '${icons}ic_no_result_found.svg';
   static const icAddFavorite = '${icons}ic_add_favorite.svg';
+  static const icAddDownload = '${icons}ic_add_download.svg';
   static const icChevronDown = '${icons}ic_chevron_down.svg';
   static const icChevronUp = '${icons}ic_chevron_up.svg';
   static const icPause = '${icons}ic_pause.svg';

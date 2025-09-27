@@ -38,13 +38,6 @@ class FavoriteCubit extends Cubit<FavoriteState> {
   }
 
   Future<void> load({String query = ''}) async {
-    emit(
-      state.copyWith(
-        status: FavoriteStatus.loading,
-        query: query,
-        isShimmer: true,
-      ),
-    );
     final response = await _favoriteUseCase.call(
       const FavoriteParams(mode: FavoriteMode.getAll),
       cancelToken: CancelToken(),
@@ -64,7 +57,6 @@ class FavoriteCubit extends Cubit<FavoriteState> {
             status: FavoriteStatus.success,
             all: safe,
             torrents: list,
-            isShimmer: false,
             favoriteKeys: set,
             emptyState: list.isEmpty
                 ? (query.isEmpty
@@ -86,7 +78,6 @@ class FavoriteCubit extends Cubit<FavoriteState> {
         emit(
           state.copyWith(
             status: FavoriteStatus.error,
-            isShimmer: false,
             emptyState: EmptyState(
               stateIcon: AppAssets.icNoNetwork,
               title: error.message,
@@ -143,7 +134,6 @@ class FavoriteCubit extends Cubit<FavoriteState> {
             status: FavoriteStatus.success,
             all: safe,
             torrents: list,
-            isShimmer: false,
             favoriteKeys: set,
             emptyState: emptyState,
             notification: AppNotification(
