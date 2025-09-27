@@ -188,3 +188,4 @@ const String deleteConfirmationMessage =
     'Are you sure you want to delete this torrent ?';
 const String keepFilesAndRemoveTorrentOnly =
     'Keep files and remove torrent only';
+const String settings = 'Settings';

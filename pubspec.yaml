@@ -25,7 +25,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   flutter_torrent:
     git:
-      url: git@github.com:udyan-dev/flutter_torrent.git
+      url: https://github.com/udyan-dev/flutter_torrent.git
       ref: master
   path: ^1.9.1
   open_filex: ^4.7.0

@@ -425,7 +425,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: "07be4ea5d02bba9f3ffbace345527d16324559c2"
-      url: "git@github.com:udyan-dev/flutter_torrent.git"
+      url: "https://github.com/udyan-dev/flutter_torrent.git"
     source: git
     version: "0.0.1"
   flutter_web_plugins:

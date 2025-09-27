@@ -1,7 +1,5 @@
 import java.util.Properties
 
-apply(from = "../../secrets.gradle.kts")
-
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -13,12 +11,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val keystorePropertiesFile = rootDir.resolve("key.properties")
+// FOR RELEASE
+/*val keystorePropertiesFile = rootDir.resolve("key.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
         load(keystorePropertiesFile.inputStream())
     }
-}
+}*/
 
 android {
     namespace = "com.ironfist.torfin"
@@ -46,23 +45,26 @@ android {
         versionName = flutter.versionName
     }
 
-    signingConfigs {
+// FOR RELEASE
+/*    signingConfigs {
         create("release") {
             storeFile = keystoreProperties["storeFile"]?.let { file(it) }
             storePassword = keystoreProperties["storePassword"] as String?
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?
         }
-    }
+    }*/
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("release")
+//            signingConfig = signingConfigs.getByName("release") // FOR RELEASE
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+//            signingConfig = signingConfigs.getByName("release") // FOR RELEASE
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
