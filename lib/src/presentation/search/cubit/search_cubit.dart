@@ -12,6 +12,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../../domain/repositories/storage_repository.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/auto_complete_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
@@ -28,12 +29,14 @@ class SearchCubit extends Cubit<SearchState> {
     required FavoriteUseCase favoriteUseCase,
     required AddTorrentUseCase addTorrentUseCase,
     required GetMagnetUseCase getMagnetUseCase,
+    required StorageRepository storageRepository,
     ConnectivityService? connectivity,
   }) : _searchTorrentUseCase = searchTorrentUseCase,
        _autoCompleteUseCase = autoCompleteUseCase,
        _favoriteUseCase = favoriteUseCase,
        _addTorrentUseCase = addTorrentUseCase,
        _getMagnetUseCase = getMagnetUseCase,
+       _storageRepository = storageRepository,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const SearchState());
 
@@ -42,6 +45,7 @@ class SearchCubit extends Cubit<SearchState> {
   final FavoriteUseCase _favoriteUseCase;
   final AddTorrentUseCase _addTorrentUseCase;
   final GetMagnetUseCase _getMagnetUseCase;
+  final StorageRepository _storageRepository;
   final ConnectivityService _connectivity;
   CancelToken? _token;
   CancelToken? _suggestionToken;
@@ -525,6 +529,11 @@ class SearchCubit extends Cubit<SearchState> {
 
   Future<List<String>> fetchSuggestions(String query) async {
     if (isClosed) return const <String>[];
+
+    final enableSuggestionsResult = await _storageRepository.getEnableSuggestions();
+    final enableSuggestions = enableSuggestionsResult.data ?? true;
+
+    if (!enableSuggestions) return const <String>[];
 
     _suggestionToken?.cancel();
     _suggestionToken = CancelToken();

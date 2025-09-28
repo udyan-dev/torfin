@@ -7,12 +7,18 @@ class ContentSwitcherWidget<T> extends StatefulWidget {
   final List<T> items;
   final ValueChanged<T> onChanged;
   final String Function(T) getItemLabel;
+  final T? selectedItem;
+  final bool enableBgColor;
+  final EdgeInsets padding;
 
   const ContentSwitcherWidget({
     super.key,
     required this.items,
     required this.onChanged,
     required this.getItemLabel,
+    this.selectedItem,
+    this.enableBgColor = true,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
   });
 
   @override
@@ -26,8 +32,24 @@ class _ContentSwitcherWidgetState<T> extends State<ContentSwitcherWidget<T>> {
   @override
   void initState() {
     super.initState();
+    _updateSelectedIndex();
+  }
+
+  @override
+  void didUpdateWidget(ContentSwitcherWidget<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedItem != widget.selectedItem) {
+      _updateSelectedIndex();
+    }
+  }
+
+  void _updateSelectedIndex() {
     if (widget.items.isNotEmpty) {
-      selectedIndex = 0;
+      selectedIndex = widget.selectedItem != null
+          ? widget.items
+                .indexOf(widget.selectedItem as T)
+                .clamp(0, widget.items.length - 1)
+          : 0;
     }
   }
 
@@ -35,9 +57,11 @@ class _ContentSwitcherWidgetState<T> extends State<ContentSwitcherWidget<T>> {
   Widget build(BuildContext context) {
     if (widget.items.isEmpty) return const SizedBox.shrink();
     return ColoredBox(
-      color: context.colors.background,
+      color: widget.enableBgColor
+          ? context.colors.background
+          : Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: widget.padding,
         child: IntrinsicHeight(
           child: ClipRRect(
             clipBehavior: Clip.hardEdge,

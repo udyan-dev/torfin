@@ -90,34 +90,42 @@ class NotificationWidget {
               ),
             ),
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppText.headingCompact01(
-                      notification.title ?? emptyString,
-                      color: context.colors.textPrimary,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (notification.title?.isNotEmpty == true)
+                            AppText.headingCompact01(
+                            notification.title ?? emptyString,
+                            color: context.colors.textPrimary,
+                          ),
+                          if (notification.message.isNotEmpty)
+                            AppText.bodyCompact01(
+                              notification.message,
+                              color: context.colors.textPrimary,
+                            ),
+                        ],
+                      ),
                     ),
-                    AppText.bodyCompact01(
-                      notification.message,
-                      color: context.colors.textPrimary,
+                  ),
+                  InkWell(
+                    onTap: ScaffoldMessenger.of(context).hideCurrentSnackBar,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: SvgPicture.asset(
+                        AppAssets.icClose,
+                        width: 20,
+                        height: 20,
+                        colorFilter: context.colors.iconPrimary.colorFilter,
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            InkWell(
-              onTap: ScaffoldMessenger.of(context).hideCurrentSnackBar,
-              child: Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: SvgPicture.asset(
-                  AppAssets.icClose,
-                  width: 20,
-                  height: 20,
-                  colorFilter: context.colors.iconPrimary.colorFilter,
-                ),
+                  )
+                ],
               ),
             ),
           ],

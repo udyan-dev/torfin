@@ -14,6 +14,9 @@ abstract class StorageRepository {
   Future<DataState<String>> getNsfw();
   Future<DataState<bool>> setNsfw(String nsfw);
 
+  Future<DataState<bool>> getEnableSuggestions();
+  Future<DataState<bool>> setEnableSuggestions(bool enable);
+
   Future<DataState<bool>> clearAll();
 
   Future<DataState<List<TorrentRes>>> getFavorites();

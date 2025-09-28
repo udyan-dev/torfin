@@ -5,8 +5,9 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 import 'package:torfin/core/theme/app_theme.dart';
+import 'package:torfin/core/services/theme_service.dart';
 
-import 'core/bindings/di.dart' as di;
+import 'core/bindings/di.dart';
 import 'core/services/firebase_service.dart';
 import 'core/utils/string_constants.dart';
 import 'src/presentation/home/home_screen.dart';
@@ -22,7 +23,7 @@ void main() {
           DeviceOrientation.portraitDown,
         ]),
         FirebaseService.init,
-        di.init,
+        initDI,
       ], eagerError: true);
 
       runApp(const MainApp());
@@ -38,11 +39,18 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      home: const HomeScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: di<ThemeService>().themeNotifier,
+      builder: (context, themeMode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          themeAnimationDuration: Duration.zero,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeMode,
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }

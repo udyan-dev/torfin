@@ -1,27 +1,30 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:torfin/src/data/engine/session.dart';
 
 import '../../../../core/bindings/di.dart';
 import '../engine.dart';
 
-const refreshIntervalSeconds = 1;
-
-class SessionModel extends ChangeNotifier {
+class SessionService {
   Session? session;
+  Timer? _timer;
 
-  SessionModel() {
-    _startSessionFetching();
-  }
-
-  Future fetchSession() async {
+  Future<Session> fetchSession() async {
     session = await di<Engine>().fetchSession();
-    notifyListeners();
+    return session!;
   }
 
-  void _startSessionFetching() {
-    fetchSession();
-    Timer.periodic(const Duration(seconds: refreshIntervalSeconds), (_) => fetchSession());
+  void startPeriodicFetch() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => fetchSession());
+  }
+
+  void stopPeriodicFetch() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void dispose() {
+    stopPeriodicFetch();
   }
 }

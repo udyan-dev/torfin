@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../src/data/engine/engine.dart';
+import '../../src/data/engine/models/session.dart';
 import '../../src/data/engine/transmission/transmission.dart';
 import '../../src/data/repositories/storage_repository_impl.dart';
 import '../../src/data/repositories/torrent_repository_impl.dart';
@@ -21,12 +22,14 @@ import '../../src/presentation/download/cubit/download_cubit.dart';
 import '../../src/presentation/favorite/cubit/favorite_cubit.dart';
 import '../../src/presentation/home/cubit/home_cubit.dart';
 import '../../src/presentation/search/cubit/search_cubit.dart';
+import '../../src/presentation/settings/cubit/settings_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
+import '../services/theme_service.dart';
 import '../utils/string_constants.dart';
 
 final di = GetIt.instance;
 
-Future<void> get init async {
+Future<void> get initDI async {
   di.registerLazySingleton(() => const Uuid());
   di.registerLazySingleton(() => StorageService());
   di.registerLazySingleton(() => CancelToken());
@@ -39,6 +42,13 @@ Future<void> get init async {
     ),
   );
   di.registerLazySingleton(() => DioService(dio: di<Dio>()));
+  di.registerLazySingleton(() => SessionService());
+  di.registerSingletonAsync<Engine>(() async {
+    final e = TransmissionEngine();
+    await e.init();
+    await e.restoreTorrentsResumeStatus();
+    return e;
+  }, dispose: (e) => e.dispose());
   di.registerLazySingleton<StorageRepository>(
     () => StorageRepositoryImpl(storageService: di()),
   );
@@ -73,6 +83,7 @@ Future<void> get init async {
       favoriteUseCase: di(),
       addTorrentUseCase: di(),
       getMagnetUseCase: di(),
+      storageRepository: di(),
     ),
   );
   di.registerFactory(
@@ -93,10 +104,16 @@ Future<void> get init async {
   di.registerFactory(
     () => DownloadCubit(engine: di(), addTorrentUseCase: di()),
   );
-  di.registerSingletonAsync<Engine>(() async {
-    final e = TransmissionEngine();
-    await e.init();
-    await e.restoreTorrentsResumeStatus();
-    return e;
-  }, dispose: (e) => e.dispose());
+  di.registerFactory(
+    () => SettingsCubit(
+      storageRepository: di(),
+      sessionService: di(),
+      engine: di(),
+    ),
+  );
+  di.registerSingletonAsync<ThemeService>(() async {
+    final service = ThemeService(storageRepository: di());
+    await service.init();
+    return service;
+  }, dispose: (service) => service.dispose());
 }

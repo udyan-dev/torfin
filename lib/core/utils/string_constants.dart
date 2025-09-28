@@ -35,6 +35,7 @@ const String unsupportedTypeError = 'Unsupported Type Error !';
 const String tokenKey = 'token';
 const String themeKey = 'theme';
 const String nsfwKey = 'nsfw';
+const String enableSuggestionsKey = 'enableSuggestions';
 const String favoritesKey = 'favorites';
 const String termsOfUseAcceptedKey = 'termsOfUseAccepted';
 const String checkForUpdateKey = 'checkForUpdate';
@@ -189,3 +190,24 @@ const String deleteConfirmationMessage =
 const String keepFilesAndRemoveTorrentOnly =
     'Keep files and remove torrent only';
 const String settings = 'Settings';
+const String chooseYourTheme = 'Choose your theme';
+const String enableSuggestionsWhileSearching =
+    'Enable suggestions while searching';
+const String showNSFWTorrent = 'Show NSFW (not safe for view) torrent';
+const String enableSpeedLimits = 'Enable speed limits';
+const String streamingMightNotWorkCorrectly =
+    'Streaming might not work correctly if speed limits are enabled.';
+const String downloadSpeedKbps = 'Download Speed ( KBps )';
+const String uploadSpeedKbps = 'Upload Speed ( KBps )';
+const String enterANumber = 'Enter a number';
+const String enterSpeedLimit = 'Enter speed limit';
+const String downloadSpeedLimit = 'Download speed limit';
+const String uploadSpeedLimit = 'Upload speed limit';
+const String maximumActiveDownloads = 'Maximum active downloads';
+const String maxDownloads = 'Max Downloads';
+const String failedToUpdateSettings = 'Failed to update settings: ';
+const String resetTorrentSettings = 'Reset torrent settings';
+const String areYouSureResetSettings = 'Are you sure you want to reset all torrent settings?';
+const String yes = 'Yes';
+const String settingsResetSuccessfully = 'Settings reset successfully';
+const String failedToResetSettings = 'Failed to reset settings: ';
