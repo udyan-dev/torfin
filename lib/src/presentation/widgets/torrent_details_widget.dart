@@ -3,6 +3,9 @@ import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mime/mime.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as path;
 import 'package:pretty_bytes/pretty_bytes.dart';
 import 'package:torfin/core/utils/extensions.dart';
 
@@ -103,39 +106,55 @@ class _FilesTabWidget extends StatelessWidget {
                 itemCount: t.files.length,
                 itemBuilder: (context, index) {
                   final file = t.files[index];
-                  return InkWell(
-                    onTap: () async {
-                      if (file.bytesCompleted != file.length) {
-                        await t.toggleFileWanted(index, !file.wanted);
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 13.0,
-                      ),
-                      child: Row(
-                        spacing: 16,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: AppText.bodyCompact01(
-                              file.name,
-                              color: context.colors.textPrimary,
-                            ),
+                  final completed = file.bytesCompleted == file.length;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 13.0,
+                    ),
+                    child: Row(
+                      spacing: 16,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: AppText.bodyCompact01(
+                            file.name,
+                            color: context.colors.textPrimary,
                           ),
-                          CheckBoxWidget(
-                            value: file.wanted,
-                            side: BorderSide(color: context.colors.iconPrimary),
-                            activeColor: context.colors.iconPrimary,
-                            onChanged: (value) async {
-                              if (file.bytesCompleted != file.length) {
-                                await t.toggleFileWanted(index, !file.wanted);
+                        ),
+                        if (completed)
+                          InkWell(
+                            onTap: () {
+                              if (completed) {
+                                OpenFilex.open(
+                                  path.join(torrent.location, file.name),
+                                  type: lookupMimeType(file.name),
+                                );
                               }
                             },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: SvgPicture.asset(
+                                AppAssets.icOpen,
+                                width: 20,
+                                height: 20,
+                                colorFilter:
+                                    context.colors.iconPrimary.colorFilter,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
+                        CheckBoxWidget(
+                          value: file.wanted,
+                          side: BorderSide(color: context.colors.iconPrimary),
+                          activeColor: context.colors.iconPrimary,
+                          onChanged: (value) async {
+                            if (file.bytesCompleted != file.length) {
+                              await t.toggleFileWanted(index, !file.wanted);
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },
