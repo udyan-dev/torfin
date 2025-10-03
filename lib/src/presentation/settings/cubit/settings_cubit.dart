@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/utils/string_constants.dart';
@@ -133,6 +134,23 @@ class SettingsCubit extends Cubit<SettingsState> {
           notification: AppNotification(
             type: NotificationType.error,
             title: failedToResetSettings,
+            message: e.toString(),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> rateTheApp() async {
+    try {
+      final InAppReview inAppReview = InAppReview.instance;
+      await inAppReview.openStoreListing();
+    } catch (e) {
+      emit(
+        state.copyWith(
+          notification: AppNotification(
+            type: NotificationType.error,
+            title: 'Failed to open Play Store',
             message: e.toString(),
           ),
         ),

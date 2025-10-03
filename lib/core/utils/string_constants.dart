@@ -211,3 +211,4 @@ const String areYouSureResetSettings = 'Are you sure you want to reset all torre
 const String yes = 'Yes';
 const String settingsResetSuccessfully = 'Settings reset successfully';
 const String failedToResetSettings = 'Failed to reset settings: ';
+const String rateTheApp = 'Support us by rating the app !';

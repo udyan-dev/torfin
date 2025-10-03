@@ -37,4 +37,5 @@ class AppAssets {
   static const icEdit = '${icons}ic_edit.svg';
   static const icDownloadMax = '${icons}ic_download_max.svg';
   static const icReset = '${icons}ic_reset.svg';
+  static const icRating = '${icons}ic_rating.svg';
 }
