@@ -93,6 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       const _SpeedLimitWidget(),
       const _MaxDownloadWidget(),
       const _ResetSettingsWidget(),
+      const _InAppRatingWidget(),
     ];
   }
 }
@@ -466,5 +467,26 @@ class _ResetSettingsWidget extends StatelessWidget {
     if (result == true && context.mounted) {
       context.read<SettingsCubit>().resetTorrentSettings();
     }
+  }
+}
+
+class _InAppRatingWidget extends StatelessWidget {
+  const _InAppRatingWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -4),
+      horizontalTitleGap: 8,
+      leading: SvgPicture.asset(
+        AppAssets.icRating,
+        width: 20,
+        height: 20,
+        colorFilter: context.colors.iconPrimary.colorFilter,
+      ),
+      title: const AppText.bodyCompact02(rateTheApp),
+      onTap: context.read<SettingsCubit>().rateTheApp,
+    );
   }
 }

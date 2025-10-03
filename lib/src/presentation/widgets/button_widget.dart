@@ -41,6 +41,7 @@ class ButtonWidget extends StatelessWidget {
         shape: LinearBorder.none,
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       child: content,
     );

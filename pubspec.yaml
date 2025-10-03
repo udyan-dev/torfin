@@ -39,6 +39,7 @@ dependencies:
   file_picker: ^10.3.3
   pretty_bytes: ^6.3.0
   duration: ^4.0.3
+  in_app_review: ^2.0.11
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +64,7 @@ flutter:
           weight: 400
     - family: IBM Plex Sans
       fonts:
-        - asset: assets/fonts/IBMPlexSans-light.ttf
+        - asset: assets/fonts/IBMPlexSans-Light.ttf
           weight: 300
         - asset: assets/fonts/IBMPlexSans-Regular.ttf
           weight: 400
