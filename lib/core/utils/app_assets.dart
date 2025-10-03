@@ -38,4 +38,5 @@ class AppAssets {
   static const icDownloadMax = '${icons}ic_download_max.svg';
   static const icReset = '${icons}ic_reset.svg';
   static const icRating = '${icons}ic_rating.svg';
+  static const icOpen = '${icons}ic_open.svg';
 }
