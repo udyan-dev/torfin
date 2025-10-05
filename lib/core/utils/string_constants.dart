@@ -205,6 +205,8 @@ const String downloadSpeedLimit = 'Download speed limit';
 const String uploadSpeedLimit = 'Upload speed limit';
 const String maximumActiveDownloads = 'Maximum active downloads';
 const String maxDownloads = 'Max Downloads';
+const String listeningPort = 'Listening port';
+const String incomingPort = 'Incoming Port';
 const String failedToUpdateSettings = 'Failed to update settings: ';
 const String resetTorrentSettings = 'Reset torrent settings';
 const String areYouSureResetSettings = 'Are you sure you want to reset all torrent settings?';
@@ -212,6 +214,9 @@ const String yes = 'Yes';
 const String settingsResetSuccessfully = 'Settings reset successfully';
 const String failedToResetSettings = 'Failed to reset settings: ';
 const String rateTheApp = 'Support us by rating the app !';
+const String appVersion = 'App version';
+const String privacyPolicy = 'Privacy policy';
+const String privacyPolicyUrl = 'https://udyan-dev.github.io/torfin-privacy-policy/';
 
 // Notification strings
 const String notificationChannelId = 'torrent_downloads';

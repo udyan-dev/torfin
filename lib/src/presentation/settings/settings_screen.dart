@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:torfin/core/utils/extensions.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/services/theme_service.dart';
@@ -92,8 +93,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       const _SpeedLimitWidget(),
       const _MaxDownloadWidget(),
+      const _ListeningPortWidget(),
       const _ResetSettingsWidget(),
       const _InAppRatingWidget(),
+      const _PrivacyPolicyWidget(),
+      const _AppVersionWidget(),
     ];
   }
 }
@@ -414,6 +418,120 @@ class _MaxDownloadWidget extends StatelessWidget {
   }
 }
 
+class _ListeningPortWidget extends StatelessWidget {
+  const _ListeningPortWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) =>
+          ListTile(
+            dense: true,
+            visualDensity: const VisualDensity(vertical: -4),
+            horizontalTitleGap: 8,
+            leading: SvgPicture.asset(
+              AppAssets.icListeningPort,
+              width: 20,
+              height: 20,
+              colorFilter: context.colors.iconPrimary.colorFilter,
+            ),
+            title: const AppText.bodyCompact02(listeningPort),
+            subtitle: AppText.label02(state.peerPort),
+            trailing: SvgPicture.asset(
+              AppAssets.icEdit,
+              width: 20,
+              height: 20,
+              colorFilter: context.colors.iconPrimary.colorFilter,
+            ),
+            onTap: () =>
+                _showListeningPortDialog(
+                  context,
+                  incomingPort,
+                  state.peerPort,
+                      (value) => _updatePeerPort(context, value),
+                ),
+          ),
+    );
+  }
+
+  Future<void> _showListeningPortDialog(BuildContext context,
+      String title,
+      String currentValue,
+      ValueChanged<int> onUpdate,) async {
+    String inputValue = currentValue;
+    bool isValid = _validateListeningPort(currentValue) == null;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) =>
+          StatefulBuilder(
+            builder: (context, setState) =>
+                DialogWidget(
+                  title: title,
+                  content: TextFieldWidget(
+                    hintText: enterANumber,
+                    initialValue: currentValue,
+                    padding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 16.0,
+                      bottom: 16.0,
+                    ),
+                    integerOnly: true,
+                    keyboardType: TextInputType.number,
+                    validator: _validateListeningPort,
+                    onChange: (value) => inputValue = value,
+                    onValidationChanged: (valid) =>
+                        setState(() => isValid = valid),
+                  ),
+                  actions: Row(
+                    children: [
+                      Expanded(
+                        child: ButtonWidget(
+                          backgroundColor: context.colors.buttonSecondary,
+                          buttonText: cancel,
+                          onTap: Navigator
+                              .of(context)
+                              .pop,
+                        ),
+                      ),
+                      Expanded(
+                        child: Opacity(
+                          opacity: isValid ? 1.0 : 0.5,
+                          child: ButtonWidget(
+                            backgroundColor: context.colors.buttonPrimary,
+                            buttonText: apply,
+                            onTap: isValid
+                                ? () => Navigator.of(context).pop(inputValue)
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+          ),
+    );
+
+    if (result?.isNotEmpty == true && context.mounted) {
+      final listeningPort = int.tryParse(result ?? '');
+      if (listeningPort != null) onUpdate(listeningPort);
+    }
+  }
+
+  String? _validateListeningPort(String? value) {
+    if (value?.isEmpty != false) return '';
+    final intValue = int.tryParse(value ?? '');
+    return (intValue != null && intValue > 0) ? null : '';
+  }
+
+  void _updatePeerPort(BuildContext context, int port) {
+    context.read<SettingsCubit>().updateSession(
+      SessionBase(peerPort: port),
+    );
+  }
+}
+
+
 class _ResetSettingsWidget extends StatelessWidget {
   const _ResetSettingsWidget();
 
@@ -487,6 +605,52 @@ class _InAppRatingWidget extends StatelessWidget {
       ),
       title: const AppText.bodyCompact02(rateTheApp),
       onTap: context.read<SettingsCubit>().rateTheApp,
+    );
+  }
+}
+
+class _PrivacyPolicyWidget extends StatelessWidget {
+  const _PrivacyPolicyWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -4),
+      horizontalTitleGap: 8,
+      leading: SvgPicture.asset(
+        AppAssets.icPolicy,
+        width: 20,
+        height: 20,
+        colorFilter: context.colors.iconPrimary.colorFilter,
+      ),
+      title: const AppText.bodyCompact02(privacyPolicy),
+      onTap: () async =>
+          (await canLaunchUrlString(privacyPolicyUrl))
+              ? launchUrlString(privacyPolicyUrl)
+              : null,
+    );
+  }
+}
+
+
+class _AppVersionWidget extends StatelessWidget {
+  const _AppVersionWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -4),
+      horizontalTitleGap: 8,
+      leading: SvgPicture.asset(
+        AppAssets.icLogo,
+        width: 20,
+        height: 20,
+        colorFilter: context.colors.iconPrimary.colorFilter,
+      ),
+      title: const AppText.bodyCompact02(appVersion),
+      subtitle: const AppText.label02('2.0.0'),
     );
   }
 }

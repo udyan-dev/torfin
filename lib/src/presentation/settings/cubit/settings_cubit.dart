@@ -56,6 +56,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         downloadSpeedLimit: sessionResult.speedLimitDown?.toString() ?? '∞',
         uploadSpeedLimit: sessionResult.speedLimitUp?.toString() ?? '∞',
         downloadQueueSize: sessionResult.downloadQueueSize?.toString() ?? '0',
+        peerPort: sessionResult.peerPort?.toString() ?? '0',
       ),
     );
   }
@@ -90,6 +91,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           downloadSpeedLimit: session?.speedLimitDown?.toString() ?? '∞',
           uploadSpeedLimit: session?.speedLimitUp?.toString() ?? '∞',
           downloadQueueSize: session?.downloadQueueSize?.toString() ?? '0',
+          peerPort: session?.peerPort?.toString() ?? '0',
         ),
       );
     } catch (e) {
@@ -121,6 +123,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           downloadSpeedLimit: session?.speedLimitDown?.toString() ?? '∞',
           uploadSpeedLimit: session?.speedLimitUp?.toString() ?? '∞',
           downloadQueueSize: session?.downloadQueueSize?.toString() ?? '0',
+          peerPort: session?.peerPort?.toString() ?? '0',
           notification: const AppNotification(
             type: NotificationType.downloadStarted,
             title: settingsResetSuccessfully,

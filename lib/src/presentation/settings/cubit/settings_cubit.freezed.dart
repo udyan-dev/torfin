@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- bool get enableSuggestions; bool get nsfw; bool get enableSpeedLimits; String get downloadSpeedLimit; String get uploadSpeedLimit; String get downloadQueueSize; AppNotification? get notification;
+ bool get enableSuggestions; bool get nsfw; bool get enableSpeedLimits; String get downloadSpeedLimit; String get uploadSpeedLimit; String get downloadQueueSize; String get peerPort; AppNotification? get notification;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.enableSuggestions, enableSuggestions) || other.enableSuggestions == enableSuggestions)&&(identical(other.nsfw, nsfw) || other.nsfw == nsfw)&&(identical(other.enableSpeedLimits, enableSpeedLimits) || other.enableSpeedLimits == enableSpeedLimits)&&(identical(other.downloadSpeedLimit, downloadSpeedLimit) || other.downloadSpeedLimit == downloadSpeedLimit)&&(identical(other.uploadSpeedLimit, uploadSpeedLimit) || other.uploadSpeedLimit == uploadSpeedLimit)&&(identical(other.downloadQueueSize, downloadQueueSize) || other.downloadQueueSize == downloadQueueSize)&&const DeepCollectionEquality().equals(other.notification, notification));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.enableSuggestions, enableSuggestions) || other.enableSuggestions == enableSuggestions)&&(identical(other.nsfw, nsfw) || other.nsfw == nsfw)&&(identical(other.enableSpeedLimits, enableSpeedLimits) || other.enableSpeedLimits == enableSpeedLimits)&&(identical(other.downloadSpeedLimit, downloadSpeedLimit) || other.downloadSpeedLimit == downloadSpeedLimit)&&(identical(other.uploadSpeedLimit, uploadSpeedLimit) || other.uploadSpeedLimit == uploadSpeedLimit)&&(identical(other.downloadQueueSize, downloadQueueSize) || other.downloadQueueSize == downloadQueueSize)&&(identical(other.peerPort, peerPort) || other.peerPort == peerPort)&&(identical(other.notification, notification) || other.notification == notification));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,enableSuggestions,nsfw,enableSpeedLimits,downloadSpeedLimit,uploadSpeedLimit,downloadQueueSize,const DeepCollectionEquality().hash(notification));
+int get hashCode => Object.hash(runtimeType,enableSuggestions,nsfw,enableSpeedLimits,downloadSpeedLimit,uploadSpeedLimit,downloadQueueSize,peerPort,notification);
 
 @override
 String toString() {
-  return 'SettingsState(enableSuggestions: $enableSuggestions, nsfw: $nsfw, enableSpeedLimits: $enableSpeedLimits, downloadSpeedLimit: $downloadSpeedLimit, uploadSpeedLimit: $uploadSpeedLimit, downloadQueueSize: $downloadQueueSize, notification: $notification)';
+  return 'SettingsState(enableSuggestions: $enableSuggestions, nsfw: $nsfw, enableSpeedLimits: $enableSpeedLimits, downloadSpeedLimit: $downloadSpeedLimit, uploadSpeedLimit: $uploadSpeedLimit, downloadQueueSize: $downloadQueueSize, peerPort: $peerPort, notification: $notification)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- bool enableSuggestions, bool nsfw, bool enableSpeedLimits, String downloadSpeedLimit, String uploadSpeedLimit, String downloadQueueSize, AppNotification? notification
+ bool enableSuggestions, bool nsfw, bool enableSpeedLimits, String downloadSpeedLimit, String uploadSpeedLimit, String downloadQueueSize, String peerPort, AppNotification? notification
 });
 
 
@@ -62,7 +62,7 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enableSuggestions = null,Object? nsfw = null,Object? enableSpeedLimits = null,Object? downloadSpeedLimit = null,Object? uploadSpeedLimit = null,Object? downloadQueueSize = null,Object? notification = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enableSuggestions = null,Object? nsfw = null,Object? enableSpeedLimits = null,Object? downloadSpeedLimit = null,Object? uploadSpeedLimit = null,Object? downloadQueueSize = null,Object? peerPort = null,Object? notification = freezed,}) {
   return _then(_self.copyWith(
 enableSuggestions: null == enableSuggestions ? _self.enableSuggestions : enableSuggestions // ignore: cast_nullable_to_non_nullable
 as bool,nsfw: null == nsfw ? _self.nsfw : nsfw // ignore: cast_nullable_to_non_nullable
@@ -70,6 +70,7 @@ as bool,enableSpeedLimits: null == enableSpeedLimits ? _self.enableSpeedLimits :
 as bool,downloadSpeedLimit: null == downloadSpeedLimit ? _self.downloadSpeedLimit : downloadSpeedLimit // ignore: cast_nullable_to_non_nullable
 as String,uploadSpeedLimit: null == uploadSpeedLimit ? _self.uploadSpeedLimit : uploadSpeedLimit // ignore: cast_nullable_to_non_nullable
 as String,downloadQueueSize: null == downloadQueueSize ? _self.downloadQueueSize : downloadQueueSize // ignore: cast_nullable_to_non_nullable
+as String,peerPort: null == peerPort ? _self.peerPort : peerPort // ignore: cast_nullable_to_non_nullable
 as String,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
 as AppNotification?,
   ));
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  AppNotification? notification)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  String peerPort,  AppNotification? notification)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.notification);case _:
+return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.peerPort,_that.notification);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  AppNotification? notification)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  String peerPort,  AppNotification? notification)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
-return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.notification);}
+return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.peerPort,_that.notification);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -191,10 +192,10 @@ return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  AppNotification? notification)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enableSuggestions,  bool nsfw,  bool enableSpeedLimits,  String downloadSpeedLimit,  String uploadSpeedLimit,  String downloadQueueSize,  String peerPort,  AppNotification? notification)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.notification);case _:
+return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that.downloadSpeedLimit,_that.uploadSpeedLimit,_that.downloadQueueSize,_that.peerPort,_that.notification);case _:
   return null;
 
 }
@@ -206,7 +207,7 @@ return $default(_that.enableSuggestions,_that.nsfw,_that.enableSpeedLimits,_that
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({this.enableSuggestions = false, this.nsfw = false, this.enableSpeedLimits = false, this.downloadSpeedLimit = '', this.uploadSpeedLimit = '', this.downloadQueueSize = '', this.notification});
+  const _SettingsState({this.enableSuggestions = false, this.nsfw = false, this.enableSpeedLimits = false, this.downloadSpeedLimit = '', this.uploadSpeedLimit = '', this.downloadQueueSize = '', this.peerPort = '', this.notification});
   
 
 @override@JsonKey() final  bool enableSuggestions;
@@ -215,6 +216,7 @@ class _SettingsState implements SettingsState {
 @override@JsonKey() final  String downloadSpeedLimit;
 @override@JsonKey() final  String uploadSpeedLimit;
 @override@JsonKey() final  String downloadQueueSize;
+@override@JsonKey() final  String peerPort;
 @override final  AppNotification? notification;
 
 /// Create a copy of SettingsState
@@ -227,16 +229,16 @@ _$SettingsStateCopyWith<_SettingsState> get copyWith => __$SettingsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.enableSuggestions, enableSuggestions) || other.enableSuggestions == enableSuggestions)&&(identical(other.nsfw, nsfw) || other.nsfw == nsfw)&&(identical(other.enableSpeedLimits, enableSpeedLimits) || other.enableSpeedLimits == enableSpeedLimits)&&(identical(other.downloadSpeedLimit, downloadSpeedLimit) || other.downloadSpeedLimit == downloadSpeedLimit)&&(identical(other.uploadSpeedLimit, uploadSpeedLimit) || other.uploadSpeedLimit == uploadSpeedLimit)&&(identical(other.downloadQueueSize, downloadQueueSize) || other.downloadQueueSize == downloadQueueSize)&&const DeepCollectionEquality().equals(other.notification, notification));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.enableSuggestions, enableSuggestions) || other.enableSuggestions == enableSuggestions)&&(identical(other.nsfw, nsfw) || other.nsfw == nsfw)&&(identical(other.enableSpeedLimits, enableSpeedLimits) || other.enableSpeedLimits == enableSpeedLimits)&&(identical(other.downloadSpeedLimit, downloadSpeedLimit) || other.downloadSpeedLimit == downloadSpeedLimit)&&(identical(other.uploadSpeedLimit, uploadSpeedLimit) || other.uploadSpeedLimit == uploadSpeedLimit)&&(identical(other.downloadQueueSize, downloadQueueSize) || other.downloadQueueSize == downloadQueueSize)&&(identical(other.peerPort, peerPort) || other.peerPort == peerPort)&&(identical(other.notification, notification) || other.notification == notification));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,enableSuggestions,nsfw,enableSpeedLimits,downloadSpeedLimit,uploadSpeedLimit,downloadQueueSize,const DeepCollectionEquality().hash(notification));
+int get hashCode => Object.hash(runtimeType,enableSuggestions,nsfw,enableSpeedLimits,downloadSpeedLimit,uploadSpeedLimit,downloadQueueSize,peerPort,notification);
 
 @override
 String toString() {
-  return 'SettingsState(enableSuggestions: $enableSuggestions, nsfw: $nsfw, enableSpeedLimits: $enableSpeedLimits, downloadSpeedLimit: $downloadSpeedLimit, uploadSpeedLimit: $uploadSpeedLimit, downloadQueueSize: $downloadQueueSize, notification: $notification)';
+  return 'SettingsState(enableSuggestions: $enableSuggestions, nsfw: $nsfw, enableSpeedLimits: $enableSpeedLimits, downloadSpeedLimit: $downloadSpeedLimit, uploadSpeedLimit: $uploadSpeedLimit, downloadQueueSize: $downloadQueueSize, peerPort: $peerPort, notification: $notification)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool enableSuggestions, bool nsfw, bool enableSpeedLimits, String downloadSpeedLimit, String uploadSpeedLimit, String downloadQueueSize, AppNotification? notification
+ bool enableSuggestions, bool nsfw, bool enableSpeedLimits, String downloadSpeedLimit, String uploadSpeedLimit, String downloadQueueSize, String peerPort, AppNotification? notification
 });
 
 
@@ -264,7 +266,7 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enableSuggestions = null,Object? nsfw = null,Object? enableSpeedLimits = null,Object? downloadSpeedLimit = null,Object? uploadSpeedLimit = null,Object? downloadQueueSize = null,Object? notification = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enableSuggestions = null,Object? nsfw = null,Object? enableSpeedLimits = null,Object? downloadSpeedLimit = null,Object? uploadSpeedLimit = null,Object? downloadQueueSize = null,Object? peerPort = null,Object? notification = freezed,}) {
   return _then(_SettingsState(
 enableSuggestions: null == enableSuggestions ? _self.enableSuggestions : enableSuggestions // ignore: cast_nullable_to_non_nullable
 as bool,nsfw: null == nsfw ? _self.nsfw : nsfw // ignore: cast_nullable_to_non_nullable
@@ -272,6 +274,7 @@ as bool,enableSpeedLimits: null == enableSpeedLimits ? _self.enableSpeedLimits :
 as bool,downloadSpeedLimit: null == downloadSpeedLimit ? _self.downloadSpeedLimit : downloadSpeedLimit // ignore: cast_nullable_to_non_nullable
 as String,uploadSpeedLimit: null == uploadSpeedLimit ? _self.uploadSpeedLimit : uploadSpeedLimit // ignore: cast_nullable_to_non_nullable
 as String,downloadQueueSize: null == downloadQueueSize ? _self.downloadQueueSize : downloadQueueSize // ignore: cast_nullable_to_non_nullable
+as String,peerPort: null == peerPort ? _self.peerPort : peerPort // ignore: cast_nullable_to_non_nullable
 as String,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
 as AppNotification?,
   ));

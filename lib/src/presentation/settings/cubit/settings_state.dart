@@ -20,6 +20,7 @@ sealed class SettingsState with _$SettingsState {
     @Default('') String downloadSpeedLimit,
     @Default('') String uploadSpeedLimit,
     @Default('') String downloadQueueSize,
+    @Default('') String peerPort,
     AppNotification? notification,
   }) = _SettingsState;
 }
