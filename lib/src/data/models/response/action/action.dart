@@ -13,7 +13,8 @@ abstract class ActionModel with _$ActionModel {
 
   const ActionModel._();
 
-  factory ActionModel.fromJson(Map<String, Object?> json) => _$ActionModelFromJson(json);
+  factory ActionModel.fromJson(Map<String, Object?> json) =>
+      _$ActionModelFromJson(json);
 }
 
 @freezed

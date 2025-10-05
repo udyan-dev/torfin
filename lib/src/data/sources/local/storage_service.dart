@@ -26,7 +26,8 @@ class StorageService {
 
   Future<bool> clear() async => (await _preferences).clear();
 
-  Future<bool> contains(String key) async => (await _preferences).containsKey(key);
+  Future<bool> contains(String key) async =>
+      (await _preferences).containsKey(key);
 
   Future<Set<String>> getKeys() async => (await _preferences).getKeys();
 }

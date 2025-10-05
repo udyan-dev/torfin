@@ -20,7 +20,7 @@ class IconWidget extends StatelessWidget {
         backgroundColor: backgroundColor,
         shape: LinearBorder.none,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(14)
+        padding: const EdgeInsets.all(14),
       ),
       child: SvgPicture.asset(
         icon,

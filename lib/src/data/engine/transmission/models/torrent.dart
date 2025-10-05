@@ -28,8 +28,8 @@ enum TorrentField {
   labels,
   peersConnected,
   magnetLink,
-  sequentialDownload, 
-  doneDate
+  sequentialDownload,
+  doneDate,
 }
 
 class TransmissionTorrentFile {
@@ -40,9 +40,9 @@ class TransmissionTorrentFile {
   const TransmissionTorrentFile(this.name, this.length, this.bytesCompleted);
 
   TransmissionTorrentFile.fromJson(Map<String, dynamic> json)
-      : name = json['name'],
-        length = json['length'],
-        bytesCompleted = json['bytesCompleted'];
+    : name = json['name'],
+      length = json['length'],
+      bytesCompleted = json['bytesCompleted'];
 }
 
 class TransmissionTorrentFileStats {
@@ -52,8 +52,8 @@ class TransmissionTorrentFileStats {
   const TransmissionTorrentFileStats(this.wanted, this.piecesRange);
 
   TransmissionTorrentFileStats.fromJson(Map<String, dynamic> json)
-      : wanted = json['wanted'],
-        piecesRange = List<int>.from(json['piecesRange']);
+    : wanted = json['wanted'],
+      piecesRange = List<int>.from(json['piecesRange']);
 }
 
 class TransmissionTorrentModel {
@@ -114,39 +114,52 @@ class TransmissionTorrentModel {
   );
 
   TransmissionTorrentModel.fromJson(Map<String, dynamic> json)
-      : id = json['id'] as int,
-        name = json['name'] as String,
-        percentDone = json['percentDone'] is int
-            ? (json['percentDone'] as int).toDouble()
-            : json['percentDone'] as double,
-        status = TorrentStatus.values[json['status'] as int],
-        totalSize = json['totalSize'] as int,
-        rateDownload = json['rateDownload'] as int,
-        rateUpload = json['rateUpload'] as int,
-        downloadedEver = json['downloadedEver'] as int,
-        uploadedEver = json['uploadedEver'] as int,
-        eta = json['eta'] as int,
-        pieces = convertBitfieldToBoolList(
-            base64Decode(json['pieces'] as String), json['pieceCount'] as int),
-        pieceCount = json['pieceCount'] as int,
-        pieceSize = json['pieceSize'] as int,
-        errorString = json['errorString'] as String,
-        location = json['downloadDir'] as String,
-        isPrivate = json['isPrivate'] as bool,
-        addedDate = json['addedDate'] as int,
-        creator = json['creator'] as String,
-        comment = json['comment'] as String,
-        files = (json['files'] as List?)
-            ?.map<TransmissionTorrentFile>((j) =>
-                TransmissionTorrentFile.fromJson(j as Map<String, dynamic>))
-            .toList() ?? const <TransmissionTorrentFile>[],
-        fileStats = (json['fileStats'] as List?)
-            ?.map<TransmissionTorrentFileStats>((j) =>
-                TransmissionTorrentFileStats.fromJson(j as Map<String, dynamic>))
-            .toList() ?? const <TransmissionTorrentFileStats>[],
-        labels = List<String>.from(json['labels'] as List),
-        peersConnected = json['peersConnected'] as int,
-        magnetLink = json['magnetLink'] as String,
-        sequentialDownload = json['sequentialDownload'] as bool,
-        doneDate = DateTime.fromMillisecondsSinceEpoch((json['doneDate'] as int) * 1000);
+    : id = json['id'] as int,
+      name = json['name'] as String,
+      percentDone = json['percentDone'] is int
+          ? (json['percentDone'] as int).toDouble()
+          : json['percentDone'] as double,
+      status = TorrentStatus.values[json['status'] as int],
+      totalSize = json['totalSize'] as int,
+      rateDownload = json['rateDownload'] as int,
+      rateUpload = json['rateUpload'] as int,
+      downloadedEver = json['downloadedEver'] as int,
+      uploadedEver = json['uploadedEver'] as int,
+      eta = json['eta'] as int,
+      pieces = convertBitfieldToBoolList(
+        base64Decode(json['pieces'] as String),
+        json['pieceCount'] as int,
+      ),
+      pieceCount = json['pieceCount'] as int,
+      pieceSize = json['pieceSize'] as int,
+      errorString = json['errorString'] as String,
+      location = json['downloadDir'] as String,
+      isPrivate = json['isPrivate'] as bool,
+      addedDate = json['addedDate'] as int,
+      creator = json['creator'] as String,
+      comment = json['comment'] as String,
+      files =
+          (json['files'] as List?)
+              ?.map<TransmissionTorrentFile>(
+                (j) =>
+                    TransmissionTorrentFile.fromJson(j as Map<String, dynamic>),
+              )
+              .toList() ??
+          const <TransmissionTorrentFile>[],
+      fileStats =
+          (json['fileStats'] as List?)
+              ?.map<TransmissionTorrentFileStats>(
+                (j) => TransmissionTorrentFileStats.fromJson(
+                  j as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const <TransmissionTorrentFileStats>[],
+      labels = List<String>.from(json['labels'] as List),
+      peersConnected = json['peersConnected'] as int,
+      magnetLink = json['magnetLink'] as String,
+      sequentialDownload = json['sequentialDownload'] as bool,
+      doneDate = DateTime.fromMillisecondsSinceEpoch(
+        (json['doneDate'] as int) * 1000,
+      );
 }

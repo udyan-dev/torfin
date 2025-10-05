@@ -14,14 +14,20 @@ enum TorrentAddedResponse { added, duplicated }
 class TorrentAddError extends Error {}
 
 Future<String> getTorrentsStatusFilePath() async {
-  return path.join((await getApplicationSupportDirectory()).path,
-      'torrents_resume_status.json');
+  return path.join(
+    (await getApplicationSupportDirectory()).path,
+    'torrents_resume_status.json',
+  );
 }
 
 abstract class Engine {
   Future init();
   Future dispose();
-  Future<TorrentAddedResponse> addTorrent(String? filename, String? metainfo, String? downloadDir);
+  Future<TorrentAddedResponse> addTorrent(
+    String? filename,
+    String? metainfo,
+    String? downloadDir,
+  );
   Future<List<Torrent>> fetchTorrents();
   Future<Torrent> fetchTorrent(int id);
   Future<Session> fetchSession();
@@ -35,20 +41,24 @@ abstract class Engine {
     await file.writeAsString(jsonEncode(torrentResumeStatus.toJson()));
   }
 
-  Future setTorrentsLocation(TorrentSetLocationArguments torrentSetLocationArguments);
+  Future setTorrentsLocation(
+    TorrentSetLocationArguments torrentSetLocationArguments,
+  );
 
   Future restoreTorrentsResumeStatus() async {
     try {
       final filePath = await getTorrentsStatusFilePath();
       final file = File(filePath);
       final jsonString = await File(filePath).readAsString();
-      final torrentResumeStatus =
-          TorrentsResumeStatus.fromJson(jsonDecode(jsonString));
+      final torrentResumeStatus = TorrentsResumeStatus.fromJson(
+        jsonDecode(jsonString),
+      );
 
       final torrents = await fetchTorrents();
       for (final torrentResumeStatus in torrentResumeStatus.torrents) {
-        final torrentInstance =
-            torrents.firstWhere((t) => t.name == torrentResumeStatus.name);
+        final torrentInstance = torrents.firstWhere(
+          (t) => t.name == torrentResumeStatus.name,
+        );
 
         if (torrentResumeStatus.status == TorrentResumeState.started) {
           torrentInstance.start();
@@ -59,8 +69,10 @@ abstract class Engine {
           torrentInstance.setSequentialDownload(false);
         }
 
-        for (final (index, fileResumeStatus) in torrentResumeStatus.files.indexed) {
-          if (fileResumeStatus && torrentInstance.files[index].wanted == false) {
+        for (final (index, fileResumeStatus)
+            in torrentResumeStatus.files.indexed) {
+          if (fileResumeStatus &&
+              torrentInstance.files[index].wanted == false) {
             torrentInstance.toggleFileWanted(index, true);
           }
         }

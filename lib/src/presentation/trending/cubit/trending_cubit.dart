@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -29,7 +28,7 @@ class TrendingCubit extends Cubit<TrendingState> {
   }) : _trendingUseCase = trendingUseCase,
        _favoriteUseCase = favoriteUseCase,
        _addTorrentUseCase = addTorrentUseCase,
-        _getMagnetUseCase = getMagnetUseCase,
+       _getMagnetUseCase = getMagnetUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const TrendingState());
 
@@ -66,7 +65,6 @@ class TrendingCubit extends Cubit<TrendingState> {
     final typeChanged = newType != state.trendingType;
     final sortChanged = newSort != state.sortType;
     final categoryChanged = newCategory != state.selectedCategoryRaw;
-
 
     if (sortChanged || isRefresh) {
       if (sortChanged && state.cacheByType.isNotEmpty) {
@@ -341,7 +339,6 @@ class TrendingCubit extends Cubit<TrendingState> {
     );
   }
 
-
   void cancelMagnetFetch() {
     _magnetCancelToken?.cancel();
     _magnetCancelToken = null;
@@ -435,9 +432,7 @@ class TrendingCubit extends Cubit<TrendingState> {
     }
 
     final response = await _addTorrentUseCase.call(
-      AddTorrentUseCaseParams(
-        magnetLink: torrent.magnet,
-      ),
+      AddTorrentUseCaseParams(magnetLink: torrent.magnet),
       cancelToken: CancelToken(),
     );
 

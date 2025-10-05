@@ -7,30 +7,38 @@ class TorrentsResumeStatus {
   const TorrentsResumeStatus(this.torrents);
 
   TorrentsResumeStatus.fromJson(Map<String, dynamic> json)
-      : torrents = (json['torrents'] as List)
-            .map<TorrentResumeStatus>((e) => TorrentResumeStatus.fromJson(e as Map<String, dynamic>))
-            .toList();
+    : torrents = (json['torrents'] as List)
+          .map<TorrentResumeStatus>(
+            (e) => TorrentResumeStatus.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
 
   Map<String, dynamic> toJson() => {
-        'torrents': torrents
-            .map((t) => {
-                  'name': t.name,
-                  'status': t.status == TorrentResumeState.stopped ? 'stopped' : 'started',
-                  'files': t.files,
-                })
-            .toList(),
-      };
+    'torrents': torrents
+        .map(
+          (t) => {
+            'name': t.name,
+            'status': t.status == TorrentResumeState.stopped
+                ? 'stopped'
+                : 'started',
+            'files': t.files,
+          },
+        )
+        .toList(),
+  };
 
   TorrentsResumeStatus.fromTorrents(List<Torrent> torrentsInstances)
-      : torrents = torrentsInstances
-            .map((torrent) => TorrentResumeStatus(
-                  torrent.name,
-                  torrent.status == TorrentStatus.stopped
-                      ? TorrentResumeState.stopped
-                      : TorrentResumeState.started,
-                  torrent.files.map((f) => f.wanted).toList(),
-                ))
-            .toList();
+    : torrents = torrentsInstances
+          .map(
+            (torrent) => TorrentResumeStatus(
+              torrent.name,
+              torrent.status == TorrentStatus.stopped
+                  ? TorrentResumeState.stopped
+                  : TorrentResumeState.started,
+              torrent.files.map((f) => f.wanted).toList(),
+            ),
+          )
+          .toList();
 }
 
 class TorrentResumeStatus {
@@ -41,9 +49,11 @@ class TorrentResumeStatus {
   const TorrentResumeStatus(this.name, this.status, this.files);
 
   TorrentResumeStatus.fromJson(Map<String, dynamic> json)
-      : name = json['name'] as String,
-        status = json['status'] == TorrentResumeState.started.name
-            ? TorrentResumeState.started
-            : TorrentResumeState.stopped,
-        files = (json['files'] as List).map<bool>((wanted) => wanted as bool).toList();
+    : name = json['name'] as String,
+      status = json['status'] == TorrentResumeState.started.name
+          ? TorrentResumeState.started
+          : TorrentResumeState.stopped,
+      files = (json['files'] as List)
+          .map<bool>((wanted) => wanted as bool)
+          .toList();
 }

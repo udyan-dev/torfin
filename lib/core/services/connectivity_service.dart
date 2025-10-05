@@ -9,4 +9,3 @@ class ConnectivityService {
     return false;
   }
 }
-
