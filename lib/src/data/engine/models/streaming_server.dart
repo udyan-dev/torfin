@@ -91,7 +91,13 @@ class StreamingServer {
     final rangeHeader = request.headers.value('range');
 
     if (rangeHeader != null) {
-      await _handleRangeRequest(request, file, fileSize, rangeHeader, cancelableCompleter);
+      await _handleRangeRequest(
+        request,
+        file,
+        fileSize,
+        rangeHeader,
+        cancelableCompleter,
+      );
     } else {
       await _sendFullFile(request, file, fileSize, cancelableCompleter);
     }
@@ -107,7 +113,14 @@ class StreamingServer {
     request.response.headers.contentType = ContentType.parse(mimeType);
     request.response.headers.contentLength = fileSize;
 
-    await _pipeFileRangeInBlocks(file, request.response, 0, fileSize - 1, torrent.pieceSize, cancelableCompleter);
+    await _pipeFileRangeInBlocks(
+      file,
+      request.response,
+      0,
+      fileSize - 1,
+      torrent.pieceSize,
+      cancelableCompleter,
+    );
   }
 
   Future<void> _handleRangeRequest(
@@ -146,11 +159,21 @@ class StreamingServer {
     final mimeType = lookupMimeType(filePath) ?? ContentType.binary.mimeType;
     request.response.headers.contentType = ContentType.parse(mimeType);
     request.response.headers.contentLength = contentLength;
-    request.response.headers.set('Content-Range', 'bytes $start-$end/$fileSize');
+    request.response.headers.set(
+      'Content-Range',
+      'bytes $start-$end/$fileSize',
+    );
 
     final piece = (start / torrent.pieceSize).floor();
     await torrent.setSequentialDownloadFromPiece(piece);
-    await _pipeFileRangeInBlocks(file, request.response, start, end, torrent.pieceSize, cancelableCompleter);
+    await _pipeFileRangeInBlocks(
+      file,
+      request.response,
+      start,
+      end,
+      torrent.pieceSize,
+      cancelableCompleter,
+    );
   }
 
   List<int> _computeNeededPieces(int? from, int? count) {
@@ -165,7 +188,11 @@ class StreamingServer {
     return neededPieces;
   }
 
-  Future<void> _waitForPieces({int? from, int? count, CancelableCompleter<void>? cancelableCompleter}) async {
+  Future<void> _waitForPieces({
+    int? from,
+    int? count,
+    CancelableCompleter<void>? cancelableCompleter,
+  }) async {
     final completer = Completer<void>();
     final neededPieces = _computeNeededPieces(from, count);
 
@@ -214,7 +241,10 @@ class StreamingServer {
       if (currentEnd > end) currentEnd = end;
 
       final piece = (currentStart / torrent.pieceSize).floor();
-      await _waitForPieces(from: piece, cancelableCompleter: cancelableCompleter);
+      await _waitForPieces(
+        from: piece,
+        cancelableCompleter: cancelableCompleter,
+      );
 
       final readStream = file.openRead(currentStart, currentEnd + 1);
       await for (final chunk in readStream) {

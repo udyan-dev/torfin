@@ -7,7 +7,9 @@ class TorrentGetResponse {
   TorrentGetResponse(this.arguments, this.result);
 
   TorrentGetResponse.fromJson(Map<String, dynamic> json)
-    : arguments = TorrentGetResponseArguments.fromJson(json['arguments'] as Map<String, dynamic>),
+    : arguments = TorrentGetResponseArguments.fromJson(
+        json['arguments'] as Map<String, dynamic>,
+      ),
       result = json['result'] as String;
 }
 

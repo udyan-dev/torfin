@@ -530,7 +530,8 @@ class SearchCubit extends Cubit<SearchState> {
   Future<List<String>> fetchSuggestions(String query) async {
     if (isClosed) return const <String>[];
 
-    final enableSuggestionsResult = await _storageRepository.getEnableSuggestions();
+    final enableSuggestionsResult = await _storageRepository
+        .getEnableSuggestions();
     final enableSuggestions = enableSuggestionsResult.data ?? true;
 
     if (!enableSuggestions) return const <String>[];

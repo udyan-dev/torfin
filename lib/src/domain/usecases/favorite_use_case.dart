@@ -7,7 +7,7 @@ import '../repositories/storage_repository.dart';
 
 class FavoriteUseCase extends BaseUseCase<List<TorrentRes>, FavoriteParams> {
   FavoriteUseCase({required StorageRepository storageRepository})
-      : _storageRepository = storageRepository;
+    : _storageRepository = storageRepository;
 
   final StorageRepository _storageRepository;
 
@@ -36,7 +36,9 @@ class FavoriteUseCase extends BaseUseCase<List<TorrentRes>, FavoriteParams> {
         }
         if (!found) next.add(torrent);
         final setRes = await _storageRepository.setFavorites(next);
-        return setRes is DataSuccess<bool> ? DataSuccess(next) : DataFailed(setRes.error!);
+        return setRes is DataSuccess<bool>
+            ? DataSuccess(next)
+            : DataFailed(setRes.error!);
     }
   }
 }
@@ -48,4 +50,3 @@ class FavoriteParams {
   final TorrentRes? torrent;
   const FavoriteParams({required this.mode, this.torrent});
 }
-

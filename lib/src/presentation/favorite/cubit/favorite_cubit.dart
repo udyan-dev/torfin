@@ -22,7 +22,7 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     required GetMagnetUseCase getMagnetUseCase,
   }) : _favoriteUseCase = favoriteUseCase,
        _addTorrentUseCase = addTorrentUseCase,
-        _getMagnetUseCase = getMagnetUseCase,
+       _getMagnetUseCase = getMagnetUseCase,
        super(const FavoriteState());
 
   final FavoriteUseCase _favoriteUseCase;
@@ -161,7 +161,6 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     return out;
   }
 
-
   void cancelMagnetFetch() {
     _magnetCancelToken?.cancel('Dialog dismissed');
     _magnetCancelToken = null;
@@ -253,9 +252,7 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     }
 
     final response = await _addTorrentUseCase.call(
-      AddTorrentUseCaseParams(
-        magnetLink: torrent.magnet,
-      ),
+      AddTorrentUseCaseParams(magnetLink: torrent.magnet),
       cancelToken: CancelToken(),
     );
 

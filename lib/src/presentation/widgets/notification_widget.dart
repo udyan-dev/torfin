@@ -101,9 +101,9 @@ class NotificationWidget {
                         children: [
                           if (notification.title?.isNotEmpty == true)
                             AppText.headingCompact01(
-                            notification.title ?? emptyString,
-                            color: context.colors.textPrimary,
-                          ),
+                              notification.title ?? emptyString,
+                              color: context.colors.textPrimary,
+                            ),
                           if (notification.message.isNotEmpty)
                             AppText.bodyCompact01(
                               notification.message,
@@ -124,7 +124,7 @@ class NotificationWidget {
                         colorFilter: context.colors.iconPrimary.colorFilter,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

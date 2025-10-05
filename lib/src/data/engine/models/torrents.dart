@@ -54,8 +54,10 @@ class TorrentsModel extends ChangeNotifier {
     await _loadSettings();
     fetchTorrents();
     // Indefinitely refresh
-    _timer = Timer.periodic(const Duration(seconds: refreshIntervalSeconds),
-        (timer) => fetchTorrents());
+    _timer = Timer.periodic(
+      const Duration(seconds: refreshIntervalSeconds),
+      (timer) => fetchTorrents(),
+    );
   }
 
   void stopTimer() {
@@ -69,19 +71,21 @@ class TorrentsModel extends ChangeNotifier {
       storage.get<bool>(reverseSortKey),
     ]);
     final sortName = (results[0] as String?) ?? sort.name;
-    sort = Sort.values.firstWhere((e) => e.name == sortName, orElse: () => sort);
+    sort = Sort.values.firstWhere(
+      (e) => e.name == sortName,
+      orElse: () => sort,
+    );
     reverseSort = (results[1] as bool?) ?? reverseSort;
   }
 
   List<Torrent> _filterTorrentsName(List<Torrent> torrents) {
     return filterText.isNotEmpty
         ? extractAllSorted(
-                query: filterText,
-                choices: torrents.toList(),
-                getter: (t) => t.name,
-                cutoff: 60)
-            .map((result) => torrents[result.index])
-            .toList()
+            query: filterText,
+            choices: torrents.toList(),
+            getter: (t) => t.name,
+            cutoff: 60,
+          ).map((result) => torrents[result.index]).toList()
         : torrents;
   }
 
@@ -107,7 +111,10 @@ class TorrentsModel extends ChangeNotifier {
   }
 
   Future<TorrentAddedResponse> addTorrent(
-      String? filename, String? metainfo, String? downloadDir) async {
+    String? filename,
+    String? metainfo,
+    String? downloadDir,
+  ) async {
     return di<Engine>().addTorrent(filename, metainfo, downloadDir);
   }
 
@@ -118,7 +125,7 @@ class TorrentsModel extends ChangeNotifier {
     // Display notification for torrents completed during last refresh
     for (final torrent in torrents) {
       if (now.difference(torrent.doneDate).inSeconds < refreshIntervalSeconds) {
-       /* showNotification(
+        /* showNotification(
             title: 'Download completed',
             body: torrent.name,
             notificationsDetailsType: NotificationsDetailsTypes
@@ -128,9 +135,10 @@ class TorrentsModel extends ChangeNotifier {
 
     labels = torrents
         .fold<List<String>>(
-            [],
-            (previousValue, element) =>
-                previousValue..addAll(element.labels ?? []))
+          [],
+          (previousValue, element) =>
+              previousValue..addAll(element.labels ?? []),
+        )
         .toSet()
         .toList();
 
@@ -149,8 +157,9 @@ class TorrentsModel extends ChangeNotifier {
   }
 
   void processDisplayedTorrents() {
-    displayedTorrents =
-        _filterTorrents(_filterTorrentsName(_sortTorrents(torrents)));
+    displayedTorrents = _filterTorrents(
+      _filterTorrentsName(_sortTorrents(torrents)),
+    );
     notifyListeners();
   }
 

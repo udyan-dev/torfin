@@ -24,8 +24,8 @@ class CategoryWidget extends StatelessWidget {
     final initialIndex = idx < 0 ? 0 : idx;
 
     return DefaultTabController(
-      key: ValueKey<String>('${tabs.join("|")}::${selectedRaw ?? ""}')
-      ,length: tabs.length,
+      key: ValueKey<String>('${tabs.join("|")}::${selectedRaw ?? ""}'),
+      length: tabs.length,
       initialIndex: initialIndex,
       child: ColoredBox(
         color: context.colors.background,

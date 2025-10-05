@@ -191,6 +191,9 @@ const String keepFilesAndRemoveTorrentOnly =
     'Keep files and remove torrent only';
 const String settings = 'Settings';
 const String chooseYourTheme = 'Choose your theme';
+const String themeLight = 'Light';
+const String themeSystem = 'System';
+const String themeDark = 'Dark';
 const String enableSuggestionsWhileSearching =
     'Enable suggestions while searching';
 const String showNSFWTorrent = 'Show NSFW (not safe for view) torrent';
@@ -209,14 +212,23 @@ const String listeningPort = 'Listening port';
 const String incomingPort = 'Incoming Port';
 const String failedToUpdateSettings = 'Failed to update settings: ';
 const String resetTorrentSettings = 'Reset torrent settings';
-const String areYouSureResetSettings = 'Are you sure you want to reset all torrent settings?';
+const String areYouSureResetSettings =
+    'Are you sure you want to reset all torrent settings?';
 const String yes = 'Yes';
 const String settingsResetSuccessfully = 'Settings reset successfully';
 const String failedToResetSettings = 'Failed to reset settings: ';
 const String rateTheApp = 'Support us by rating the app !';
+const String failedToOpenPlayStore = 'Failed to open Play Store';
 const String appVersion = 'App version';
+const String appVersionNumber = '2.0.0';
 const String privacyPolicy = 'Privacy policy';
-const String privacyPolicyUrl = 'https://udyan-dev.github.io/torfin-privacy-policy/';
+const String privacyPolicyUrl =
+    'https://udyan-dev.github.io/torfin-privacy-policy/';
+const String speedUnitKBps = 'KBps';
+const String defaultSpeedValue = '∞';
+const String defaultPortValue = '0';
+const String nsfwEnabledValue = '1';
+const String nsfwDisabledValue = '0';
 
 // Notification strings
 const String notificationChannelId = 'torrent_downloads';

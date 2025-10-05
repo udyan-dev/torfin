@@ -58,69 +58,69 @@ class _TrendingScreenState extends State<TrendingScreen> {
           final torrent = state.torrents[index];
           return _buildTorrentItem(context, state, torrent);
         },
-        separatorBuilder: (_, i) =>
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: context.colors.borderSubtle00,
-            ),
+        separatorBuilder: (_, i) => Divider(
+          height: 1,
+          thickness: 1,
+          color: context.colors.borderSubtle00,
+        ),
       ),
     );
   }
 
-  Widget _buildTorrentItem(BuildContext context, TrendingState state,
-      TorrentRes torrent) {
+  Widget _buildTorrentItem(
+    BuildContext context,
+    TrendingState state,
+    TorrentRes torrent,
+  ) {
     return TorrentWidget(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
       onSave: () => _cubit.toggleFavorite(torrent),
       onDownload: () => _cubit.downloadTorrent(torrent),
       onDialogClosed: _cubit.cancelMagnetFetch,
-      dialogBuilder: (parentContext, dialogContext, t) =>
-          BlocProvider.value(
-            value: _cubit,
-            child: DialogWidget(
-              title: t.name,
-              actions: Row(
-                children: [
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonSecondary,
-                      buttonText: state.isFavorite(torrent) ? remove : save,
-                      onTap: () {
-                        _cubit.toggleFavorite(torrent);
-                        Navigator.of(dialogContext).maybePop();
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: ButtonWidget(
-                      backgroundColor: dialogContext.colors.buttonPrimary,
-                      buttonText: download,
-                      onTap: () {
-                        _cubit.downloadTorrent(t);
-                        if (t.magnet.isNotEmpty) {
-                          Navigator.of(dialogContext).maybePop();
-                        }
-                      },
-                      trailing: BlocBuilder<TrendingCubit, TrendingState>(
-                        buildWhen: (p, c) =>
-                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
-                        builder: (context, s) {
-                          return s.fetchingMagnetForKey == t.identityKey
-                              ? const LoadingWidget()
-                              : const SizedBox.shrink();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+      dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
+        value: _cubit,
+        child: DialogWidget(
+          title: t.name,
+          actions: Row(
+            children: [
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonSecondary,
+                  buttonText: state.isFavorite(torrent) ? remove : save,
+                  onTap: () {
+                    _cubit.toggleFavorite(torrent);
+                    Navigator.of(dialogContext).maybePop();
+                  },
+                ),
               ),
-            ),
+              Expanded(
+                child: ButtonWidget(
+                  backgroundColor: dialogContext.colors.buttonPrimary,
+                  buttonText: download,
+                  onTap: () {
+                    _cubit.downloadTorrent(t);
+                    if (t.magnet.isNotEmpty) {
+                      Navigator.of(dialogContext).maybePop();
+                    }
+                  },
+                  trailing: BlocBuilder<TrendingCubit, TrendingState>(
+                    buildWhen: (p, c) =>
+                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
+                    builder: (context, s) {
+                      return s.fetchingMagnetForKey == t.identityKey
+                          ? const LoadingWidget()
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +135,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
         },
         child: BlocListener<TrendingCubit, TrendingState>(
           listenWhen: (p, c) =>
-          p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
+              p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
           listener: (context, _) => Navigator.of(context).maybePop(),
           child: Column(
             children: [
@@ -154,7 +154,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
               ),
               BlocBuilder<TrendingCubit, TrendingState>(
                 buildWhen: (p, c) =>
-                p.status != c.status ||
+                    p.status != c.status ||
                     p.isShimmer != c.isShimmer ||
                     p.categoriesRaw != c.categoriesRaw ||
                     p.selectedCategoryRaw != c.selectedCategoryRaw,
@@ -174,7 +174,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
               Expanded(
                 child: BlocBuilder<TrendingCubit, TrendingState>(
                   buildWhen: (p, c) =>
-                  p.status != c.status ||
+                      p.status != c.status ||
                       p.selectedCategoryRaw != c.selectedCategoryRaw ||
                       p.torrents.length != c.torrents.length ||
                       p.isShimmer != c.isShimmer ||

@@ -10,7 +10,15 @@ import 'engine.dart';
 import 'file.dart';
 import 'models/subtitles.dart';
 
-enum TorrentStatus { stopped, queuedToCheck, checking, queuedToDownload, downloading, queuedToSeed, seeding }
+enum TorrentStatus {
+  stopped,
+  queuedToCheck,
+  checking,
+  queuedToDownload,
+  downloading,
+  queuedToSeed,
+  seeding,
+}
 
 class TorrentBase {
   final int id;
@@ -85,7 +93,9 @@ abstract class Torrent extends TorrentBase {
     await di<Engine>().saveTorrentsResumeStatus();
     start();
 
-    final otherTorrents = (await di<Engine>().fetchTorrents()).where((t) => t.id != id);
+    final otherTorrents = (await di<Engine>().fetchTorrents()).where(
+      (t) => t.id != id,
+    );
     for (final otherTorrent in otherTorrents) {
       otherTorrent.stop();
     }
@@ -107,7 +117,8 @@ abstract class Torrent extends TorrentBase {
     await di<Engine>().restoreTorrentsResumeStatus();
   }
 
-  bool hasLoadedPieces(List<int> piecesToTest) => piecesToTest.every((p) => pieces[p]);
+  bool hasLoadedPieces(List<int> piecesToTest) =>
+      piecesToTest.every((p) => pieces[p]);
 
   Future openFolder(BuildContext context) async {
     final folderPath = files.length == 1
@@ -122,7 +133,9 @@ abstract class Torrent extends TorrentBase {
         ResultType.fileNotFound => 'Not found',
         ResultType.permissionDenied => 'Permission denied',
         ResultType.error =>
-            await Directory(folderPath).exists() == false ? 'Folder not found' : 'Unknown error',
+          await Directory(folderPath).exists() == false
+              ? 'Folder not found'
+              : 'Unknown error',
         _ => 'Unknown error',
       };
 

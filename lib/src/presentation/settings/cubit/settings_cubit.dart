@@ -42,8 +42,8 @@ class SettingsCubit extends Cubit<SettingsState> {
     final sessionResult = results[2] as Session;
 
     final enableSuggestions = enableSuggestionsResult.data ?? true;
-    final nsfwValue = nsfwResult.data ?? "0";
-    final nsfw = nsfwValue == "1";
+    final nsfwValue = nsfwResult.data ?? nsfwDisabledValue;
+    final nsfw = nsfwValue == nsfwEnabledValue;
     final enableSpeedLimits =
         sessionResult.speedLimitDownEnabled == true ||
         sessionResult.speedLimitUpEnabled == true;
@@ -53,10 +53,13 @@ class SettingsCubit extends Cubit<SettingsState> {
         enableSuggestions: enableSuggestions,
         nsfw: nsfw,
         enableSpeedLimits: enableSpeedLimits,
-        downloadSpeedLimit: sessionResult.speedLimitDown?.toString() ?? '∞',
-        uploadSpeedLimit: sessionResult.speedLimitUp?.toString() ?? '∞',
-        downloadQueueSize: sessionResult.downloadQueueSize?.toString() ?? '0',
-        peerPort: sessionResult.peerPort?.toString() ?? '0',
+        downloadSpeedLimit:
+            sessionResult.speedLimitDown?.toString() ?? defaultSpeedValue,
+        uploadSpeedLimit:
+            sessionResult.speedLimitUp?.toString() ?? defaultSpeedValue,
+        downloadQueueSize:
+            sessionResult.downloadQueueSize?.toString() ?? defaultPortValue,
+        peerPort: sessionResult.peerPort?.toString() ?? defaultPortValue,
       ),
     );
   }
@@ -68,7 +71,9 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> setNsfw(bool enable) async {
     emit(state.copyWith(nsfw: enable));
-    await _storageRepository.setNsfw(enable ? "1" : "0");
+    await _storageRepository.setNsfw(
+      enable ? nsfwEnabledValue : nsfwDisabledValue,
+    );
   }
 
   Future<void> updateSession(SessionBase sessionBase) async {
@@ -88,10 +93,13 @@ class SettingsCubit extends Cubit<SettingsState> {
       emit(
         state.copyWith(
           enableSpeedLimits: enableSpeedLimits,
-          downloadSpeedLimit: session?.speedLimitDown?.toString() ?? '∞',
-          uploadSpeedLimit: session?.speedLimitUp?.toString() ?? '∞',
-          downloadQueueSize: session?.downloadQueueSize?.toString() ?? '0',
-          peerPort: session?.peerPort?.toString() ?? '0',
+          downloadSpeedLimit:
+              session?.speedLimitDown?.toString() ?? defaultSpeedValue,
+          uploadSpeedLimit:
+              session?.speedLimitUp?.toString() ?? defaultSpeedValue,
+          downloadQueueSize:
+              session?.downloadQueueSize?.toString() ?? defaultPortValue,
+          peerPort: session?.peerPort?.toString() ?? defaultPortValue,
         ),
       );
     } catch (e) {
@@ -120,15 +128,13 @@ class SettingsCubit extends Cubit<SettingsState> {
       emit(
         state.copyWith(
           enableSpeedLimits: enableSpeedLimits,
-          downloadSpeedLimit: session?.speedLimitDown?.toString() ?? '∞',
-          uploadSpeedLimit: session?.speedLimitUp?.toString() ?? '∞',
-          downloadQueueSize: session?.downloadQueueSize?.toString() ?? '0',
-          peerPort: session?.peerPort?.toString() ?? '0',
-          notification: const AppNotification(
-            type: NotificationType.downloadStarted,
-            title: settingsResetSuccessfully,
-            message: '',
-          ),
+          downloadSpeedLimit:
+              session?.speedLimitDown?.toString() ?? defaultSpeedValue,
+          uploadSpeedLimit:
+              session?.speedLimitUp?.toString() ?? defaultSpeedValue,
+          downloadQueueSize:
+              session?.downloadQueueSize?.toString() ?? defaultPortValue,
+          peerPort: session?.peerPort?.toString() ?? defaultPortValue,
         ),
       );
     } catch (e) {
@@ -153,7 +159,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         state.copyWith(
           notification: AppNotification(
             type: NotificationType.error,
-            title: 'Failed to open Play Store',
+            title: failedToOpenPlayStore,
             message: e.toString(),
           ),
         ),

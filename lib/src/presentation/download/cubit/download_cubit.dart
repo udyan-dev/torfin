@@ -11,7 +11,6 @@ import '../../../data/engine/torrent.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../../core/utils/string_constants.dart';
 
-
 part 'download_cubit.freezed.dart';
 
 part 'download_state.dart';
@@ -58,7 +57,9 @@ class DownloadCubit extends Cubit<DownloadState> {
     }
   }
 
-  void startAutoRefresh({Duration interval = const Duration(milliseconds: 250)}) {
+  void startAutoRefresh({
+    Duration interval = const Duration(milliseconds: 250),
+  }) {
     _refreshTimer?.cancel();
     _refreshTimer = Timer.periodic(interval, (_) async {
       try {

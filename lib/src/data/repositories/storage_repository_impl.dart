@@ -64,8 +64,9 @@ class StorageRepositoryImpl extends BaseRepository
   );
 
   @override
-  Future<DataState<bool>> setEnableSuggestions(bool enable) =>
-      getStateOf(request: () => _storageService.set(enableSuggestionsKey, enable));
+  Future<DataState<bool>> setEnableSuggestions(bool enable) => getStateOf(
+    request: () => _storageService.set(enableSuggestionsKey, enable),
+  );
 
   @override
   Future<DataState<bool>> clearAll() =>

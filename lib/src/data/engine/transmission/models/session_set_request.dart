@@ -4,8 +4,10 @@ class SessionSetRequest {
 
   SessionSetRequest({required this.arguments});
 
-  Map<String, dynamic> toJson() =>
-      {'method': method, 'arguments': arguments.toJson()};
+  Map<String, dynamic> toJson() => {
+    'method': method,
+    'arguments': arguments.toJson(),
+  };
 }
 
 class SessionSetRequestArguments {
@@ -18,15 +20,16 @@ class SessionSetRequestArguments {
   final int? speedLimitDown;
   final int? speedLimitUp;
 
-  SessionSetRequestArguments(
-      {this.downloadDir,
-      this.downloadQueueEnabled,
-      this.downloadQueueSize,
-      this.peerPort,
-      this.speedLimitDownEnabled,
-      this.speedLimitUpEnabled,
-      this.speedLimitDown,
-      this.speedLimitUp});
+  SessionSetRequestArguments({
+    this.downloadDir,
+    this.downloadQueueEnabled,
+    this.downloadQueueSize,
+    this.peerPort,
+    this.speedLimitDownEnabled,
+    this.speedLimitUpEnabled,
+    this.speedLimitDown,
+    this.speedLimitUp,
+  });
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};

@@ -5,8 +5,8 @@ class SessionGetResponse {
   SessionGetResponse(this.arguments, this.result);
 
   SessionGetResponse.fromJson(Map<String, dynamic> json)
-      : arguments = SessionGetResponseArguments.fromJson(json['arguments']),
-        result = json['result'] as String;
+    : arguments = SessionGetResponseArguments.fromJson(json['arguments']),
+      result = json['result'] as String;
 }
 
 class SessionGetResponseArguments {
@@ -20,12 +20,12 @@ class SessionGetResponseArguments {
   final int? speedLimitUp;
 
   SessionGetResponseArguments.fromJson(Map<String, dynamic> json)
-      : downloadDir = json['download-dir'],
-        downloadQueueEnabled = json['download-queue-enabled'],
-        downloadQueueSize = json['download-queue-size'],
-        peerPort = json['peer-port'],
-        speedLimitDownEnabled = json['speed-limit-down-enabled'],
-        speedLimitUpEnabled = json['speed-limit-up-enabled'],
-        speedLimitDown = json['speed-limit-down'],
-        speedLimitUp = json['speed-limit-up'];
+    : downloadDir = json['download-dir'],
+      downloadQueueEnabled = json['download-queue-enabled'],
+      downloadQueueSize = json['download-queue-size'],
+      peerPort = json['peer-port'],
+      speedLimitDownEnabled = json['speed-limit-down-enabled'],
+      speedLimitUpEnabled = json['speed-limit-up-enabled'],
+      speedLimitDown = json['speed-limit-down'],
+      speedLimitUp = json['speed-limit-up'];
 }

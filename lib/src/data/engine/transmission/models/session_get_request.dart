@@ -15,8 +15,10 @@ class SessionGetRequest {
 
   SessionGetRequest({required this.arguments});
 
-  Map<String, dynamic> toJson() =>
-      {'method': method, 'arguments': arguments.toJson()};
+  Map<String, dynamic> toJson() => {
+    'method': method,
+    'arguments': arguments.toJson(),
+  };
 }
 
 class SessionGetRequestArguments {
@@ -35,9 +37,9 @@ class SessionGetRequestArguments {
           SessionField.speedLimitDownEnabled => 'speed-limit-down-enabled',
           SessionField.speedLimitUpEnabled => 'speed-limit-up-enabled',
           SessionField.speedLimitDown => 'speed-limit-down',
-          SessionField.speedLimitUp => 'speed-limit-up'
+          SessionField.speedLimitUp => 'speed-limit-up',
         };
-      }).toList()
+      }).toList(),
     };
 
     return json;

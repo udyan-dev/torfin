@@ -1,9 +1,9 @@
 part of 'settings_cubit.dart';
 
 enum ThemeEnum {
-  light("Light", ThemeMode.light),
-  system("System", ThemeMode.system),
-  dark("Dark", ThemeMode.dark);
+  light(themeLight, ThemeMode.light),
+  system(themeSystem, ThemeMode.system),
+  dark(themeDark, ThemeMode.dark);
 
   final String title;
   final ThemeMode value;

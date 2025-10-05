@@ -15,7 +15,11 @@ String truncateFromLastSlash(String text) {
 List<File> getExternalSubtitles(File file, Torrent torrent) {
   final slashesCount = countSlashesRegex(file.name);
   return torrent.files
-      .where((f) => slashesCount == countSlashesRegex(f.name) && f.name.endsWith('.srt'))
+      .where(
+        (f) =>
+            slashesCount == countSlashesRegex(f.name) &&
+            f.name.endsWith('.srt'),
+      )
       .toList();
 }
 
