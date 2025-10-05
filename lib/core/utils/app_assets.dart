@@ -39,4 +39,7 @@ class AppAssets {
   static const icReset = '${icons}ic_reset.svg';
   static const icRating = '${icons}ic_rating.svg';
   static const icOpen = '${icons}ic_open.svg';
+  static const icListeningPort = '${icons}ic_listening_port.svg';
+  static const icLogo = '${icons}ic_logo.svg';
+  static const icPolicy = '${icons}ic_policy.svg';
 }
