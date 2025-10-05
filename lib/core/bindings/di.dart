@@ -24,6 +24,7 @@ import '../../src/presentation/home/cubit/home_cubit.dart';
 import '../../src/presentation/search/cubit/search_cubit.dart';
 import '../../src/presentation/settings/cubit/settings_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
+import '../services/notification_service.dart';
 import '../services/theme_service.dart';
 import '../utils/string_constants.dart';
 
@@ -41,20 +42,32 @@ Future<void> get initDI async {
       ),
     ),
   );
-  di.registerLazySingleton(() => DioService(dio: di<Dio>()));
+  di.registerLazySingleton(() => DioService(dio: di()));
   di.registerLazySingleton(() => SessionService());
-  di.registerSingletonAsync<Engine>(() async {
-    final e = TransmissionEngine();
-    await e.init();
-    await e.restoreTorrentsResumeStatus();
-    return e;
-  }, dispose: (e) => e.dispose());
   di.registerLazySingleton<StorageRepository>(
     () => StorageRepositoryImpl(storageService: di()),
   );
   di.registerLazySingleton<TorrentRepository>(
     () => TorrentRepositoryImpl(dioService: di()),
   );
+
+  final themeService = ThemeService(storageRepository: di());
+  await themeService.init();
+  di.registerSingleton<ThemeService>(themeService, dispose: (s) => s.dispose());
+
+  final engine = TransmissionEngine();
+  await engine.init();
+  await engine.restoreTorrentsResumeStatus();
+  di.registerSingleton<Engine>(engine, dispose: (e) => e.dispose());
+
+  final notificationService = NotificationService(engine);
+  await notificationService.init();
+  notificationService.start();
+  di.registerSingleton<NotificationService>(
+    notificationService,
+    dispose: (s) => s.stop(),
+  );
+
   di.registerLazySingleton(
     () => GetTokenUseCase(torrentRepository: di(), storageRepository: di()),
   );
@@ -75,7 +88,13 @@ Future<void> get initDI async {
     ),
   );
   di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
-  di.registerFactory(() => HomeCubit(getTokenUseCase: di(), cancelToken: di()));
+  di.registerFactory(
+    () => HomeCubit(
+      getTokenUseCase: di(),
+      cancelToken: di(),
+      notificationService: di(),
+    ),
+  );
   di.registerFactory(
     () => SearchCubit(
       searchTorrentUseCase: di(),
@@ -111,9 +130,4 @@ Future<void> get initDI async {
       engine: di(),
     ),
   );
-  di.registerSingletonAsync<ThemeService>(() async {
-    final service = ThemeService(storageRepository: di());
-    await service.init();
-    return service;
-  }, dispose: (service) => service.dispose());
 }

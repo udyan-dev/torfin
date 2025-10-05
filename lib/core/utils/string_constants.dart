@@ -212,3 +212,20 @@ const String yes = 'Yes';
 const String settingsResetSuccessfully = 'Settings reset successfully';
 const String failedToResetSettings = 'Failed to reset settings: ';
 const String rateTheApp = 'Support us by rating the app !';
+
+// Notification strings
+const String notificationChannelId = 'torrent_downloads';
+const String notificationChannelName = 'Torrent Downloads';
+const String notificationDownloading = 'Downloading';
+const String notificationActive = 'Active';
+const String notificationPaused = 'Paused';
+const String notificationPause = 'Pause';
+const String notificationResume = 'Resume';
+const String notificationPauseAll = 'Pause All';
+const String notificationResumeAll = 'Resume All';
+const String notificationInfinity = '∞';
+const String notificationSeparator = ' • ';
+const String notificationPercentSuffix = '%';
+const String notificationSpeedSuffix = '/s';
+const String torrentSuffix = 'torrent';
+const String torrentsSuffix = 'torrents';

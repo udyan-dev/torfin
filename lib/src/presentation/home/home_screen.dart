@@ -26,6 +26,7 @@ class HomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => di<HomeCubit>()
         ..getToken()
+        ..checkNotificationPermission()
         ..checkDownloadPermission(),
       child: DefaultTabController(
         animationDuration: Duration.zero,
