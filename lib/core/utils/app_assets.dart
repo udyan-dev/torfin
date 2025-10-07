@@ -18,11 +18,11 @@ class AppAssets {
   static const icCaution = '${icons}ic_caution.svg';
   static const icCheckBox = '${icons}ic_checkbox.svg';
   static const icCheckBoxFilled = '${icons}ic_checkbox_filled.svg';
-  static const icStartSearch = '${icons}ic_start_search.svg';
-  static const icNoNetwork = '${icons}ic_no_network.svg';
-  static const icNoResultFound = '${icons}ic_no_result_found.svg';
-  static const icAddFavorite = '${icons}ic_add_favorite.svg';
-  static const icAddDownload = '${icons}ic_add_download.svg';
+  static const icStartSearch = '${icons}ic_start_search_state.svg';
+  static const icNoNetwork = '${icons}ic_no_network_state.svg';
+  static const icNoResultFound = '${icons}ic_no_result_found_state.svg';
+  static const icAddFavorite = '${icons}ic_favorite_state.svg';
+  static const icAddDownload = '${icons}ic_download_state.svg';
   static const icChevronDown = '${icons}ic_chevron_down.svg';
   static const icChevronUp = '${icons}ic_chevron_up.svg';
   static const icPause = '${icons}ic_pause.svg';
@@ -31,7 +31,7 @@ class AppAssets {
   static const icStop = '${icons}ic_stop.svg';
   static const icQueue = '${icons}ic_queue.svg';
   static const icDelete = '${icons}ic_delete.svg';
-  static const icSearchSuggestion = '${icons}ic_search_suggestion.svg';
+  static const icSearchSuggestion = '${icons}ic_search_suggestion_state.svg';
   static const icNSFW = '${icons}ic_nsfw.svg';
   static const icMeter = '${icons}ic_meter.svg';
   static const icEdit = '${icons}ic_edit.svg';
@@ -42,4 +42,6 @@ class AppAssets {
   static const icListeningPort = '${icons}ic_listening_port.svg';
   static const icLogo = '${icons}ic_logo.svg';
   static const icPolicy = '${icons}ic_policy.svg';
+  static const icCoinLottie = '${assets}lottie/coin.json';
+  static const icAdd = '${icons}ic_add.svg';
 }

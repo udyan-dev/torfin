@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
@@ -17,7 +16,6 @@ class DioService {
     Map<String, dynamic>? queryParams,
     CancelToken? cancelToken,
   }) {
-    log('HTTP_GET: $endpoint');
     return _handleCollectionRequest<List<T>>(
       request: () => _dio.get<String>(
         endpoint,
@@ -105,25 +103,18 @@ class DioService {
       if (jsonData.isEmpty) return const <TorrentRes>[];
 
       final result = <TorrentRes>[];
-      int skippedCount = 0;
 
       for (int i = 0; i < jsonData.length; i++) {
         final item = jsonData[i];
         try {
           if (item is Map<String, dynamic>) {
             result.add(TorrentRes.fromJson(item));
-          } else {
-            skippedCount++;
           }
-        } catch (e) {
-          skippedCount++;
+        } catch (_) {
           continue;
         }
       }
 
-      log(
-        'JSON_PARSE: received=${jsonData.length} parsed=${result.length} skipped=$skippedCount',
-      );
       return result;
     } catch (e) {
       throw BaseException(

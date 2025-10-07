@@ -161,4 +161,38 @@ class DownloadCubit extends Cubit<DownloadState> {
       ),
     );
   }
+
+  Future<void> removeMultipleTorrents(Set<int> ids, bool keepFiles) async {
+    if (ids.isEmpty) return;
+
+    emit(state.copyWith(isBulkOperationInProgress: true));
+
+    final torrentsToRemove = state.torrents
+        .where((t) => ids.contains(t.id))
+        .toList();
+
+    if (torrentsToRemove.isEmpty) {
+      emit(state.copyWith(isBulkOperationInProgress: false));
+      return;
+    }
+
+    try {
+      final withData = !keepFiles;
+      for (int i = 0; i < torrentsToRemove.length; i++) {
+        torrentsToRemove[i].remove(withData);
+      }
+
+      final torrents = await _engine.fetchTorrents();
+      _allTorrents = torrents;
+
+      emit(
+        state.copyWith(
+          isBulkOperationInProgress: false,
+          torrents: _filterByStatus(_allTorrents, _filterStatus),
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(isBulkOperationInProgress: false));
+    }
+  }
 }

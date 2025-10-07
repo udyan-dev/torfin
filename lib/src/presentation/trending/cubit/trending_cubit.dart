@@ -1,18 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
-import 'package:torfin/src/domain/usecases/trending_torrent_use_case.dart';
 
 import '../../../../core/helpers/base_exception.dart';
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
+import '../../../data/engine/engine.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../shared/notification_builders.dart';
+import '../../../data/models/response/torrent/torrent_res.dart';
+
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
 import '../../../domain/usecases/get_magnet_use_case.dart';
+import '../../../domain/usecases/trending_torrent_use_case.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'trending_cubit.freezed.dart';
@@ -173,17 +177,21 @@ class TrendingCubit extends Cubit<TrendingState> {
     final hasOld = oldSel != null && oldSel.isNotEmpty;
     bool oldPresent = false;
     if (hasOld) {
-      for (int i = 0; i < out.length; i++) {
-        if (out[i].type.trim() == oldSel) {
-          oldPresent = true;
-          break;
+      if (oldSel == all) {
+        oldPresent = true;
+      } else {
+        for (int i = 0; i < out.length; i++) {
+          if (out[i].type.trim() == oldSel) {
+            oldPresent = true;
+            break;
+          }
         }
       }
     }
 
     final newCategoriesRaw = categoriesSeen.isEmpty
         ? const <String>[]
-        : List<String>.from(categoriesSeen, growable: false);
+        : [all, ...categoriesSeen];
 
     List<TorrentRes> filtered;
     String? newSelectedRaw;
@@ -240,9 +248,7 @@ class TrendingCubit extends Cubit<TrendingState> {
       final r = raw[i].type.trim();
       if (r.isNotEmpty) categories.add(r);
     }
-    final cats = categories.isEmpty
-        ? const <String>[]
-        : List<String>.from(categories, growable: false);
+    final cats = categories.isEmpty ? const <String>[] : [all, ...categories];
     final sel = cats.isNotEmpty ? cats.first : null;
     emit(
       state.copyWith(
@@ -277,13 +283,7 @@ class TrendingCubit extends Cubit<TrendingState> {
   }
 
   List<TorrentRes> _filter(List<TorrentRes> list, String? raw) {
-    final cr = raw?.trim();
-    if (cr == null || cr.isEmpty) return list;
-    final out = <TorrentRes>[];
-    for (int i = 0; i < list.length; i++) {
-      if (list[i].type.trim() == cr) out.add(list[i]);
-    }
-    return out;
+    return filterByCategory<TorrentRes>(list, raw, (t) => t.type, all: all);
   }
 
   Future<void> _syncFavorites() async {
@@ -293,12 +293,7 @@ class TrendingCubit extends Cubit<TrendingState> {
     );
     res.when(
       success: (data) {
-        final set = <String>{};
-        if (data.isNotEmpty) {
-          for (int i = 0; i < data.length; i++) {
-            set.add(data[i].identityKey);
-          }
-        }
+        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
         emit(state.copyWith(favoriteKeys: set));
       },
     );
@@ -307,9 +302,7 @@ class TrendingCubit extends Cubit<TrendingState> {
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
     final wasAdded = !state.favoriteKeys.contains(k);
-    final next = wasAdded
-        ? (state.favoriteKeys.toSet()..add(k))
-        : (state.favoriteKeys.toSet()..remove(k));
+    final next = toggleKey(state.favoriteKeys, k);
     emit(state.copyWith(favoriteKeys: next));
     final response = await _favoriteUseCase(
       FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
@@ -317,22 +310,11 @@ class TrendingCubit extends Cubit<TrendingState> {
     );
     response.when(
       success: (data) {
-        final set = <String>{};
-        if (data.isNotEmpty) {
-          for (int i = 0; i < data.length; i++) {
-            set.add(data[i].identityKey);
-          }
-        }
+        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
         emit(
           state.copyWith(
             favoriteKeys: set,
-            notification: AppNotification(
-              title: torrent.name,
-              type: wasAdded
-                  ? NotificationType.favoriteAdded
-                  : NotificationType.favoriteRemoved,
-              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
-            ),
+            notification: favoriteNotification(torrent.name, wasAdded),
           ),
         );
       },
@@ -363,18 +345,14 @@ class TrendingCubit extends Cubit<TrendingState> {
       String? magnet;
       res.when(
         success: (links) {
-          if (links.isNotEmpty) magnet = links.first;
+          magnet = firstOrNull<String>(links);
         },
         failure: (error) {
           _magnetCancelToken = null;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: error.message,
-              ),
+              notification: errorNotification(torrent.name, error.message),
             ),
           );
         },
@@ -385,11 +363,7 @@ class TrendingCubit extends Cubit<TrendingState> {
         emit(
           state.copyWith(
             fetchingMagnetForKey: null,
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: magnetLinkNotFound,
-            ),
+            notification: magnetNotFoundNotification(torrent.name),
           ),
         );
         return;
@@ -401,16 +375,13 @@ class TrendingCubit extends Cubit<TrendingState> {
       );
 
       addRes.when(
-        success: (_) {
+        success: (response) {
           _magnetCancelToken = null;
+          final isDuplicate = response == TorrentAddedResponse.duplicated;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.downloadStarted,
-                message: downloadStartedSuccessfully,
-              ),
+              notification: addStartedNotification(torrent.name, isDuplicate),
             ),
           );
         },
@@ -419,11 +390,7 @@ class TrendingCubit extends Cubit<TrendingState> {
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: '$failedToStartDownloadPrefix${error.message}',
-              ),
+              notification: addFailedNotification(torrent.name, error.message),
             ),
           );
         },
@@ -437,25 +404,18 @@ class TrendingCubit extends Cubit<TrendingState> {
     );
 
     response.when(
-      success: (_) {
+      success: (response) {
+        final isDuplicate = response == TorrentAddedResponse.duplicated;
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.downloadStarted,
-              message: downloadStartedSuccessfully,
-            ),
+            notification: addStartedNotification(torrent.name, isDuplicate),
           ),
         );
       },
       failure: (error) {
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: '$failedToStartDownloadPrefix${error.message}',
-            ),
+            notification: addFailedNotification(torrent.name, error.message),
           ),
         );
       },

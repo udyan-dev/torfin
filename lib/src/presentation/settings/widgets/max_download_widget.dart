@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/data/engine/session.dart';
-import 'package:torfin/src/presentation/settings/cubit/settings_cubit.dart';
-import 'package:torfin/src/presentation/settings/widgets/numeric_input_dialog.dart';
-import 'package:torfin/src/presentation/settings/widgets/settings_list_tile.dart';
+
+import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../../data/engine/session.dart';
+import '../cubit/settings_cubit.dart';
+import 'numeric_input_dialog.dart';
+import 'settings_list_tile.dart';
 
 class MaxDownloadWidget extends StatelessWidget {
   const MaxDownloadWidget({super.key});

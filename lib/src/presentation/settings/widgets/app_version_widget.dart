@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/settings/widgets/settings_list_tile.dart';
+
+import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/string_constants.dart';
+import 'settings_list_tile.dart';
 
 class AppVersionWidget extends StatelessWidget {
   const AppVersionWidget({super.key});

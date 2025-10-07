@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/empty_state/empty_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
@@ -237,9 +237,16 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               BlocBuilder<SearchCubit, SearchState>(
                 buildWhen: (p, c) =>
+                    p.status != c.status ||
+                    p.isShimmer != c.isShimmer ||
                     p.categoriesRaw != c.categoriesRaw ||
                     p.selectedCategoryRaw != c.selectedCategoryRaw,
                 builder: (context, state) {
+                  if (state.isShimmer ||
+                      state.status != SearchStatus.success ||
+                      state.categoriesRaw.isEmpty) {
+                    return emptyBox;
+                  }
                   return CategoryWidget(
                     categories: state.categoriesRaw,
                     selectedRaw: state.selectedCategoryRaw,
@@ -250,40 +257,53 @@ class _SearchScreenState extends State<SearchScreen> {
               Expanded(
                 child: BlocListener<SearchCubit, SearchState>(
                   listenWhen: (p, c) =>
-                      c.status == SearchStatus.success && c.canLoadMore,
-                  listener: (context, state) => _checkAutoLoadMore(state),
-                  child: BlocBuilder<SearchCubit, SearchState>(
-                    buildWhen: (previous, current) =>
-                        previous.status != current.status ||
-                        previous.selectedCategoryRaw !=
-                            current.selectedCategoryRaw ||
-                        previous.torrents.length != current.torrents.length ||
-                        previous.isShimmer != current.isShimmer ||
-                        previous.isPaginating != current.isPaginating ||
-                        previous.isAutoLoadingMore !=
-                            current.isAutoLoadingMore ||
-                        !identical(previous.torrents, current.torrents),
-                    builder: (context, state) => AnimatedSwitcherWidget(
-                      child: switch (state.status) {
-                        SearchStatus.initial => emptyBox,
-                        SearchStatus.loading => _buildTorrents(context, state),
-                        SearchStatus.success =>
-                          state.search.isEmpty && state.torrents.isEmpty
-                              ? EmptyStateWidget(
-                                  iconColor: context.colors.interactive,
-                                  emptyState: const EmptyState(
-                                    stateIcon: AppAssets.icStartSearch,
-                                    title: searchTorrentsTitle,
-                                    description: searchTorrentsDescription,
-                                  ),
-                                )
-                              : _buildTorrents(context, state),
-                        SearchStatus.error => EmptyStateWidget(
-                          emptyState: state.emptyState,
-                          iconColor: context.colors.supportError,
-                          onTap: _cubit.onRetry,
-                        ),
-                      },
+                      p.selectedCategoryRaw != c.selectedCategoryRaw &&
+                      c.selectedCategoryRaw != null,
+                  listener: (context, state) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(0);
+                    }
+                  },
+                  child: BlocListener<SearchCubit, SearchState>(
+                    listenWhen: (p, c) =>
+                        c.status == SearchStatus.success && c.canLoadMore,
+                    listener: (context, state) => _checkAutoLoadMore(state),
+                    child: BlocBuilder<SearchCubit, SearchState>(
+                      buildWhen: (previous, current) =>
+                          previous.status != current.status ||
+                          previous.selectedCategoryRaw !=
+                              current.selectedCategoryRaw ||
+                          previous.torrents.length != current.torrents.length ||
+                          previous.isShimmer != current.isShimmer ||
+                          previous.isPaginating != current.isPaginating ||
+                          previous.isAutoLoadingMore !=
+                              current.isAutoLoadingMore ||
+                          !identical(previous.torrents, current.torrents),
+                      builder: (context, state) => AnimatedSwitcherWidget(
+                        child: switch (state.status) {
+                          SearchStatus.initial => emptyBox,
+                          SearchStatus.loading => _buildTorrents(
+                            context,
+                            state,
+                          ),
+                          SearchStatus.success =>
+                            state.search.isEmpty && state.torrents.isEmpty
+                                ? EmptyStateWidget(
+                                    iconColor: context.colors.interactive,
+                                    emptyState: const EmptyState(
+                                      stateIcon: AppAssets.icStartSearch,
+                                      title: searchTorrentsTitle,
+                                      description: searchTorrentsDescription,
+                                    ),
+                                  )
+                                : _buildTorrents(context, state),
+                          SearchStatus.error => EmptyStateWidget(
+                            emptyState: state.emptyState,
+                            iconColor: context.colors.supportError,
+                            onTap: _cubit.onRetry,
+                          ),
+                        },
+                      ),
                     ),
                   ),
                 ),

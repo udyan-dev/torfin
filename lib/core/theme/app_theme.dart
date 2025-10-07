@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/theme/app_colors.dart';
 
 import '../utils/string_constants.dart';
+import 'app_colors.dart';
 
 class AppTheme {
   AppTheme._();

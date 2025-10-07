@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:torfin/src/data/engine/session.dart';
-
 import '../../../../core/bindings/di.dart';
 import '../engine.dart';
+import '../session.dart';
 
 class SessionService {
   Session? session;

@@ -7,15 +7,17 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as path;
 import 'package:pretty_bytes/pretty_bytes.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/engine/torrent.dart';
 import '../download/cubit/download_cubit.dart';
 import 'button_widget.dart';
 import 'checkbox_widget.dart';
+import 'dialog_widget.dart';
+import 'icon_widget.dart';
 
 class TorrentDetailsWidget extends StatefulWidget {
   final Torrent torrent;
@@ -124,7 +126,9 @@ class _FilesTabWidget extends StatelessWidget {
                           ),
                         ),
                         if (completed)
-                          InkWell(
+                          IconWidget(
+                            icon: AppAssets.icOpen,
+                            iconColor: context.colors.iconPrimary,
                             onTap: () {
                               if (completed) {
                                 OpenFilex.open(
@@ -133,16 +137,6 @@ class _FilesTabWidget extends StatelessWidget {
                                 );
                               }
                             },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: SvgPicture.asset(
-                                AppAssets.icOpen,
-                                width: 20,
-                                height: 20,
-                                colorFilter:
-                                    context.colors.iconPrimary.colorFilter,
-                              ),
-                            ),
                           ),
                         CheckBoxWidget(
                           value: file.wanted,
@@ -305,70 +299,64 @@ class _DetailTabItemWidget extends StatelessWidget {
   }
 }
 
+Widget _buildKeepFilesCheckbox(
+  BuildContext context,
+  ValueNotifier<bool> keepFiles,
+) {
+  return ValueListenableBuilder<bool>(
+    valueListenable: keepFiles,
+    builder: (context, checked, _) => Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+      child: Row(
+        spacing: 8,
+        children: [
+          CheckBoxWidget(
+            value: checked,
+            side: BorderSide(color: context.colors.iconPrimary),
+            activeColor: context.colors.iconPrimary,
+            onChanged: (v) => keepFiles.value = v ?? false,
+          ),
+          AppText.bodyCompact01(
+            keepFilesAndRemoveTorrentOnly,
+            color: context.colors.textPrimary,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Future<bool?> _showTorrentDeleteDialog(
   BuildContext context,
   Torrent torrent,
 ) async {
   final keepFiles = ValueNotifier<bool>(false);
   final result = await showDialog<bool>(
+    barrierDismissible: false,
     barrierColor: context.colors.overlay,
     context: context,
-    builder: (context) => Dialog(
-      backgroundColor: context.colors.layer01,
-      elevation: 0,
-      shape: LinearBorder.none,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    builder: (dialogContext) => DialogWidget(
+      title: deleteConfirmationMessage,
+      content: _buildKeepFilesCheckbox(dialogContext, keepFiles),
+      actions: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: AppText.heading03(deleteConfirmationMessage),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: keepFiles,
-              builder: (context, checked, _) => Row(
-                spacing: 8,
-                children: [
-                  CheckBoxWidget(
-                    value: checked,
-                    side: BorderSide(color: context.colors.iconPrimary),
-                    activeColor: context.colors.iconPrimary,
-                    onChanged: (v) => keepFiles.value = v ?? false,
-                  ),
-                  AppText.bodyCompact01(
-                    keepFilesAndRemoveTorrentOnly,
-                    color: context.colors.textPrimary,
-                  ),
-                ],
-              ),
+          Expanded(
+            child: ButtonWidget(
+              backgroundColor: dialogContext.colors.buttonSecondary,
+              buttonText: cancel,
+              onTap: () => Navigator.of(dialogContext).pop(false),
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonSecondary,
-                  buttonText: cancel,
-                  onTap: () => Navigator.of(context).pop(false),
-                ),
-              ),
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonPrimary,
-                  buttonText: delete,
-                  onTap: () {
-                    final withData = !keepFiles.value;
-                    torrent.remove(withData);
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ),
-            ],
+          Expanded(
+            child: ButtonWidget(
+              backgroundColor: dialogContext.colors.buttonPrimary,
+              buttonText: delete,
+              onTap: () {
+                final withData = !keepFiles.value;
+                torrent.remove(withData);
+                Navigator.of(dialogContext).pop(true);
+              },
+            ),
           ),
         ],
       ),

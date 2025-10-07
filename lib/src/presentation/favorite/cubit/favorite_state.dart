@@ -13,6 +13,7 @@ sealed class FavoriteState with _$FavoriteState {
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
     String? fetchingMagnetForKey,
+    @Default(false) bool isBulkOperationInProgress,
   }) = _FavoriteState;
 }
 

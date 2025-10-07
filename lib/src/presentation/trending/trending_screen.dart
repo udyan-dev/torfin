@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/empty_state/empty_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
@@ -52,6 +52,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
         return Future.value();
       },
       child: ListView.separated(
+        key: ValueKey(state.selectedCategoryRaw),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: state.torrents.length,
         itemBuilder: (context, index) {

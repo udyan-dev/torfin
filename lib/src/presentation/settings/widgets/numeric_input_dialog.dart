@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/widgets/button_widget.dart';
-import 'package:torfin/src/presentation/widgets/dialog_widget.dart';
-import 'package:torfin/src/presentation/widgets/text_field_widget.dart';
+
+import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../widgets/button_widget.dart';
+import '../../widgets/dialog_widget.dart';
+import '../../widgets/text_field_widget.dart';
 
 class NumericInputDialog extends StatefulWidget {
   const NumericInputDialog({

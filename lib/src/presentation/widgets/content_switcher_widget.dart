@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
+import '../../../core/utils/extensions.dart';
 
 class ContentSwitcherWidget<T> extends StatefulWidget {
   final List<T> items;

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/theme/app_styles.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/extensions.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/settings/cubit/settings_cubit.dart';
-import 'package:torfin/src/presentation/settings/widgets/settings_list_tile.dart';
-import 'package:torfin/src/presentation/widgets/button_widget.dart';
-import 'package:torfin/src/presentation/widgets/dialog_widget.dart';
+
+import '../../../../core/theme/app_styles.dart';
+import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../widgets/button_widget.dart';
+import '../../widgets/dialog_widget.dart';
+import '../cubit/settings_cubit.dart';
+import 'settings_list_tile.dart';
 
 class ResetSettingsWidget extends StatelessWidget {
   const ResetSettingsWidget({super.key});

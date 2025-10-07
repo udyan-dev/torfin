@@ -1,7 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:torfin/src/data/models/request/search/search_req.dart';
-import 'package:torfin/src/data/models/request/trending/trending_req.dart';
-import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
 
 import '../../../core/bindings/env.dart';
 import '../../../core/helpers/base_exception.dart';
@@ -10,6 +7,9 @@ import '../../../core/helpers/data_state.dart';
 import '../../../core/utils/routes.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../domain/repositories/torrent_repository.dart';
+import '../models/request/search/search_req.dart';
+import '../models/request/trending/trending_req.dart';
+import '../models/response/torrent/torrent_res.dart';
 import '../sources/remote/dio_service.dart';
 
 class TorrentRepositoryImpl extends BaseRepository

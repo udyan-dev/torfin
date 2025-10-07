@@ -10,6 +10,7 @@ import '../../../data/engine/models/session.dart';
 import '../../../data/engine/session.dart';
 import '../../../domain/repositories/storage_repository.dart';
 import '../../widgets/notification_widget.dart';
+import '../../shared/notification_builders.dart';
 
 part 'settings_cubit.freezed.dart';
 part 'settings_state.dart';
@@ -105,11 +106,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (e) {
       emit(
         state.copyWith(
-          notification: AppNotification(
-            type: NotificationType.error,
-            title: failedToUpdateSettings,
-            message: e.toString(),
-          ),
+          notification: errorNotification(failedToUpdateSettings, e.toString()),
         ),
       );
     }
@@ -140,11 +137,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (e) {
       emit(
         state.copyWith(
-          notification: AppNotification(
-            type: NotificationType.error,
-            title: failedToResetSettings,
-            message: e.toString(),
-          ),
+          notification: errorNotification(failedToResetSettings, e.toString()),
         ),
       );
     }
@@ -157,11 +150,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (e) {
       emit(
         state.copyWith(
-          notification: AppNotification(
-            type: NotificationType.error,
-            title: failedToOpenPlayStore,
-            message: e.toString(),
-          ),
+          notification: errorNotification(failedToOpenPlayStore, e.toString()),
         ),
       );
     }

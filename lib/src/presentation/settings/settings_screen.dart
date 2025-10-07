@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/bindings/di.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/settings/cubit/settings_cubit.dart';
-import 'package:torfin/src/presentation/settings/widgets/app_version_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/in_app_rating_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/listening_port_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/max_download_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/privacy_policy_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/reset_settings_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/speed_limit_widget.dart';
-import 'package:torfin/src/presentation/settings/widgets/theme_switcher_widget.dart';
-import 'package:torfin/src/presentation/widgets/app_bar_widget.dart';
-import 'package:torfin/src/presentation/widgets/notification_widget.dart';
-import 'package:torfin/src/presentation/widgets/toggle_widget.dart';
+
+import '../../../core/bindings/di.dart';
+import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/string_constants.dart';
+import '../widgets/app_bar_widget.dart';
+import '../widgets/notification_widget.dart';
+import '../widgets/toggle_widget.dart';
+import 'cubit/settings_cubit.dart';
+import 'widgets/app_version_widget.dart';
+import 'widgets/in_app_rating_widget.dart';
+import 'widgets/listening_port_widget.dart';
+import 'widgets/max_download_widget.dart';
+import 'widgets/privacy_policy_widget.dart';
+import 'widgets/reset_settings_widget.dart';
+import 'widgets/speed_limit_widget.dart';
+import 'widgets/theme_switcher_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

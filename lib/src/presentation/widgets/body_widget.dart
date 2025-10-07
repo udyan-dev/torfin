@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
+
+import '../../../core/utils/extensions.dart';
 
 class BodyWidget extends StatelessWidget {
   final Widget child;

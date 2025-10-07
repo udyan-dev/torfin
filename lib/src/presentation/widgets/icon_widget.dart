@@ -4,29 +4,24 @@ import 'package:torfin/core/utils/extensions.dart';
 
 class IconWidget extends StatelessWidget {
   final String icon;
-  final Color backgroundColor;
+  final Color? iconColor;
+  final VoidCallback? onTap;
 
-  const IconWidget({
-    super.key,
-    required this.icon,
-    required this.backgroundColor,
-  });
+  const IconWidget({super.key, required this.icon, this.iconColor, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () {},
-      style: FilledButton.styleFrom(
-        backgroundColor: backgroundColor,
-        shape: LinearBorder.none,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(14),
-      ),
-      child: SvgPicture.asset(
-        icon,
-        width: 20,
-        height: 20,
-        colorFilter: context.colors.iconOnColor.colorFilter,
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: SvgPicture.asset(
+          icon,
+          width: 20,
+          height: 20,
+          colorFilter:
+              iconColor?.colorFilter ?? context.colors.iconPrimary.colorFilter,
+        ),
       ),
     );
   }

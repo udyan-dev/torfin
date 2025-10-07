@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
+
+import '../../../core/utils/extensions.dart';
 
 class Shimmer extends StatefulWidget {
   static ShimmerState? of(BuildContext context) {

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DownloadState {
 
- DownloadStatus get status; List<Torrent> get torrents; Session? get session; String? get selectedCategoryRaw;
+ DownloadStatus get status; List<Torrent> get torrents; Session? get session; String? get selectedCategoryRaw; bool get isBulkOperationInProgress;
 /// Create a copy of DownloadState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $DownloadStateCopyWith<DownloadState> get copyWith => _$DownloadStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.torrents, torrents)&&(identical(other.session, session) || other.session == session)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.torrents, torrents)&&(identical(other.session, session) || other.session == session)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw)&&(identical(other.isBulkOperationInProgress, isBulkOperationInProgress) || other.isBulkOperationInProgress == isBulkOperationInProgress));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(torrents),session,selectedCategoryRaw);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(torrents),session,selectedCategoryRaw,isBulkOperationInProgress);
 
 @override
 String toString() {
-  return 'DownloadState(status: $status, torrents: $torrents, session: $session, selectedCategoryRaw: $selectedCategoryRaw)';
+  return 'DownloadState(status: $status, torrents: $torrents, session: $session, selectedCategoryRaw: $selectedCategoryRaw, isBulkOperationInProgress: $isBulkOperationInProgress)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $DownloadStateCopyWith<$Res>  {
   factory $DownloadStateCopyWith(DownloadState value, $Res Function(DownloadState) _then) = _$DownloadStateCopyWithImpl;
 @useResult
 $Res call({
- DownloadStatus status, List<Torrent> torrents, Session? session, String? selectedCategoryRaw
+ DownloadStatus status, List<Torrent> torrents, Session? session, String? selectedCategoryRaw, bool isBulkOperationInProgress
 });
 
 
@@ -62,13 +62,14 @@ class _$DownloadStateCopyWithImpl<$Res>
 
 /// Create a copy of DownloadState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? torrents = null,Object? session = freezed,Object? selectedCategoryRaw = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? torrents = null,Object? session = freezed,Object? selectedCategoryRaw = freezed,Object? isBulkOperationInProgress = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DownloadStatus,torrents: null == torrents ? _self.torrents : torrents // ignore: cast_nullable_to_non_nullable
 as List<Torrent>,session: freezed == session ? _self.session : session // ignore: cast_nullable_to_non_nullable
 as Session?,selectedCategoryRaw: freezed == selectedCategoryRaw ? _self.selectedCategoryRaw : selectedCategoryRaw // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isBulkOperationInProgress: null == isBulkOperationInProgress ? _self.isBulkOperationInProgress : isBulkOperationInProgress // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -150,10 +151,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw,  bool isBulkOperationInProgress)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DownloadState() when $default != null:
-return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw);case _:
+return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw,_that.isBulkOperationInProgress);case _:
   return orElse();
 
 }
@@ -171,10 +172,10 @@ return $default(_that.status,_that.torrents,_that.session,_that.selectedCategory
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw,  bool isBulkOperationInProgress)  $default,) {final _that = this;
 switch (_that) {
 case _DownloadState():
-return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw);}
+return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw,_that.isBulkOperationInProgress);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -188,10 +189,10 @@ return $default(_that.status,_that.torrents,_that.session,_that.selectedCategory
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DownloadStatus status,  List<Torrent> torrents,  Session? session,  String? selectedCategoryRaw,  bool isBulkOperationInProgress)?  $default,) {final _that = this;
 switch (_that) {
 case _DownloadState() when $default != null:
-return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw);case _:
+return $default(_that.status,_that.torrents,_that.session,_that.selectedCategoryRaw,_that.isBulkOperationInProgress);case _:
   return null;
 
 }
@@ -203,7 +204,7 @@ return $default(_that.status,_that.torrents,_that.session,_that.selectedCategory
 
 
 class _DownloadState implements DownloadState {
-  const _DownloadState({this.status = DownloadStatus.initial, final  List<Torrent> torrents = const <Torrent>[], this.session, this.selectedCategoryRaw}): _torrents = torrents;
+  const _DownloadState({this.status = DownloadStatus.initial, final  List<Torrent> torrents = const <Torrent>[], this.session, this.selectedCategoryRaw, this.isBulkOperationInProgress = false}): _torrents = torrents;
   
 
 @override@JsonKey() final  DownloadStatus status;
@@ -216,6 +217,7 @@ class _DownloadState implements DownloadState {
 
 @override final  Session? session;
 @override final  String? selectedCategoryRaw;
+@override@JsonKey() final  bool isBulkOperationInProgress;
 
 /// Create a copy of DownloadState
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ _$DownloadStateCopyWith<_DownloadState> get copyWith => __$DownloadStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DownloadState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._torrents, _torrents)&&(identical(other.session, session) || other.session == session)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DownloadState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._torrents, _torrents)&&(identical(other.session, session) || other.session == session)&&(identical(other.selectedCategoryRaw, selectedCategoryRaw) || other.selectedCategoryRaw == selectedCategoryRaw)&&(identical(other.isBulkOperationInProgress, isBulkOperationInProgress) || other.isBulkOperationInProgress == isBulkOperationInProgress));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_torrents),session,selectedCategoryRaw);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_torrents),session,selectedCategoryRaw,isBulkOperationInProgress);
 
 @override
 String toString() {
-  return 'DownloadState(status: $status, torrents: $torrents, session: $session, selectedCategoryRaw: $selectedCategoryRaw)';
+  return 'DownloadState(status: $status, torrents: $torrents, session: $session, selectedCategoryRaw: $selectedCategoryRaw, isBulkOperationInProgress: $isBulkOperationInProgress)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$DownloadStateCopyWith<$Res> implements $DownloadStateCopy
   factory _$DownloadStateCopyWith(_DownloadState value, $Res Function(_DownloadState) _then) = __$DownloadStateCopyWithImpl;
 @override @useResult
 $Res call({
- DownloadStatus status, List<Torrent> torrents, Session? session, String? selectedCategoryRaw
+ DownloadStatus status, List<Torrent> torrents, Session? session, String? selectedCategoryRaw, bool isBulkOperationInProgress
 });
 
 
@@ -264,13 +266,14 @@ class __$DownloadStateCopyWithImpl<$Res>
 
 /// Create a copy of DownloadState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? torrents = null,Object? session = freezed,Object? selectedCategoryRaw = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? torrents = null,Object? session = freezed,Object? selectedCategoryRaw = freezed,Object? isBulkOperationInProgress = null,}) {
   return _then(_DownloadState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DownloadStatus,torrents: null == torrents ? _self._torrents : torrents // ignore: cast_nullable_to_non_nullable
 as List<Torrent>,session: freezed == session ? _self.session : session // ignore: cast_nullable_to_non_nullable
 as Session?,selectedCategoryRaw: freezed == selectedCategoryRaw ? _self.selectedCategoryRaw : selectedCategoryRaw // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isBulkOperationInProgress: null == isBulkOperationInProgress ? _self.isBulkOperationInProgress : isBulkOperationInProgress // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

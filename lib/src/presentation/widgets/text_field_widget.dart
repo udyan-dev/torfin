@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 
 class TextFieldWidget extends StatefulWidget {

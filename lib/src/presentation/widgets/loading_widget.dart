@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
+
+import '../../../core/utils/extensions.dart';
 
 enum LoadingType {
   small(16.0),

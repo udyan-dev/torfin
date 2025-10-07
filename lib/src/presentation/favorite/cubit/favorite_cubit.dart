@@ -1,15 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
-import 'package:torfin/src/domain/usecases/add_torrent_use_case.dart';
-import 'package:torfin/src/domain/usecases/favorite_use_case.dart';
-import 'package:torfin/src/domain/usecases/get_magnet_use_case.dart';
 
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
+import '../../../data/engine/engine.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+import '../../../data/models/response/torrent/torrent_res.dart';
+import '../../../domain/usecases/add_torrent_use_case.dart';
+import '../../../domain/usecases/favorite_use_case.dart';
+import '../../../domain/usecases/get_magnet_use_case.dart';
+import '../../shared/notification_builders.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'favorite_cubit.freezed.dart';
@@ -46,12 +49,7 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       success: (data) {
         final safe = data;
         final list = _filter(safe, query);
-        final set = <String>{};
-        if (safe.isNotEmpty) {
-          for (int i = 0; i < safe.length; i++) {
-            set.add(safe[i].identityKey);
-          }
-        }
+        final set = toKeySet<TorrentRes>(safe, (t) => t.identityKey);
         emit(
           state.copyWith(
             status: FavoriteStatus.success,
@@ -90,12 +88,46 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     );
   }
 
+  void _updateStateWithFavorites(
+    List<TorrentRes> favorites, {
+    AppNotification? notification,
+    bool isBulkOperationInProgress = false,
+  }) {
+    final list = _filter(favorites, state.query);
+    final set = toKeySet<TorrentRes>(favorites, (t) => t.identityKey);
+    EmptyState emptyState;
+    if (favorites.isEmpty) {
+      emptyState = const EmptyState(
+        stateIcon: AppAssets.icAddFavorite,
+        title: saveYourFavoriteTorrents,
+        description: addTorrentsToYourFavorites,
+      );
+    } else if (list.isEmpty && state.query.isNotEmpty) {
+      emptyState = const EmptyState(
+        stateIcon: AppAssets.icNoResultFound,
+        title: noResultsFoundTitle,
+        description: noResultsFoundDescription,
+      );
+    } else {
+      emptyState = const EmptyState();
+    }
+    emit(
+      state.copyWith(
+        status: FavoriteStatus.success,
+        all: favorites,
+        torrents: list,
+        favoriteKeys: set,
+        emptyState: emptyState,
+        isBulkOperationInProgress: isBulkOperationInProgress,
+        notification: notification,
+      ),
+    );
+  }
+
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
     final wasAdded = !state.favoriteKeys.contains(k);
-    final next = wasAdded
-        ? (state.favoriteKeys.toSet()..add(k))
-        : (state.favoriteKeys.toSet()..remove(k));
+    final next = toggleKey(state.favoriteKeys, k);
     emit(state.copyWith(favoriteKeys: next));
 
     final response = await _favoriteUseCase(
@@ -104,46 +136,9 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     );
     response.when(
       success: (data) {
-        final safe = data;
-        final list = _filter(safe, state.query);
-        final set = <String>{};
-        if (safe.isNotEmpty) {
-          for (int i = 0; i < safe.length; i++) {
-            set.add(safe[i].identityKey);
-          }
-        }
-        EmptyState emptyState;
-        if (safe.isEmpty) {
-          emptyState = const EmptyState(
-            stateIcon: AppAssets.icAddFavorite,
-            title: saveYourFavoriteTorrents,
-            description: addTorrentsToYourFavorites,
-          );
-        } else if (list.isEmpty && state.query.isNotEmpty) {
-          emptyState = const EmptyState(
-            stateIcon: AppAssets.icNoResultFound,
-            title: noResultsFoundTitle,
-            description: noResultsFoundDescription,
-          );
-        } else {
-          emptyState = const EmptyState();
-        }
-
-        emit(
-          state.copyWith(
-            status: FavoriteStatus.success,
-            all: safe,
-            torrents: list,
-            favoriteKeys: set,
-            emptyState: emptyState,
-            notification: AppNotification(
-              title: torrent.name,
-              type: wasAdded
-                  ? NotificationType.favoriteAdded
-                  : NotificationType.favoriteRemoved,
-              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
-            ),
-          ),
+        _updateStateWithFavorites(
+          data,
+          notification: favoriteNotification(torrent.name, wasAdded),
         );
       },
     );
@@ -162,10 +157,15 @@ class FavoriteCubit extends Cubit<FavoriteState> {
   }
 
   void cancelMagnetFetch() {
-    _magnetCancelToken?.cancel('Dialog dismissed');
+    _magnetCancelToken?.cancel();
     _magnetCancelToken = null;
-    if (!isClosed && state.fetchingMagnetForKey != null) {
-      emit(state.copyWith(fetchingMagnetForKey: null));
+    if (!isClosed) {
+      if (state.fetchingMagnetForKey != null) {
+        emit(state.copyWith(fetchingMagnetForKey: null));
+      }
+      if (state.isBulkOperationInProgress) {
+        emit(state.copyWith(isBulkOperationInProgress: false));
+      }
     }
   }
 
@@ -183,18 +183,14 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       String? magnet;
       res.when(
         success: (links) {
-          if (links.isNotEmpty) magnet = links.first;
+          magnet = firstOrNull<String>(links);
         },
         failure: (error) {
           _magnetCancelToken = null;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: error.message,
-              ),
+              notification: errorNotification(torrent.name, error.message),
             ),
           );
         },
@@ -205,11 +201,7 @@ class FavoriteCubit extends Cubit<FavoriteState> {
         emit(
           state.copyWith(
             fetchingMagnetForKey: null,
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: magnetLinkNotFound,
-            ),
+            notification: magnetNotFoundNotification(torrent.name),
           ),
         );
         return;
@@ -221,16 +213,13 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       );
 
       addRes.when(
-        success: (_) {
+        success: (response) {
           _magnetCancelToken = null;
+          final isDuplicate = response == TorrentAddedResponse.duplicated;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.downloadStarted,
-                message: downloadStartedSuccessfully,
-              ),
+              notification: addStartedNotification(torrent.name, isDuplicate),
             ),
           );
         },
@@ -239,11 +228,7 @@ class FavoriteCubit extends Cubit<FavoriteState> {
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: '$failedToStartDownloadPrefix${error.message}',
-              ),
+              notification: addFailedNotification(torrent.name, error.message),
             ),
           );
         },
@@ -257,28 +242,160 @@ class FavoriteCubit extends Cubit<FavoriteState> {
     );
 
     response.when(
-      success: (_) {
+      success: (response) {
+        final isDuplicate = response == TorrentAddedResponse.duplicated;
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.downloadStarted,
-              message: downloadStartedSuccessfully,
-            ),
+            notification: addStartedNotification(torrent.name, isDuplicate),
           ),
         );
       },
       failure: (error) {
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: '$failedToStartDownloadPrefix${error.message}',
-            ),
+            notification: addFailedNotification(torrent.name, error.message),
           ),
         );
       },
+    );
+  }
+
+  Future<void> removeMultipleFromFavorites(Set<String> keys) async {
+    if (keys.isEmpty) return;
+
+    emit(state.copyWith(isBulkOperationInProgress: true));
+
+    final torrentsToRemove = state.all
+        .where((t) => keys.contains(t.identityKey))
+        .toList();
+
+    if (torrentsToRemove.isEmpty) {
+      emit(state.copyWith(isBulkOperationInProgress: false));
+      return;
+    }
+
+    final response = await _favoriteUseCase(
+      FavoriteParams(
+        mode: FavoriteMode.removeMultiple,
+        torrents: torrentsToRemove,
+      ),
+      cancelToken: CancelToken(),
+    );
+
+    response.when(
+      success: (data) {
+        _updateStateWithFavorites(
+          data,
+          notification: bulkRemoveSuccessNotification(torrentsToRemove.length),
+        );
+      },
+      failure: (error) {
+        emit(
+          state.copyWith(
+            isBulkOperationInProgress: false,
+            notification: bulkRemoveFailedNotification(error.message),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> downloadMultipleTorrents(Set<String> keys) async {
+    if (keys.isEmpty) return;
+
+    final torrentsToDownload = state.torrents
+        .where((t) => keys.contains(t.identityKey))
+        .toList();
+
+    if (torrentsToDownload.isEmpty) return;
+
+    emit(state.copyWith(isBulkOperationInProgress: true));
+
+    _magnetCancelToken?.cancel();
+    _magnetCancelToken = CancelToken();
+
+    int successCount = 0;
+    int failureCount = 0;
+
+    for (int i = 0; i < torrentsToDownload.length; i++) {
+      if (_magnetCancelToken?.isCancelled ?? true) break;
+
+      final torrent = torrentsToDownload[i];
+      String? magnetLink = torrent.magnet;
+
+      if (magnetLink.isEmpty) {
+        final res = await _getMagnetUseCase.call(
+          torrent.url,
+          cancelToken: _magnetCancelToken!,
+        );
+        res.when(
+          success: (links) {
+            if (links.isNotEmpty) magnetLink = links.first;
+          },
+          failure: (_) {
+            magnetLink = null;
+          },
+        );
+      }
+
+      if (magnetLink == null || magnetLink!.isEmpty) {
+        failureCount++;
+        continue;
+      }
+
+      final response = await _addTorrentUseCase.call(
+        AddTorrentUseCaseParams(magnetLink: magnetLink!),
+        cancelToken: _magnetCancelToken!,
+      );
+
+      response.when(
+        success: (res) {
+          if (res == TorrentAddedResponse.duplicated) {
+            failureCount++;
+          } else {
+            successCount++;
+          }
+        },
+        failure: (_) => failureCount++,
+      );
+    }
+
+    if (_magnetCancelToken?.isCancelled ?? true) {
+      emit(state.copyWith(isBulkOperationInProgress: false));
+      _magnetCancelToken = null;
+      return;
+    }
+
+    _magnetCancelToken = null;
+
+    String title;
+    String message;
+    NotificationType notificationType;
+
+    if (successCount > 0 && failureCount > 0) {
+      title =
+          '$successCount $successSuffix, $failureCount $failedToDownloadTorrents';
+      message = emptyString;
+      notificationType = NotificationType.downloadStarted;
+    } else if (successCount > 0) {
+      title = '$successCount $torrentsWereAddedToDownload';
+      message = emptyString;
+      notificationType = NotificationType.downloadStarted;
+    } else {
+      title = '$failureCount $failedToDownloadTorrents';
+      message = emptyString;
+      notificationType = NotificationType.error;
+    }
+
+    emit(
+      state.copyWith(
+        isBulkOperationInProgress: false,
+        notification: AppNotification(
+          title: title,
+          type: notificationType,
+          message: message,
+        ),
+      ),
     );
   }
 }

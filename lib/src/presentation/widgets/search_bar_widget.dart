@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 
 class SearchBarWidget extends StatefulWidget {

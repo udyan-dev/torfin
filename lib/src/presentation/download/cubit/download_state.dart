@@ -21,5 +21,6 @@ sealed class DownloadState with _$DownloadState {
     @Default(<Torrent>[]) List<Torrent> torrents,
     Session? session,
     String? selectedCategoryRaw,
+    @Default(false) bool isBulkOperationInProgress,
   }) = _DownloadState;
 }

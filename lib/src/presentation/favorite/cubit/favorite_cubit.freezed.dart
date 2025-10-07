@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FavoriteState {
 
- FavoriteStatus get status; EmptyState get emptyState; List<TorrentRes> get torrents; List<TorrentRes> get all; String get query; Set<String> get favoriteKeys; AppNotification? get notification; String? get fetchingMagnetForKey;
+ FavoriteStatus get status; EmptyState get emptyState; List<TorrentRes> get torrents; List<TorrentRes> get all; String get query; Set<String> get favoriteKeys; AppNotification? get notification; String? get fetchingMagnetForKey; bool get isBulkOperationInProgress;
 /// Create a copy of FavoriteState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FavoriteStateCopyWith<FavoriteState> get copyWith => _$FavoriteStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FavoriteState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other.torrents, torrents)&&const DeepCollectionEquality().equals(other.all, all)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.favoriteKeys, favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.fetchingMagnetForKey, fetchingMagnetForKey) || other.fetchingMagnetForKey == fetchingMagnetForKey));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FavoriteState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other.torrents, torrents)&&const DeepCollectionEquality().equals(other.all, all)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.favoriteKeys, favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.fetchingMagnetForKey, fetchingMagnetForKey) || other.fetchingMagnetForKey == fetchingMagnetForKey)&&(identical(other.isBulkOperationInProgress, isBulkOperationInProgress) || other.isBulkOperationInProgress == isBulkOperationInProgress));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(torrents),const DeepCollectionEquality().hash(all),query,const DeepCollectionEquality().hash(favoriteKeys),notification,fetchingMagnetForKey);
+int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(torrents),const DeepCollectionEquality().hash(all),query,const DeepCollectionEquality().hash(favoriteKeys),notification,fetchingMagnetForKey,isBulkOperationInProgress);
 
 @override
 String toString() {
-  return 'FavoriteState(status: $status, emptyState: $emptyState, torrents: $torrents, all: $all, query: $query, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey)';
+  return 'FavoriteState(status: $status, emptyState: $emptyState, torrents: $torrents, all: $all, query: $query, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey, isBulkOperationInProgress: $isBulkOperationInProgress)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FavoriteStateCopyWith<$Res>  {
   factory $FavoriteStateCopyWith(FavoriteState value, $Res Function(FavoriteState) _then) = _$FavoriteStateCopyWithImpl;
 @useResult
 $Res call({
- FavoriteStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> all, String query, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey
+ FavoriteStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> all, String query, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey, bool isBulkOperationInProgress
 });
 
 
@@ -62,7 +62,7 @@ class _$FavoriteStateCopyWithImpl<$Res>
 
 /// Create a copy of FavoriteState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? all = null,Object? query = null,Object? favoriteKeys = null,Object? notification = freezed,Object? fetchingMagnetForKey = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? all = null,Object? query = null,Object? favoriteKeys = null,Object? notification = freezed,Object? fetchingMagnetForKey = freezed,Object? isBulkOperationInProgress = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FavoriteStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,8 @@ as List<TorrentRes>,query: null == query ? _self.query : query // ignore: cast_n
 as String,favoriteKeys: null == favoriteKeys ? _self.favoriteKeys : favoriteKeys // ignore: cast_nullable_to_non_nullable
 as Set<String>,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
 as AppNotification?,fetchingMagnetForKey: freezed == fetchingMagnetForKey ? _self.fetchingMagnetForKey : fetchingMagnetForKey // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isBulkOperationInProgress: null == isBulkOperationInProgress ? _self.isBulkOperationInProgress : isBulkOperationInProgress // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of FavoriteState
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey,  bool isBulkOperationInProgress)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FavoriteState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);case _:
+return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey,_that.isBulkOperationInProgress);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.que
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey,  bool isBulkOperationInProgress)  $default,) {final _that = this;
 switch (_that) {
 case _FavoriteState():
-return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);}
+return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey,_that.isBulkOperationInProgress);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -201,10 +202,10 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.que
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FavoriteStatus status,  EmptyState emptyState,  List<TorrentRes> torrents,  List<TorrentRes> all,  String query,  Set<String> favoriteKeys,  AppNotification? notification,  String? fetchingMagnetForKey,  bool isBulkOperationInProgress)?  $default,) {final _that = this;
 switch (_that) {
 case _FavoriteState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey);case _:
+return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.query,_that.favoriteKeys,_that.notification,_that.fetchingMagnetForKey,_that.isBulkOperationInProgress);case _:
   return null;
 
 }
@@ -216,7 +217,7 @@ return $default(_that.status,_that.emptyState,_that.torrents,_that.all,_that.que
 
 
 class _FavoriteState implements FavoriteState {
-  const _FavoriteState({this.status = FavoriteStatus.initial, this.emptyState = const EmptyState(), final  List<TorrentRes> torrents = const <TorrentRes>[], final  List<TorrentRes> all = const <TorrentRes>[], this.query = '', final  Set<String> favoriteKeys = const <String>{}, this.notification, this.fetchingMagnetForKey}): _torrents = torrents,_all = all,_favoriteKeys = favoriteKeys;
+  const _FavoriteState({this.status = FavoriteStatus.initial, this.emptyState = const EmptyState(), final  List<TorrentRes> torrents = const <TorrentRes>[], final  List<TorrentRes> all = const <TorrentRes>[], this.query = '', final  Set<String> favoriteKeys = const <String>{}, this.notification, this.fetchingMagnetForKey, this.isBulkOperationInProgress = false}): _torrents = torrents,_all = all,_favoriteKeys = favoriteKeys;
   
 
 @override@JsonKey() final  FavoriteStatus status;
@@ -245,6 +246,7 @@ class _FavoriteState implements FavoriteState {
 
 @override final  AppNotification? notification;
 @override final  String? fetchingMagnetForKey;
+@override@JsonKey() final  bool isBulkOperationInProgress;
 
 /// Create a copy of FavoriteState
 /// with the given fields replaced by the non-null parameter values.
@@ -256,16 +258,16 @@ _$FavoriteStateCopyWith<_FavoriteState> get copyWith => __$FavoriteStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FavoriteState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other._torrents, _torrents)&&const DeepCollectionEquality().equals(other._all, _all)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._favoriteKeys, _favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.fetchingMagnetForKey, fetchingMagnetForKey) || other.fetchingMagnetForKey == fetchingMagnetForKey));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FavoriteState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&const DeepCollectionEquality().equals(other._torrents, _torrents)&&const DeepCollectionEquality().equals(other._all, _all)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._favoriteKeys, _favoriteKeys)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.fetchingMagnetForKey, fetchingMagnetForKey) || other.fetchingMagnetForKey == fetchingMagnetForKey)&&(identical(other.isBulkOperationInProgress, isBulkOperationInProgress) || other.isBulkOperationInProgress == isBulkOperationInProgress));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(_torrents),const DeepCollectionEquality().hash(_all),query,const DeepCollectionEquality().hash(_favoriteKeys),notification,fetchingMagnetForKey);
+int get hashCode => Object.hash(runtimeType,status,emptyState,const DeepCollectionEquality().hash(_torrents),const DeepCollectionEquality().hash(_all),query,const DeepCollectionEquality().hash(_favoriteKeys),notification,fetchingMagnetForKey,isBulkOperationInProgress);
 
 @override
 String toString() {
-  return 'FavoriteState(status: $status, emptyState: $emptyState, torrents: $torrents, all: $all, query: $query, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey)';
+  return 'FavoriteState(status: $status, emptyState: $emptyState, torrents: $torrents, all: $all, query: $query, favoriteKeys: $favoriteKeys, notification: $notification, fetchingMagnetForKey: $fetchingMagnetForKey, isBulkOperationInProgress: $isBulkOperationInProgress)';
 }
 
 
@@ -276,7 +278,7 @@ abstract mixin class _$FavoriteStateCopyWith<$Res> implements $FavoriteStateCopy
   factory _$FavoriteStateCopyWith(_FavoriteState value, $Res Function(_FavoriteState) _then) = __$FavoriteStateCopyWithImpl;
 @override @useResult
 $Res call({
- FavoriteStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> all, String query, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey
+ FavoriteStatus status, EmptyState emptyState, List<TorrentRes> torrents, List<TorrentRes> all, String query, Set<String> favoriteKeys, AppNotification? notification, String? fetchingMagnetForKey, bool isBulkOperationInProgress
 });
 
 
@@ -293,7 +295,7 @@ class __$FavoriteStateCopyWithImpl<$Res>
 
 /// Create a copy of FavoriteState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? all = null,Object? query = null,Object? favoriteKeys = null,Object? notification = freezed,Object? fetchingMagnetForKey = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? emptyState = null,Object? torrents = null,Object? all = null,Object? query = null,Object? favoriteKeys = null,Object? notification = freezed,Object? fetchingMagnetForKey = freezed,Object? isBulkOperationInProgress = null,}) {
   return _then(_FavoriteState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FavoriteStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
@@ -303,7 +305,8 @@ as List<TorrentRes>,query: null == query ? _self.query : query // ignore: cast_n
 as String,favoriteKeys: null == favoriteKeys ? _self._favoriteKeys : favoriteKeys // ignore: cast_nullable_to_non_nullable
 as Set<String>,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
 as AppNotification?,fetchingMagnetForKey: freezed == fetchingMagnetForKey ? _self.fetchingMagnetForKey : fetchingMagnetForKey // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isBulkOperationInProgress: null == isBulkOperationInProgress ? _self.isBulkOperationInProgress : isBulkOperationInProgress // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

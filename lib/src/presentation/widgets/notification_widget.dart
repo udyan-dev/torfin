@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
+import '../../../core/utils/app_assets.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 
 enum NotificationType {
   favoriteAdded,
   favoriteRemoved,
   downloadStarted,
+  warning,
   error;
 
   String get icon {
@@ -20,6 +21,8 @@ enum NotificationType {
         return AppAssets.icError;
       case NotificationType.downloadStarted:
         return AppAssets.icCheckmark;
+      case NotificationType.warning:
+        return AppAssets.icError;
       case NotificationType.error:
         return AppAssets.icError;
     }
@@ -33,6 +36,8 @@ enum NotificationType {
         return context.colors.notificationBackgroundError;
       case NotificationType.downloadStarted:
         return context.colors.notificationBackgroundSuccess;
+      case NotificationType.warning:
+        return context.colors.notificationBackgroundWarning;
       case NotificationType.error:
         return context.colors.notificationBackgroundError;
     }
@@ -46,6 +51,8 @@ enum NotificationType {
         return context.colors.supportError;
       case NotificationType.downloadStarted:
         return context.colors.supportSuccess;
+      case NotificationType.warning:
+        return context.colors.supportCautionMajor;
       case NotificationType.error:
         return context.colors.supportError;
     }
@@ -91,6 +98,7 @@ class NotificationWidget {
             ),
             Flexible(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(

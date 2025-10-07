@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:torfin/core/theme/app_styles.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/extensions.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/data/engine/session.dart';
-import 'package:torfin/src/presentation/settings/cubit/settings_cubit.dart';
-import 'package:torfin/src/presentation/settings/widgets/numeric_input_dialog.dart';
-import 'package:torfin/src/presentation/widgets/toggle_widget.dart';
+
+import '../../../../core/theme/app_styles.dart';
+import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../../data/engine/session.dart';
+import '../../widgets/toggle_widget.dart';
+import '../cubit/settings_cubit.dart';
+import 'numeric_input_dialog.dart';
 
 class SpeedLimitWidget extends StatelessWidget {
   const SpeedLimitWidget({super.key});

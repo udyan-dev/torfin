@@ -1,14 +1,10 @@
 import 'dart:io' show Directory;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart';
 
-import '../../../core/bindings/di.dart';
-import 'engine.dart';
 import 'file.dart';
-import 'models/subtitles.dart';
 
 enum TorrentStatus {
   stopped,
@@ -87,35 +83,6 @@ abstract class Torrent extends TorrentBase {
   Future<void> toggleAllFilesWanted(bool wanted);
   Future<void> setSequentialDownload(bool sequential);
   Future<void> setSequentialDownloadFromPiece(int sequentialDownloadFromPiece);
-
-  Future<void> startStreaming(File file) async {
-    if (file.bytesCompleted == file.length) return;
-    await di<Engine>().saveTorrentsResumeStatus();
-    start();
-
-    final otherTorrents = (await di<Engine>().fetchTorrents()).where(
-      (t) => t.id != id,
-    );
-    for (final otherTorrent in otherTorrents) {
-      otherTorrent.stop();
-    }
-
-    await toggleAllFilesWanted(false);
-    final fileIndex = files.indexWhere((f) => f.name == file.name);
-    final externalSubtitles = getExternalSubtitles(file, this);
-    for (final f in files) {
-      if (externalSubtitles.firstWhereOrNull((s) => s.name == f.name) != null) {
-        await toggleFileWanted(fileIndex, true);
-      }
-    }
-    await toggleFileWanted(fileIndex, true);
-    await setSequentialDownload(true);
-  }
-
-  Future<void> stopStreaming() async {
-    setSequentialDownload(false);
-    await di<Engine>().restoreTorrentsResumeStatus();
-  }
 
   bool hasLoadedPieces(List<int> piecesToTest) =>
       piecesToTest.every((p) => pieces[p]);

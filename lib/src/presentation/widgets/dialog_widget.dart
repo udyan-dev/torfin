@@ -1,7 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
+import '../../../core/utils/extensions.dart';
+
+Future<T?> showAppDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = false,
+  bool useRootNavigator = false,
+}) => showDialog<T>(
+  context: context,
+  builder: builder,
+  barrierDismissible: barrierDismissible,
+  barrierColor: context.colors.overlay,
+  useRootNavigator: useRootNavigator,
+);
+
+Future<T?> showAppBottomSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool isScrollControlled = false,
+}) => showModalBottomSheet<T>(
+  context: context,
+  builder: builder,
+  barrierColor: context.colors.overlay,
+  backgroundColor: Colors.transparent,
+  shape: LinearBorder.none,
+  isScrollControlled: isScrollControlled,
+);
 
 class DialogWidget extends StatelessWidget {
   final String title;

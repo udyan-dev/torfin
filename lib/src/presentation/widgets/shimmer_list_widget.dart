@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
-import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
 
+import '../../../core/utils/extensions.dart';
+import '../../data/models/response/torrent/torrent_res.dart';
 import 'dialog_widget.dart';
 import 'shimmer.dart';
 import 'torrent_widget.dart';

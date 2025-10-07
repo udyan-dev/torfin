@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/helpers/data_state.dart';
+import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../download/download_screen.dart';
 import '../favorite/favorite_screen.dart';

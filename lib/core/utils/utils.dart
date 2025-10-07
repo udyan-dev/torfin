@@ -69,3 +69,42 @@ Future<String?> getDownloadDirectory() async {
     ExternalPath.DIRECTORY_DOWNLOAD,
   );
 }
+
+List<T> filterByCategory<T>(
+  List<T> list,
+  String? raw,
+  String Function(T) getRaw, {
+  required String all,
+}) {
+  final cr = raw?.trim();
+  if (cr == null || cr.isEmpty || cr == all) return list;
+  final out = <T>[];
+  for (int i = 0; i < list.length; i++) {
+    if (getRaw(list[i]).trim() == cr) out.add(list[i]);
+  }
+  return out;
+}
+
+Set<String> toKeySet<T>(List<T> list, String Function(T) keyOf) {
+  final set = <String>{};
+  if (list.isEmpty) return set;
+  for (int i = 0; i < list.length; i++) {
+    set.add(keyOf(list[i]));
+  }
+  return set;
+}
+
+Set<String> toggleKey(Set<String> set, String key) {
+  final copy = set.toSet();
+  if (copy.contains(key)) {
+    copy.remove(key);
+  } else {
+    copy.add(key);
+  }
+  return copy;
+}
+
+T? firstOrNull<T>(List<T> list) {
+  if (list.isEmpty) return null;
+  return list.first;
+}

@@ -10,6 +10,7 @@ import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../../core/utils/utils.dart';
+import '../../shared/notification_builders.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/get_token_use_case.dart';
 import '../../widgets/notification_widget.dart';
@@ -32,7 +33,9 @@ class HomeCubit extends Cubit<HomeState> {
        _cancelToken = cancelToken,
        _notificationService = notificationService,
        _connectivity = connectivity ?? ConnectivityService(),
-       super(const HomeState());
+       super(const HomeState()) {
+    _notificationService.start();
+  }
 
   Future<void> getToken() async {
     if (!await _connectivity.hasInternet) {
@@ -87,10 +90,9 @@ class HomeCubit extends Cubit<HomeState> {
             await Permission.storage.request() != PermissionStatus.granted) {
           emit(
             state.copyWith(
-              notification: const AppNotification(
-                type: NotificationType.error,
-                title: storagePermissionNotGranted,
-                message: pleaseGrantStoragePermission,
+              notification: errorNotification(
+                storagePermissionNotGranted,
+                pleaseGrantStoragePermission,
               ),
             ),
           );
@@ -99,10 +101,9 @@ class HomeCubit extends Cubit<HomeState> {
     } catch (_) {
       emit(
         state.copyWith(
-          notification: const AppNotification(
-            type: NotificationType.error,
-            title: storagePermissionNotGranted,
-            message: somethingWentWrong,
+          notification: errorNotification(
+            storagePermissionNotGranted,
+            somethingWentWrong,
           ),
         ),
       );
@@ -112,6 +113,7 @@ class HomeCubit extends Cubit<HomeState> {
   @override
   Future<void> close() async {
     _cancelToken.cancel();
+    _notificationService.stop();
     return super.close();
   }
 }

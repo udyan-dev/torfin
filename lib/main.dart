@@ -1,15 +1,13 @@
 import 'dart:async' show runZonedGuarded;
-import 'dart:developer' show log;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
-import 'package:torfin/core/theme/app_theme.dart';
-import 'package:torfin/core/services/theme_service.dart';
 
 import 'core/bindings/di.dart';
 import 'core/services/firebase_service.dart';
-import 'core/utils/string_constants.dart';
+import 'core/services/theme_service.dart';
+import 'core/theme/app_theme.dart';
 import 'src/presentation/home/home_screen.dart';
 
 void main() {
@@ -30,7 +28,7 @@ void main() {
     },
     (error, stack) => !kDebugMode
         ? FirebaseService.recordError(error, stack, fatal: true)
-        : log(zone, error: error, stackTrace: stack),
+        : null,
   );
 }
 

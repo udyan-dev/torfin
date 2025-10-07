@@ -33,7 +33,7 @@ final di = GetIt.instance;
 Future<void> get initDI async {
   di.registerLazySingleton(() => const Uuid());
   di.registerLazySingleton(() => StorageService());
-  di.registerLazySingleton(() => CancelToken());
+  di.registerFactory(() => CancelToken());
   di.registerLazySingleton(
     () => Dio(
       BaseOptions(
@@ -62,7 +62,6 @@ Future<void> get initDI async {
 
   final notificationService = NotificationService(engine);
   await notificationService.init();
-  notificationService.start();
   di.registerSingleton<NotificationService>(
     notificationService,
     dispose: (s) => s.stop(),

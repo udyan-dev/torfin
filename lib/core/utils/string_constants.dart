@@ -37,12 +37,10 @@ const String themeKey = 'theme';
 const String nsfwKey = 'nsfw';
 const String enableSuggestionsKey = 'enableSuggestions';
 const String favoritesKey = 'favorites';
-const String termsOfUseAcceptedKey = 'termsOfUseAccepted';
-const String checkForUpdateKey = 'checkForUpdate';
 const String sortKey = 'sort';
 const String reverseSortKey = 'reverseSort';
-const String localeKey = 'locale';
 const String storageExceptionPrefix = 'StorageException: ';
+const String downloadLocationKey = 'downloadLocation';
 const String userAgentHeader = 'user-agent';
 const String acceptHeader = 'accept';
 const String acceptLanguageHeader = 'accept-language';
@@ -68,9 +66,7 @@ const String secFetchDestValue = 'empty';
 const String secFetchModeValue = 'cors';
 const String secFetchSiteValue = 'same-origin';
 const String xRequestedWithValue = 'XMLHttpRequest';
-
 const timeoutDuration = Duration(seconds: 60);
-
 final Map<String, String> torrentHeaders = {
   userAgentHeader: '$userAgentValue${Platform.operatingSystemVersion})',
   acceptHeader: acceptValue,
@@ -86,7 +82,6 @@ final Map<String, String> torrentHeaders = {
   secFetchSiteHeader: secFetchSiteValue,
   xRequestedWithHeader: xRequestedWithValue,
 };
-
 const String torrentDio = 'torrentDio';
 const String generalDio = 'generalDio';
 const String repositoryError = 'Repository Error !';
@@ -135,17 +130,13 @@ const String nothingStopped = 'No Torrents Stopped !';
 const String wasAddedToFavorites = 'Was added to favorites';
 const String wasRemovedFromFavorites = 'Was removed from favorites';
 const String storagePermissionNotGranted = 'Storage permission not granted';
-const String downloadLocationKey = 'downloadLocation';
 const String pleaseGrantStoragePermission =
     'Please grant storage permission to download torrents';
 const String somethingWentWrong = 'Something went wrong !';
-
-// Download/magnet messages
 const String magnetLinkNotFound = 'Magnet link not found';
 const String downloadStartedSuccessfully = 'Download started successfully';
+const String torrentAlreadyExists = 'Torrent already exists';
 const String failedToStartDownloadPrefix = 'Failed to start download: ';
-
-// Download filter titles
 const String allTitle = 'All';
 const String downloadingTitle = 'Downloading';
 const String completedTitle = 'Completed';
@@ -155,8 +146,6 @@ const String selectAll = 'Select All';
 const String files = 'Files';
 const String details = 'Details';
 const String error = 'Error';
-
-// Torrent details labels
 const String nameLabel = 'Name';
 const String idLabel = 'ID';
 const String labelsLabel = 'Labels';
@@ -229,8 +218,6 @@ const String defaultSpeedValue = '∞';
 const String defaultPortValue = '0';
 const String nsfwEnabledValue = '1';
 const String nsfwDisabledValue = '0';
-
-// Notification strings
 const String notificationChannelId = 'torrent_downloads';
 const String notificationChannelName = 'Torrent Downloads';
 const String notificationDownloading = 'Downloading';
@@ -246,3 +233,21 @@ const String notificationPercentSuffix = '%';
 const String notificationSpeedSuffix = '/s';
 const String torrentSuffix = 'torrent';
 const String torrentsSuffix = 'torrents';
+const String all = 'All';
+const String downloadAll = 'Download All';
+const String removeAll = 'Remove All';
+const String areYouSureYouWantToDownloadAllSelectedTorrents =
+    'Are you sure you want to download all selected torrents ?';
+const String areYouSureYouWantToRemoveAllSelectedTorrents =
+    'Are you sure you want to remove all selected torrents ?';
+const String failedToRemoveFavorites = 'Failed to remove favorites';
+const String torrentsWereRemovedFromFavorites =
+    'Torrents were removed from favorites';
+const String torrentsWereAddedToDownload = 'Torrents were added to download';
+const String successSuffix = 'success';
+const String failedSuffix = 'failed';
+const String failedToDownloadTorrents = 'failed to download torrents';
+const String torrentsWereDeleted = 'Torrents were deleted';
+const String failedToDeleteTorrents = 'Failed to delete torrents';
+const String areYouSureYouWantToDeleteAllSelectedTorrents =
+    'Are you sure you want to delete all selected torrents ?';

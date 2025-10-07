@@ -25,16 +25,23 @@ class FavoriteUseCase extends BaseUseCase<List<TorrentRes>, FavoriteParams> {
         final torrent = params.torrent;
         if (torrent == null) return DataSuccess(list);
         final key = torrent.identityKey;
-        final next = <TorrentRes>[];
-        bool found = false;
-        for (int i = 0; i < list.length; i++) {
-          if (list[i].identityKey == key) {
-            found = true;
-          } else {
-            next.add(list[i]);
-          }
-        }
-        if (!found) next.add(torrent);
+        final found = list.any((t) => t.identityKey == key);
+        final next = found
+            ? list.where((t) => t.identityKey != key).toList(growable: false)
+            : (List<TorrentRes>.from(list)..add(torrent));
+        final setRes = await _storageRepository.setFavorites(next);
+        return setRes is DataSuccess<bool>
+            ? DataSuccess(next)
+            : DataFailed(setRes.error!);
+      case FavoriteMode.removeMultiple:
+        final current = await _storageRepository.getFavorites();
+        final list = current.data ?? const <TorrentRes>[];
+        final torrentsToRemove = params.torrents ?? const <TorrentRes>[];
+        if (torrentsToRemove.isEmpty) return DataSuccess(list);
+        final keysToRemove = torrentsToRemove.map((t) => t.identityKey).toSet();
+        final next = list
+            .where((t) => !keysToRemove.contains(t.identityKey))
+            .toList(growable: false);
         final setRes = await _storageRepository.setFavorites(next);
         return setRes is DataSuccess<bool>
             ? DataSuccess(next)
@@ -43,10 +50,11 @@ class FavoriteUseCase extends BaseUseCase<List<TorrentRes>, FavoriteParams> {
   }
 }
 
-enum FavoriteMode { getAll, toggle }
+enum FavoriteMode { getAll, toggle, removeMultiple }
 
 class FavoriteParams {
   final FavoriteMode mode;
   final TorrentRes? torrent;
-  const FavoriteParams({required this.mode, this.torrent});
+  final List<TorrentRes>? torrents;
+  const FavoriteParams({required this.mode, this.torrent, this.torrents});
 }

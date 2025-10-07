@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/bindings/di.dart';
-import 'package:torfin/core/services/theme_service.dart';
-import 'package:torfin/core/theme/app_styles.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/settings/cubit/settings_cubit.dart';
-import 'package:torfin/src/presentation/widgets/content_switcher_widget.dart';
+
+import '../../../../core/bindings/di.dart';
+import '../../../../core/services/theme_service.dart';
+import '../../../../core/theme/app_styles.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../widgets/content_switcher_widget.dart';
+import '../cubit/settings_cubit.dart';
 
 class ThemeSwitcherWidget extends StatelessWidget {
   const ThemeSwitcherWidget({super.key});

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/app_assets.dart';
-import 'package:torfin/core/utils/string_constants.dart';
-import 'package:torfin/src/presentation/settings/widgets/settings_list_tile.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/string_constants.dart';
+import '../../shared/notification_builders.dart';
+import '../../widgets/notification_widget.dart';
+import 'settings_list_tile.dart';
 
 class PrivacyPolicyWidget extends StatelessWidget {
   const PrivacyPolicyWidget({super.key});
@@ -12,13 +15,20 @@ class PrivacyPolicyWidget extends StatelessWidget {
     return SettingsListTile(
       icon: AppAssets.icPolicy,
       title: privacyPolicy,
-      onTap: _launchPrivacyPolicy,
+      onTap: () => _launchPrivacyPolicy(context),
     );
   }
 
-  Future<void> _launchPrivacyPolicy() async {
-    if (await canLaunchUrlString(privacyPolicyUrl)) {
+  Future<void> _launchPrivacyPolicy(BuildContext context) async {
+    try {
       await launchUrlString(privacyPolicyUrl);
+    } catch (e) {
+      if (context.mounted) {
+        NotificationWidget.notify(
+          context,
+          errorNotification(privacyPolicy, e.toString()),
+        );
+      }
     }
   }
 }

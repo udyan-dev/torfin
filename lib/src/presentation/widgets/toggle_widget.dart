@@ -5,9 +5,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
+import '../../../core/utils/extensions.dart';
 
 class ToggleWidget extends StatelessWidget {
   final String label;

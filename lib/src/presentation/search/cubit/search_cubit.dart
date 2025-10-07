@@ -1,22 +1,27 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:torfin/src/data/models/response/torrent/torrent_res.dart';
-import 'package:torfin/src/domain/usecases/search_torrent_use_case.dart';
 
 import '../../../../core/helpers/base_exception.dart';
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
+import '../../../data/engine/engine.dart';
+import '../../../../core/utils/utils.dart';
+import '../../shared/notification_builders.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
+
+import '../../../data/models/response/torrent/torrent_res.dart';
 import '../../../domain/repositories/storage_repository.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/auto_complete_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
 import '../../../domain/usecases/get_magnet_use_case.dart';
+import '../../../domain/usecases/search_torrent_use_case.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'search_cubit.freezed.dart';
@@ -52,11 +57,14 @@ class SearchCubit extends Cubit<SearchState> {
   bool _isProcessingRequest = false;
   CancelToken? _magnetCancelToken;
 
+  Timer? _liveSearchDebounce;
+
   @override
   Future<void> close() {
     _token?.cancel();
     _suggestionToken?.cancel();
     _magnetCancelToken?.cancel();
+    _liveSearchDebounce?.cancel();
     return super.close();
   }
 
@@ -377,35 +385,34 @@ class SearchCubit extends Cubit<SearchState> {
     if (oldSel == null || oldSel.isEmpty) {
       for (int i = 0; i < merged.length; i++) {
         final r = merged[i].type.trim();
-        if (r.isNotEmpty && categoriesSeen.add(r) && firstCategory == null) {
-          firstCategory = r;
-        }
+        if (r.isNotEmpty) categoriesSeen.add(r);
       }
-
-      if (firstCategory == null) {
-        filtered = merged;
-      } else {
-        final out = <TorrentRes>[];
-        for (int i = 0; i < merged.length; i++) {
-          if (merged[i].type.trim() == firstCategory) out.add(merged[i]);
-        }
-        filtered = out;
-      }
+      filtered = merged;
+      firstCategory = categoriesSeen.isEmpty ? null : all;
     } else {
-      filtered = <TorrentRes>[];
-      for (int i = 0; i < merged.length; i++) {
-        final r = merged[i].type.trim();
-        if (r.isNotEmpty) {
-          categoriesSeen.add(r);
-          if (!oldSelPresent && r == oldSel) oldSelPresent = true;
+      if (oldSel == all) {
+        oldSelPresent = true;
+        filtered = merged;
+        for (int i = 0; i < merged.length; i++) {
+          final r = merged[i].type.trim();
+          if (r.isNotEmpty) categoriesSeen.add(r);
         }
-        if (r == oldSel) filtered.add(merged[i]);
+      } else {
+        filtered = <TorrentRes>[];
+        for (int i = 0; i < merged.length; i++) {
+          final r = merged[i].type.trim();
+          if (r.isNotEmpty) {
+            categoriesSeen.add(r);
+            if (!oldSelPresent && r == oldSel) oldSelPresent = true;
+          }
+          if (r == oldSel) filtered.add(merged[i]);
+        }
       }
     }
 
     final newCategoriesRaw = categoriesSeen.isEmpty
         ? const <String>[]
-        : List<String>.from(categoriesSeen, growable: false);
+        : [all, ...categoriesSeen];
 
     final keepOldSelForNextPages =
         oldSel != null && oldSel.isNotEmpty && !oldSelPresent && hasMoreData;
@@ -483,14 +490,7 @@ class SearchCubit extends Cubit<SearchState> {
     List<TorrentRes> torrents,
     String? raw,
   ) {
-    final cr = raw?.trim();
-    if (cr == null || cr.isEmpty) return torrents;
-
-    final out = <TorrentRes>[];
-    for (int i = 0; i < torrents.length; i++) {
-      if (torrents[i].type.trim() == cr) out.add(torrents[i]);
-    }
-    return out;
+    return filterByCategory<TorrentRes>(torrents, raw, (t) => t.type, all: all);
   }
 
   SearchState _getInitialState(SortType sortType) {
@@ -534,7 +534,15 @@ class SearchCubit extends Cubit<SearchState> {
         .getEnableSuggestions();
     final enableSuggestions = enableSuggestionsResult.data ?? true;
 
-    if (!enableSuggestions) return const <String>[];
+    if (!enableSuggestions) {
+      _liveSearchDebounce?.cancel();
+      _liveSearchDebounce = Timer(const Duration(milliseconds: 500), () {
+        if (!isClosed) {
+          search(search: query);
+        }
+      });
+      return const <String>[];
+    }
 
     _suggestionToken?.cancel();
     _suggestionToken = CancelToken();
@@ -570,12 +578,7 @@ class SearchCubit extends Cubit<SearchState> {
     );
     res.when(
       success: (data) {
-        final set = <String>{};
-        if (data.isNotEmpty) {
-          for (int i = 0; i < data.length; i++) {
-            set.add(data[i].identityKey);
-          }
-        }
+        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
         emit(state.copyWith(favoriteKeys: set));
       },
     );
@@ -584,9 +587,7 @@ class SearchCubit extends Cubit<SearchState> {
   Future<void> toggleFavorite(TorrentRes torrent) async {
     final k = torrent.identityKey;
     final wasAdded = !state.favoriteKeys.contains(k);
-    final next = wasAdded
-        ? (state.favoriteKeys.toSet()..add(k))
-        : (state.favoriteKeys.toSet()..remove(k));
+    final next = toggleKey(state.favoriteKeys, k);
     emit(state.copyWith(favoriteKeys: next));
     final res = await _favoriteUseCase(
       FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
@@ -594,22 +595,11 @@ class SearchCubit extends Cubit<SearchState> {
     );
     res.when(
       success: (data) {
-        final set = <String>{};
-        if (data.isNotEmpty) {
-          for (int i = 0; i < data.length; i++) {
-            set.add(data[i].identityKey);
-          }
-        }
+        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
         emit(
           state.copyWith(
             favoriteKeys: set,
-            notification: AppNotification(
-              title: torrent.name,
-              type: wasAdded
-                  ? NotificationType.favoriteAdded
-                  : NotificationType.favoriteRemoved,
-              message: wasAdded ? wasAddedToFavorites : wasRemovedFromFavorites,
-            ),
+            notification: favoriteNotification(torrent.name, wasAdded),
           ),
         );
       },
@@ -640,18 +630,14 @@ class SearchCubit extends Cubit<SearchState> {
       String? magnet;
       res.when(
         success: (links) {
-          if (links.isNotEmpty) magnet = links.first;
+          magnet = firstOrNull<String>(links);
         },
         failure: (error) {
           _magnetCancelToken = null;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: error.message,
-              ),
+              notification: errorNotification(torrent.name, error.message),
             ),
           );
         },
@@ -662,11 +648,7 @@ class SearchCubit extends Cubit<SearchState> {
         emit(
           state.copyWith(
             fetchingMagnetForKey: null,
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: magnetLinkNotFound,
-            ),
+            notification: magnetNotFoundNotification(torrent.name),
           ),
         );
         return;
@@ -678,16 +660,13 @@ class SearchCubit extends Cubit<SearchState> {
       );
 
       addRes.when(
-        success: (_) {
+        success: (response) {
           _magnetCancelToken = null;
+          final isDuplicate = response == TorrentAddedResponse.duplicated;
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.downloadStarted,
-                message: downloadStartedSuccessfully,
-              ),
+              notification: addStartedNotification(torrent.name, isDuplicate),
             ),
           );
         },
@@ -696,11 +675,7 @@ class SearchCubit extends Cubit<SearchState> {
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: AppNotification(
-                title: torrent.name,
-                type: NotificationType.error,
-                message: '$failedToStartDownloadPrefix${error.message}',
-              ),
+              notification: addFailedNotification(torrent.name, error.message),
             ),
           );
         },
@@ -714,25 +689,18 @@ class SearchCubit extends Cubit<SearchState> {
     );
 
     response.when(
-      success: (_) {
+      success: (response) {
+        final isDuplicate = response == TorrentAddedResponse.duplicated;
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.downloadStarted,
-              message: downloadStartedSuccessfully,
-            ),
+            notification: addStartedNotification(torrent.name, isDuplicate),
           ),
         );
       },
       failure: (error) {
         emit(
           state.copyWith(
-            notification: AppNotification(
-              title: torrent.name,
-              type: NotificationType.error,
-              message: '$failedToStartDownloadPrefix${error.message}',
-            ),
+            notification: addFailedNotification(torrent.name, error.message),
           ),
         );
       },

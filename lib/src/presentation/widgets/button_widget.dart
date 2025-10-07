@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:torfin/core/utils/extensions.dart';
 
 import '../../../core/theme/app_styles.dart';
+import '../../../core/utils/extensions.dart';
 
 class ButtonWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final String buttonText;
   final Color? backgroundColor;
+  final Color? foregroundColor;
   final Widget? trailing;
   const ButtonWidget({
     super.key,
     required this.buttonText,
     this.onTap,
     this.backgroundColor,
+    this.foregroundColor,
     this.trailing,
   });
 
@@ -20,7 +22,7 @@ class ButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = AppText.bodyCompact02(
       buttonText,
-      color: context.colors.textOnColor,
+      color: foregroundColor ?? context.colors.textOnColor,
     );
     final content = trailing == null
         ? text
@@ -36,7 +38,7 @@ class ButtonWidget extends StatelessWidget {
       onPressed: onTap,
       style: FilledButton.styleFrom(
         backgroundColor: backgroundColor ?? context.colors.buttonPrimary,
-        foregroundColor: context.colors.textOnColor,
+        foregroundColor: foregroundColor ?? context.colors.textOnColor,
         elevation: 0,
         shape: LinearBorder.none,
         alignment: Alignment.centerLeft,
