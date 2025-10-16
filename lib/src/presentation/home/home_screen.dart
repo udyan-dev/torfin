@@ -13,21 +13,46 @@ import '../trending/trending_screen.dart';
 import '../widgets/animated_switcher_widget.dart';
 import '../widgets/body_widget.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
+import '../widgets/coins/cubit/coins_cubit.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/notification_widget.dart';
 import '../widgets/status_widget.dart';
 import 'cubit/home_cubit.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final CoinsCubit _coinsCubit;
+  late final HomeCubit _homeCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _coinsCubit = di<CoinsCubit>();
+    _homeCubit = di<HomeCubit>()
+      ..getToken()
+      ..checkNotificationPermission()
+      ..checkDownloadPermission();
+  }
+
+  @override
+  void dispose() {
+    if (!_homeCubit.isClosed) _homeCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di<HomeCubit>()
-        ..getToken()
-        ..checkNotificationPermission()
-        ..checkDownloadPermission(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _homeCubit),
+        BlocProvider.value(value: _coinsCubit),
+      ],
       child: DefaultTabController(
         animationDuration: Duration.zero,
         length: navigationItems.length,

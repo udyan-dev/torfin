@@ -10,6 +10,7 @@ enum NotificationType {
   favoriteAdded,
   favoriteRemoved,
   downloadStarted,
+  partialSuccess,
   warning,
   error;
 
@@ -20,6 +21,8 @@ enum NotificationType {
       case NotificationType.favoriteRemoved:
         return AppAssets.icError;
       case NotificationType.downloadStarted:
+        return AppAssets.icCheckmark;
+      case NotificationType.partialSuccess:
         return AppAssets.icCheckmark;
       case NotificationType.warning:
         return AppAssets.icError;
@@ -36,6 +39,8 @@ enum NotificationType {
         return context.colors.notificationBackgroundError;
       case NotificationType.downloadStarted:
         return context.colors.notificationBackgroundSuccess;
+      case NotificationType.partialSuccess:
+        return context.colors.notificationBackgroundWarning;
       case NotificationType.warning:
         return context.colors.notificationBackgroundWarning;
       case NotificationType.error:
@@ -51,6 +56,8 @@ enum NotificationType {
         return context.colors.supportError;
       case NotificationType.downloadStarted:
         return context.colors.supportSuccess;
+      case NotificationType.partialSuccess:
+        return context.colors.supportCautionMinor;
       case NotificationType.warning:
         return context.colors.supportCautionMajor;
       case NotificationType.error:

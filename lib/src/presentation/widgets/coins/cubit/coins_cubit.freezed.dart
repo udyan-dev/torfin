@@ -14,30 +14,61 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CoinsState {
 
-
+ int get coins;
+/// Create a copy of CoinsState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CoinsStateCopyWith<CoinsState> get copyWith => _$CoinsStateCopyWithImpl<CoinsState>(this as CoinsState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoinsState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoinsState&&(identical(other.coins, coins) || other.coins == coins));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,coins);
 
 @override
 String toString() {
-  return 'CoinsState()';
+  return 'CoinsState(coins: $coins)';
 }
 
 
 }
 
 /// @nodoc
-class $CoinsStateCopyWith<$Res>  {
-$CoinsStateCopyWith(CoinsState _, $Res Function(CoinsState) __);
+abstract mixin class $CoinsStateCopyWith<$Res>  {
+  factory $CoinsStateCopyWith(CoinsState value, $Res Function(CoinsState) _then) = _$CoinsStateCopyWithImpl;
+@useResult
+$Res call({
+ int coins
+});
+
+
+
+
+}
+/// @nodoc
+class _$CoinsStateCopyWithImpl<$Res>
+    implements $CoinsStateCopyWith<$Res> {
+  _$CoinsStateCopyWithImpl(this._self, this._then);
+
+  final CoinsState _self;
+  final $Res Function(CoinsState) _then;
+
+/// Create a copy of CoinsState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? coins = null,}) {
+  return _then(_self.copyWith(
+coins: null == coins ? _self.coins : coins // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
 }
 
 
@@ -55,11 +86,11 @@ extension CoinsStatePatterns on CoinsState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CoinsState value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial(_that);case _:
+case _CoinsState() when $default != null:
+return $default(_that);case _:
   return orElse();
 
 }
@@ -77,14 +108,11 @@ return initial(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,}){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CoinsState value)  $default,){
 final _that = this;
 switch (_that) {
-case _Initial():
-return initial(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
+case _CoinsState():
+return $default(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -98,11 +126,11 @@ return initial(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CoinsState value)?  $default,){
 final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial(_that);case _:
+case _CoinsState() when $default != null:
+return $default(_that);case _:
   return null;
 
 }
@@ -119,10 +147,10 @@ return initial(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int coins)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial();case _:
+case _CoinsState() when $default != null:
+return $default(_that.coins);case _:
   return orElse();
 
 }
@@ -140,13 +168,10 @@ return initial();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int coins)  $default,) {final _that = this;
 switch (_that) {
-case _Initial():
-return initial();case _:
-  throw StateError('Unexpected subclass');
-
-}
+case _CoinsState():
+return $default(_that.coins);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -160,10 +185,10 @@ return initial();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int coins)?  $default,) {final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial();case _:
+case _CoinsState() when $default != null:
+return $default(_that.coins);case _:
   return null;
 
 }
@@ -174,33 +199,67 @@ return initial();case _:
 /// @nodoc
 
 
-class _Initial implements CoinsState {
-  const _Initial();
+class _CoinsState implements CoinsState {
+  const _CoinsState({this.coins = initialCoins});
   
 
+@override@JsonKey() final  int coins;
 
-
+/// Create a copy of CoinsState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CoinsStateCopyWith<_CoinsState> get copyWith => __$CoinsStateCopyWithImpl<_CoinsState>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoinsState&&(identical(other.coins, coins) || other.coins == coins));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,coins);
 
 @override
 String toString() {
-  return 'CoinsState.initial()';
+  return 'CoinsState(coins: $coins)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$CoinsStateCopyWith<$Res> implements $CoinsStateCopyWith<$Res> {
+  factory _$CoinsStateCopyWith(_CoinsState value, $Res Function(_CoinsState) _then) = __$CoinsStateCopyWithImpl;
+@override @useResult
+$Res call({
+ int coins
+});
 
 
+
+
+}
+/// @nodoc
+class __$CoinsStateCopyWithImpl<$Res>
+    implements _$CoinsStateCopyWith<$Res> {
+  __$CoinsStateCopyWithImpl(this._self, this._then);
+
+  final _CoinsState _self;
+  final $Res Function(_CoinsState) _then;
+
+/// Create a copy of CoinsState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? coins = null,}) {
+  return _then(_CoinsState(
+coins: null == coins ? _self.coins : coins // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
 
 // dart format on

@@ -109,4 +109,5 @@ enum BaseExceptionType {
   unknown,
   badCertificate,
   parseError,
+  insufficientCoins,
 }

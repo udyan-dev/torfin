@@ -24,6 +24,7 @@ import '../../src/presentation/home/cubit/home_cubit.dart';
 import '../../src/presentation/search/cubit/search_cubit.dart';
 import '../../src/presentation/settings/cubit/settings_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
+import '../../src/presentation/widgets/coins/cubit/coins_cubit.dart';
 import '../services/notification_service.dart';
 import '../services/theme_service.dart';
 import '../utils/string_constants.dart';
@@ -44,8 +45,9 @@ Future<void> get initDI async {
   );
   di.registerLazySingleton(() => DioService(dio: di()));
   di.registerLazySingleton(() => SessionService());
-  di.registerLazySingleton<StorageRepository>(
-    () => StorageRepositoryImpl(storageService: di()),
+  di.registerSingleton<StorageRepository>(
+    StorageRepositoryImpl(storageService: di()),
+    dispose: (storageRepository) => storageRepository.dispose(),
   );
   di.registerLazySingleton<TorrentRepository>(
     () => TorrentRepositoryImpl(dioService: di()),
@@ -79,14 +81,21 @@ Future<void> get initDI async {
   );
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
-  di.registerLazySingleton(() => AddTorrentUseCase(engine: di()));
+  di.registerSingleton(CoinsCubit(storageRepository: di())..load());
+  di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
+  di.registerLazySingleton(
+    () => AddTorrentUseCase(
+      engine: di(),
+      storageRepository: di(),
+      getMagnetUseCase: di(),
+    ),
+  );
   di.registerLazySingleton(
     () => TrendingTorrentUseCase(
       torrentRepository: di(),
       storageRepository: di(),
     ),
   );
-  di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
   di.registerFactory(
     () => HomeCubit(
       getTokenUseCase: di(),

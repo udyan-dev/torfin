@@ -19,6 +19,7 @@ sealed class TrendingState with _$TrendingState {
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
     String? fetchingMagnetForKey,
+    @Default(false) bool isBulkOperationInProgress,
   }) = _TrendingState;
 }
 

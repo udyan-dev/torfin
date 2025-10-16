@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,11 +10,9 @@ import '../../../../core/helpers/data_state.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
-import '../../../data/engine/engine.dart';
 import '../../../../core/utils/utils.dart';
-import '../../shared/notification_builders.dart';
+import '../../../data/engine/engine.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
-
 import '../../../data/models/response/torrent/torrent_res.dart';
 import '../../../domain/repositories/storage_repository.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
@@ -22,6 +20,7 @@ import '../../../domain/usecases/auto_complete_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
 import '../../../domain/usecases/get_magnet_use_case.dart';
 import '../../../domain/usecases/search_torrent_use_case.dart';
+import '../../shared/notification_builders.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'search_cubit.freezed.dart';
@@ -675,7 +674,9 @@ class SearchCubit extends Cubit<SearchState> {
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: addFailedNotification(torrent.name, error.message),
+              notification: error.type == BaseExceptionType.insufficientCoins
+                  ? insufficientCoinsNotification()
+                  : addFailedNotification(torrent.name, error.message),
             ),
           );
         },
@@ -700,10 +701,99 @@ class SearchCubit extends Cubit<SearchState> {
       failure: (error) {
         emit(
           state.copyWith(
-            notification: addFailedNotification(torrent.name, error.message),
+            notification: error.type == BaseExceptionType.insufficientCoins
+                ? insufficientCoinsNotification()
+                : addFailedNotification(torrent.name, error.message),
           ),
         );
       },
+    );
+  }
+
+  Future<void> addMultipleToFavorites(Set<String> keys) async {
+    if (keys.isEmpty) return;
+
+    final torrentsToAdd = state.torrents
+        .where((t) => keys.contains(t.identityKey))
+        .toList();
+
+    if (torrentsToAdd.isEmpty) return;
+
+    emit(state.copyWith(isBulkOperationInProgress: true));
+
+    final result = await _favoriteUseCase.callBatch(torrentsToAdd);
+
+    final response = await _favoriteUseCase(
+      const FavoriteParams(mode: FavoriteMode.getAll),
+      cancelToken: CancelToken(),
+    );
+
+    final favoriteKeys = response.data != null
+        ? toKeySet<TorrentRes>(response.data!, (t) => t.identityKey)
+        : state.favoriteKeys;
+
+    final notificationType = result.isError
+        ? NotificationType.error
+        : result.hasPartialSuccess
+        ? NotificationType.partialSuccess
+        : NotificationType.favoriteAdded;
+
+    emit(
+      state.copyWith(
+        favoriteKeys: favoriteKeys,
+        isBulkOperationInProgress: false,
+        notification: AppNotification(
+          title: result.title,
+          message: result.message ?? '',
+          type: notificationType,
+        ),
+      ),
+    );
+  }
+
+  Future<void> downloadMultipleTorrents(Set<String> keys) async {
+    if (keys.isEmpty) return;
+
+    final items = state.torrents
+        .where((t) => keys.contains(t.identityKey))
+        .map((t) => BatchTorrentItem(url: t.url, magnet: t.magnet))
+        .toList();
+
+    if (items.isEmpty) return;
+
+    emit(state.copyWith(isBulkOperationInProgress: true));
+
+    _magnetCancelToken?.cancel();
+    _magnetCancelToken = CancelToken();
+
+    final result = await _addTorrentUseCase.callBatch(
+      items,
+      _magnetCancelToken!,
+    );
+
+    if (_magnetCancelToken?.isCancelled ?? true) {
+      emit(state.copyWith(isBulkOperationInProgress: false));
+      _magnetCancelToken = null;
+      return;
+    }
+
+    _magnetCancelToken = null;
+
+    final notificationType = result.isError
+        ? NotificationType.error
+        : result.hasPartialSuccess
+        ? NotificationType.partialSuccess
+        : NotificationType.downloadStarted;
+
+    emit(
+      state.copyWith(
+        isBulkOperationInProgress: false,
+        notification: AppNotification(
+          title: result.title,
+          message: result.message,
+          type: notificationType,
+        ),
+      ),
     );
   }
 }

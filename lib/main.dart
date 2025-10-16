@@ -1,8 +1,9 @@
-import 'dart:async' show runZonedGuarded;
+import 'dart:async' show runZonedGuarded, unawaited;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/bindings/di.dart';
 import 'core/services/firebase_service.dart';
@@ -14,7 +15,7 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
+      unawaited(MobileAds.instance.initialize());
       await Future.wait([
         SystemChrome.setPreferredOrientations(const [
           DeviceOrientation.portraitUp,

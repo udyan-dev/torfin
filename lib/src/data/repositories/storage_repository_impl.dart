@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,9 +13,26 @@ import '../models/response/torrent/torrent_res.dart';
 class StorageRepositoryImpl extends BaseRepository
     implements StorageRepository {
   StorageRepositoryImpl({required StorageService storageService})
-    : _storageService = storageService;
+    : _storageService = storageService,
+      _coinsController = StreamController<int>.broadcast();
 
   final StorageService _storageService;
+  final StreamController<int> _coinsController;
+
+  Stream<int> get coinsStream => _coinsController.stream;
+
+  void _emitCoins(int coins) {
+    if (!_coinsController.isClosed) {
+      _coinsController.add(coins);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (!_coinsController.isClosed) {
+      _coinsController.close();
+    }
+  }
 
   @override
   Future<DataState<String>> getToken() => getStateOf(
@@ -111,4 +129,22 @@ class StorageRepositoryImpl extends BaseRepository
   Future<DataState<bool>> setTorrentFolder(String folderPath) => getStateOf(
     request: () => _storageService.set(downloadLocationKey, folderPath),
   );
+
+  @override
+  Future<DataState<int>> getCoins() => getStateOf(
+    request: () => _storageService
+        .get<int>(coinsKey)
+        .then((value) => value ?? initialCoins),
+  );
+
+  @override
+  Future<DataState<bool>> setCoins(int coins) async {
+    final result = await getStateOf(
+      request: () => _storageService.set(coinsKey, coins),
+    );
+    if (result is DataSuccess<bool> && result.data == true) {
+      _emitCoins(coins);
+    }
+    return result;
+  }
 }

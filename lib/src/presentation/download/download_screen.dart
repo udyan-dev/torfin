@@ -107,6 +107,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
     return MultiSelectBar(
       selectAllValue: _getSelectAllValue(),
       onSelectAllToggle: _toggleSelectAll,
+      selectedCount: _selection.count,
       actions: [
         MultiSelectAction(
           icon: AppAssets.icDelete,

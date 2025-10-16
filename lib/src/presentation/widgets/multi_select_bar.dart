@@ -12,6 +12,7 @@ class MultiSelectBar extends StatelessWidget {
   final VoidCallback onSelectAllToggle;
   final List<MultiSelectAction> actions;
   final VoidCallback onClose;
+  final int selectedCount;
 
   const MultiSelectBar({
     super.key,
@@ -19,6 +20,7 @@ class MultiSelectBar extends StatelessWidget {
     required this.onSelectAllToggle,
     required this.actions,
     required this.onClose,
+    required this.selectedCount,
   });
 
   @override
@@ -50,6 +52,10 @@ class MultiSelectBar extends StatelessWidget {
                   AppText.headingCompact01(
                     selectAll,
                     color: context.colors.textSecondary,
+                  ),
+                  AppText.headingCompact01(
+                    '( $selectedCount )',
+                    color: context.colors.textPrimary,
                   ),
                 ],
               ),

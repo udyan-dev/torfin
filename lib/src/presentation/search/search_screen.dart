@@ -9,13 +9,16 @@ import '../../data/models/response/empty_state/empty_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
 import '../widgets/animated_switcher_widget.dart';
 import '../widgets/app_bar_widget.dart';
+import '../widgets/bulk_operation_dialog.dart';
 import '../widgets/button_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/dialog_widget.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/multi_select_bar.dart';
 import '../widgets/notification_widget.dart';
 import '../widgets/search_bar_widget.dart';
+import '../widgets/selection_notifier.dart';
 import '../widgets/shimmer_list_widget.dart';
 import '../widgets/sort_widget.dart';
 import '../widgets/status_widget.dart';
@@ -32,12 +35,14 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   late final ScrollController _scrollController;
   late final SearchCubit _cubit;
+  late final SelectionNotifier _selection;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _cubit = di<SearchCubit>();
+    _selection = SelectionNotifier();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cubit.initializeWithAnimation();
@@ -48,6 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _selection.dispose();
     _cubit.close();
     super.dispose();
   }
@@ -100,7 +106,17 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    return _buildTorrentList(context, state);
+    return ListenableBuilder(
+      listenable: _selection,
+      builder: (context, _) {
+        return Column(
+          children: [
+            if (_selection.isActive) _buildMultiSelectBar(context),
+            Expanded(child: _buildTorrentList(context, state)),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildTorrentList(BuildContext context, SearchState state) {
@@ -111,6 +127,9 @@ class _SearchScreenState extends State<SearchScreen> {
       color: context.colors.interactive,
       backgroundColor: context.colors.background,
       onRefresh: () {
+        if (_selection.isActive) {
+          return Future.value();
+        }
         _cubit.search(search: state.search, isRefresh: true);
         return Future.value();
       },
@@ -123,54 +142,99 @@ class _SearchScreenState extends State<SearchScreen> {
     SearchState state,
     TorrentRes torrent,
   ) {
-    return TorrentWidget(
-      torrent: torrent,
-      isFavorite: state.isFavorite(torrent),
-      onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent),
-      onDialogClosed: _cubit.cancelMagnetFetch,
-      dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
-        value: _cubit,
-        child: DialogWidget(
-          title: t.name,
-          actions: Row(
-            children: [
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: dialogContext.colors.buttonSecondary,
-                  buttonText: state.isFavorite(torrent) ? remove : save,
-                  onTap: () {
-                    _cubit.toggleFavorite(torrent);
-                    Navigator.of(dialogContext).maybePop();
-                  },
-                ),
-              ),
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: dialogContext.colors.buttonPrimary,
-                  buttonText: download,
-                  onTap: () {
-                    _cubit.downloadTorrent(t);
-                    if (t.magnet.isNotEmpty) {
-                      Navigator.of(dialogContext).maybePop();
-                    }
-                  },
-                  trailing: BlocBuilder<SearchCubit, SearchState>(
-                    buildWhen: (p, c) =>
-                        p.fetchingMagnetForKey != c.fetchingMagnetForKey,
-                    builder: (context, s) {
-                      return s.fetchingMagnetForKey == t.identityKey
-                          ? const LoadingWidget()
-                          : const SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final key = torrent.identityKey;
+    final isSelected = _selection.isSelected(key);
+
+    return InkWell(
+      onTap: _selection.isActive ? () => _selection.toggle(key) : null,
+      onLongPress: () => _selection.toggle(key),
+      child: IgnorePointer(
+        ignoring: _selection.isActive,
+        child: TorrentWidget(
+          torrent: torrent,
+          isFavorite: state.isFavorite(torrent),
+          onSave: () => _cubit.toggleFavorite(torrent),
+          onDownload: () => _cubit.downloadTorrent(torrent),
+          onDialogClosed: _cubit.cancelMagnetFetch,
+          showCheckbox: _selection.isActive,
+          isSelected: isSelected,
+          onCheckboxTap: () => _selection.toggle(key),
+          dialogBuilder: (parentContext, dialogContext, t) =>
+              _buildDialog(t, dialogContext, state, torrent),
         ),
       ),
     );
+  }
+
+  Widget _buildDialog(
+    TorrentRes t,
+    BuildContext dialogContext,
+    SearchState state,
+    TorrentRes torrent,
+  ) {
+    return BlocProvider.value(
+      value: _cubit,
+      child: DialogWidget(
+        title: t.name,
+        actions: Row(
+          children: [
+            Expanded(
+              child: ButtonWidget(
+                backgroundColor: dialogContext.colors.buttonSecondary,
+                buttonText: state.isFavorite(torrent) ? remove : save,
+                onTap: () {
+                  _cubit.toggleFavorite(torrent);
+                  Navigator.of(dialogContext).maybePop();
+                },
+              ),
+            ),
+            Expanded(
+              child: ButtonWidget(
+                backgroundColor: dialogContext.colors.buttonPrimary,
+                buttonText: download,
+                onTap: () {
+                  _cubit.downloadTorrent(t);
+                  if (t.magnet.isNotEmpty) {
+                    Navigator.of(dialogContext).maybePop();
+                  }
+                },
+                trailing: BlocBuilder<SearchCubit, SearchState>(
+                  buildWhen: (p, c) =>
+                      p.fetchingMagnetForKey != c.fetchingMagnetForKey,
+                  builder: (context, s) {
+                    return s.fetchingMagnetForKey == t.identityKey
+                        ? const LoadingWidget()
+                        : const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _selectAll() {
+    final keys = _cubit.state.torrents.map((t) => t.identityKey);
+    _selection.addAll(keys);
+  }
+
+  bool? _getSelectAllValue() {
+    final totalCount = _cubit.state.torrents.length;
+    final selectedCount = _selection.count;
+    if (selectedCount == 0) return false;
+    if (selectedCount == totalCount) return true;
+    return null;
+  }
+
+  void _toggleSelectAll() {
+    final value = _getSelectAllValue();
+    if (value == true) {
+      _selection.clear();
+    } else {
+      _selectAll();
+    }
   }
 
   Widget _buildActualList(BuildContext context, SearchState state) {
@@ -221,95 +285,186 @@ class _SearchScreenState extends State<SearchScreen> {
           listenWhen: (p, c) =>
               p.fetchingMagnetForKey != null && c.fetchingMagnetForKey == null,
           listener: (context, _) => Navigator.of(context).maybePop(),
-          child: Column(
-            children: [
-              AppBarWidget(
-                title: search,
-                actions: [
-                  SortWidget(
-                    onSort: (sortType) => _cubit.search(sortType: sortType),
-                  ),
-                ],
-              ),
-              SearchBarWidget(
-                onSearch: (searchText) => _cubit.search(search: searchText),
-                onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
-              ),
-              BlocBuilder<SearchCubit, SearchState>(
-                buildWhen: (p, c) =>
-                    p.status != c.status ||
-                    p.isShimmer != c.isShimmer ||
-                    p.categoriesRaw != c.categoriesRaw ||
-                    p.selectedCategoryRaw != c.selectedCategoryRaw,
-                builder: (context, state) {
-                  if (state.isShimmer ||
-                      state.status != SearchStatus.success ||
-                      state.categoriesRaw.isEmpty) {
-                    return emptyBox;
-                  }
-                  return CategoryWidget(
-                    categories: state.categoriesRaw,
-                    selectedRaw: state.selectedCategoryRaw,
-                    onCategoryChange: (raw) => _cubit.search(category: raw),
-                  );
-                },
-              ),
-              Expanded(
-                child: BlocListener<SearchCubit, SearchState>(
-                  listenWhen: (p, c) =>
-                      p.selectedCategoryRaw != c.selectedCategoryRaw &&
-                      c.selectedCategoryRaw != null,
-                  listener: (context, state) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(0);
+          child: BlocListener<SearchCubit, SearchState>(
+            listenWhen: (p, c) =>
+                p.isBulkOperationInProgress && !c.isBulkOperationInProgress,
+            listener: (context, state) {
+              if (state.notification?.type != NotificationType.error) {
+                _selection.clear();
+              }
+            },
+            child: Column(
+              children: [
+                AppBarWidget(
+                  title: search,
+                  actions: [
+                    SortWidget(
+                      onSort: (sortType) => _cubit.search(sortType: sortType),
+                    ),
+                  ],
+                ),
+                SearchBarWidget(
+                  onSearch: (searchText) => _cubit.search(search: searchText),
+                  onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
+                ),
+                BlocBuilder<SearchCubit, SearchState>(
+                  buildWhen: (p, c) =>
+                      p.status != c.status ||
+                      p.isShimmer != c.isShimmer ||
+                      p.categoriesRaw != c.categoriesRaw ||
+                      p.selectedCategoryRaw != c.selectedCategoryRaw,
+                  builder: (context, state) {
+                    if (state.isShimmer ||
+                        state.status != SearchStatus.success ||
+                        state.categoriesRaw.isEmpty) {
+                      return emptyBox;
                     }
+                    return CategoryWidget(
+                      categories: state.categoriesRaw,
+                      selectedRaw: state.selectedCategoryRaw,
+                      onCategoryChange: (raw) => _cubit.search(category: raw),
+                    );
                   },
+                ),
+                Expanded(
                   child: BlocListener<SearchCubit, SearchState>(
                     listenWhen: (p, c) =>
-                        c.status == SearchStatus.success && c.canLoadMore,
-                    listener: (context, state) => _checkAutoLoadMore(state),
-                    child: BlocBuilder<SearchCubit, SearchState>(
-                      buildWhen: (previous, current) =>
-                          previous.status != current.status ||
-                          previous.selectedCategoryRaw !=
-                              current.selectedCategoryRaw ||
-                          previous.torrents.length != current.torrents.length ||
-                          previous.isShimmer != current.isShimmer ||
-                          previous.isPaginating != current.isPaginating ||
-                          previous.isAutoLoadingMore !=
-                              current.isAutoLoadingMore ||
-                          !identical(previous.torrents, current.torrents),
-                      builder: (context, state) => AnimatedSwitcherWidget(
-                        child: switch (state.status) {
-                          SearchStatus.initial => emptyBox,
-                          SearchStatus.loading => _buildTorrents(
-                            context,
-                            state,
-                          ),
-                          SearchStatus.success =>
-                            state.search.isEmpty && state.torrents.isEmpty
-                                ? EmptyStateWidget(
-                                    iconColor: context.colors.interactive,
-                                    emptyState: const EmptyState(
-                                      stateIcon: AppAssets.icStartSearch,
-                                      title: searchTorrentsTitle,
-                                      description: searchTorrentsDescription,
-                                    ),
-                                  )
-                                : _buildTorrents(context, state),
-                          SearchStatus.error => EmptyStateWidget(
-                            emptyState: state.emptyState,
-                            iconColor: context.colors.supportError,
-                            onTap: _cubit.onRetry,
-                          ),
-                        },
+                        p.selectedCategoryRaw != c.selectedCategoryRaw &&
+                        c.selectedCategoryRaw != null,
+                    listener: (context, state) {
+                      if (_scrollController.hasClients) {
+                        _scrollController.jumpTo(0);
+                      }
+                    },
+                    child: BlocListener<SearchCubit, SearchState>(
+                      listenWhen: (p, c) =>
+                          c.status == SearchStatus.success && c.canLoadMore,
+                      listener: (context, state) => _checkAutoLoadMore(state),
+                      child: BlocBuilder<SearchCubit, SearchState>(
+                        buildWhen: (previous, current) =>
+                            previous.status != current.status ||
+                            previous.selectedCategoryRaw !=
+                                current.selectedCategoryRaw ||
+                            previous.torrents.length !=
+                                current.torrents.length ||
+                            previous.isShimmer != current.isShimmer ||
+                            previous.isPaginating != current.isPaginating ||
+                            previous.isAutoLoadingMore !=
+                                current.isAutoLoadingMore ||
+                            !identical(previous.torrents, current.torrents),
+                        builder: (context, state) => AnimatedSwitcherWidget(
+                          child: switch (state.status) {
+                            SearchStatus.initial => emptyBox,
+                            SearchStatus.loading => _buildTorrents(
+                              context,
+                              state,
+                            ),
+                            SearchStatus.success =>
+                              state.search.isEmpty && state.torrents.isEmpty
+                                  ? EmptyStateWidget(
+                                      iconColor: context.colors.interactive,
+                                      emptyState: const EmptyState(
+                                        stateIcon: AppAssets.icStartSearch,
+                                        title: searchTorrentsTitle,
+                                        description: searchTorrentsDescription,
+                                      ),
+                                    )
+                                  : _buildTorrents(context, state),
+                            SearchStatus.error => EmptyStateWidget(
+                              emptyState: state.emptyState,
+                              iconColor: context.colors.supportError,
+                              onTap: _cubit.onRetry,
+                            ),
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultiSelectBar(BuildContext context) {
+    return MultiSelectBar(
+      selectAllValue: _getSelectAllValue(),
+      onSelectAllToggle: _toggleSelectAll,
+      selectedCount: _selection.count,
+      actions: [
+        MultiSelectAction(
+          icon: AppAssets.icFavorite,
+          onTap: () => _showSaveDialog(context),
+        ),
+        MultiSelectAction(
+          icon: AppAssets.icDownload,
+          onTap: () => _showDownloadDialog(context),
+        ),
+      ],
+      onClose: _selection.clear,
+    );
+  }
+
+  void _showSaveDialog(BuildContext context) {
+    showAppDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: _cubit,
+        child: BlocConsumer<SearchCubit, SearchState>(
+          listenWhen: (p, c) =>
+              p.isBulkOperationInProgress && !c.isBulkOperationInProgress,
+          listener: (context, state) {
+            Navigator.of(dialogContext).maybePop();
+          },
+          builder: (context, state) {
+            return BulkOperationDialog(
+              title: areYouSureYouWantToSaveAllSelectedTorrents,
+              confirmButtonText: saveAll,
+              onConfirm: state.isBulkOperationInProgress
+                  ? null
+                  : () => _cubit.addMultipleToFavorites(_selection.keys),
+              trailing: state.isBulkOperationInProgress
+                  ? const LoadingWidget()
+                  : null,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showDownloadDialog(BuildContext context) {
+    showAppDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: _cubit,
+        child: BlocConsumer<SearchCubit, SearchState>(
+          listenWhen: (p, c) =>
+              p.isBulkOperationInProgress && !c.isBulkOperationInProgress,
+          listener: (context, state) {
+            Navigator.of(dialogContext).maybePop();
+          },
+          builder: (context, state) {
+            return BulkOperationDialog(
+              title: areYouSureYouWantToDownloadAllSelectedTorrents,
+              confirmButtonText: downloadAll,
+              onConfirm: state.isBulkOperationInProgress
+                  ? null
+                  : () => _cubit.downloadMultipleTorrents(_selection.keys),
+              onCancel: state.isBulkOperationInProgress
+                  ? () {
+                      _cubit.cancelMagnetFetch();
+                      Navigator.of(dialogContext).maybePop();
+                    }
+                  : null,
+              trailing: state.isBulkOperationInProgress
+                  ? const LoadingWidget()
+                  : null,
+            );
+          },
         ),
       ),
     );

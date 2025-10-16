@@ -41,6 +41,10 @@ const String sortKey = 'sort';
 const String reverseSortKey = 'reverseSort';
 const String storageExceptionPrefix = 'StorageException: ';
 const String downloadLocationKey = 'downloadLocation';
+const String coinsKey = 'coins';
+const int initialCoins = 10;
+const int coinsPerAd = 10;
+const int maxCoins = 10;
 const String userAgentHeader = 'user-agent';
 const String acceptHeader = 'accept';
 const String acceptLanguageHeader = 'accept-language';
@@ -236,18 +240,40 @@ const String torrentsSuffix = 'torrents';
 const String all = 'All';
 const String downloadAll = 'Download All';
 const String removeAll = 'Remove All';
+const String saveAll = 'Save All';
 const String areYouSureYouWantToDownloadAllSelectedTorrents =
     'Are you sure you want to download all selected torrents ?';
 const String areYouSureYouWantToRemoveAllSelectedTorrents =
     'Are you sure you want to remove all selected torrents ?';
+const String areYouSureYouWantToSaveAllSelectedTorrents =
+    'Are you sure you want to save all selected torrents ?';
 const String failedToRemoveFavorites = 'Failed to remove favorites';
+const String failedToAddFavorites = 'Failed to add favorites';
 const String torrentsWereRemovedFromFavorites =
     'Torrents were removed from favorites';
+const String torrentsWereAddedToFavorites = 'Torrents were added to favorites';
+const String torrentWasAlreadyInFavorites = 'Torrent was already in favorites';
+const String torrentsWereAlreadyInFavorites =
+    'Torrents were already in favorites';
 const String torrentsWereAddedToDownload = 'Torrents were added to download';
 const String successSuffix = 'success';
 const String failedSuffix = 'failed';
 const String failedToDownloadTorrents = 'failed to download torrents';
 const String torrentsWereDeleted = 'Torrents were deleted';
+const String insufficientCoins = 'Insufficient coins';
+const String watchAdForCoins = 'Watch Ad for Coins';
+const String watchAdMessage =
+    'Watch a rewarded ad to get $coinsPerAd coins and continue downloading.';
+const String watch = 'Watch';
+const String coinsAdded = 'Coins added successfully';
+const String adNotReady = 'Ad not ready. Please try again.';
+const String adFailedToLoad = 'Failed to load ad';
 const String failedToDeleteTorrents = 'Failed to delete torrents';
+const String failedToRetrieveCoins = 'Failed to retrieve coins';
+const String failedToAddTorrent = 'Failed to add torrent';
+const String torrentWasNotDownloaded =
+    'torrent was not downloaded due to insufficient coins';
+const String torrentsWereNotDownloaded =
+    'torrents were not downloaded due to insufficient coins';
 const String areYouSureYouWantToDeleteAllSelectedTorrents =
     'Are you sure you want to delete all selected torrents ?';

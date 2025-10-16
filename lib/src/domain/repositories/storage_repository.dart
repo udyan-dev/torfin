@@ -24,4 +24,9 @@ abstract class StorageRepository {
 
   Future<DataState<String>> getTorrentFolder();
   Future<DataState<bool>> setTorrentFolder(String folderPath);
+
+  Future<DataState<int>> getCoins();
+  Future<DataState<bool>> setCoins(int coins);
+
+  void dispose();
 }

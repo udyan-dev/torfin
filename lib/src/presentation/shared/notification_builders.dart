@@ -62,3 +62,15 @@ AppNotification bulkDeleteFailedNotification(String message) => AppNotification(
   type: NotificationType.error,
   message: message,
 );
+
+AppNotification insufficientCoinsNotification() => const AppNotification(
+  title: insufficientCoins,
+  type: NotificationType.error,
+  message: emptyString,
+);
+
+AppNotification successNotification(String message) => AppNotification(
+  title: message,
+  type: NotificationType.downloadStarted,
+  message: emptyString,
+);

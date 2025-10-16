@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/helpers/base_exception.dart';
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
@@ -228,7 +229,9 @@ class FavoriteCubit extends Cubit<FavoriteState> {
           emit(
             state.copyWith(
               fetchingMagnetForKey: null,
-              notification: addFailedNotification(torrent.name, error.message),
+              notification: error.type == BaseExceptionType.insufficientCoins
+                  ? insufficientCoinsNotification()
+                  : addFailedNotification(torrent.name, error.message),
             ),
           );
         },
@@ -253,7 +256,9 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       failure: (error) {
         emit(
           state.copyWith(
-            notification: addFailedNotification(torrent.name, error.message),
+            notification: error.type == BaseExceptionType.insufficientCoins
+                ? insufficientCoinsNotification()
+                : addFailedNotification(torrent.name, error.message),
           ),
         );
       },
@@ -303,62 +308,22 @@ class FavoriteCubit extends Cubit<FavoriteState> {
   Future<void> downloadMultipleTorrents(Set<String> keys) async {
     if (keys.isEmpty) return;
 
-    final torrentsToDownload = state.torrents
+    final items = state.torrents
         .where((t) => keys.contains(t.identityKey))
+        .map((t) => BatchTorrentItem(url: t.url, magnet: t.magnet))
         .toList();
 
-    if (torrentsToDownload.isEmpty) return;
+    if (items.isEmpty) return;
 
     emit(state.copyWith(isBulkOperationInProgress: true));
 
     _magnetCancelToken?.cancel();
     _magnetCancelToken = CancelToken();
 
-    int successCount = 0;
-    int failureCount = 0;
-
-    for (int i = 0; i < torrentsToDownload.length; i++) {
-      if (_magnetCancelToken?.isCancelled ?? true) break;
-
-      final torrent = torrentsToDownload[i];
-      String? magnetLink = torrent.magnet;
-
-      if (magnetLink.isEmpty) {
-        final res = await _getMagnetUseCase.call(
-          torrent.url,
-          cancelToken: _magnetCancelToken!,
-        );
-        res.when(
-          success: (links) {
-            if (links.isNotEmpty) magnetLink = links.first;
-          },
-          failure: (_) {
-            magnetLink = null;
-          },
-        );
-      }
-
-      if (magnetLink == null || magnetLink!.isEmpty) {
-        failureCount++;
-        continue;
-      }
-
-      final response = await _addTorrentUseCase.call(
-        AddTorrentUseCaseParams(magnetLink: magnetLink!),
-        cancelToken: _magnetCancelToken!,
-      );
-
-      response.when(
-        success: (res) {
-          if (res == TorrentAddedResponse.duplicated) {
-            failureCount++;
-          } else {
-            successCount++;
-          }
-        },
-        failure: (_) => failureCount++,
-      );
-    }
+    final result = await _addTorrentUseCase.callBatch(
+      items,
+      _magnetCancelToken!,
+    );
 
     if (_magnetCancelToken?.isCancelled ?? true) {
       emit(state.copyWith(isBulkOperationInProgress: false));
@@ -368,32 +333,19 @@ class FavoriteCubit extends Cubit<FavoriteState> {
 
     _magnetCancelToken = null;
 
-    String title;
-    String message;
-    NotificationType notificationType;
-
-    if (successCount > 0 && failureCount > 0) {
-      title =
-          '$successCount $successSuffix, $failureCount $failedToDownloadTorrents';
-      message = emptyString;
-      notificationType = NotificationType.downloadStarted;
-    } else if (successCount > 0) {
-      title = '$successCount $torrentsWereAddedToDownload';
-      message = emptyString;
-      notificationType = NotificationType.downloadStarted;
-    } else {
-      title = '$failureCount $failedToDownloadTorrents';
-      message = emptyString;
-      notificationType = NotificationType.error;
-    }
+    final notificationType = result.isError
+        ? NotificationType.error
+        : result.hasPartialSuccess
+        ? NotificationType.partialSuccess
+        : NotificationType.downloadStarted;
 
     emit(
       state.copyWith(
         isBulkOperationInProgress: false,
         notification: AppNotification(
-          title: title,
+          title: result.title,
+          message: result.message,
           type: notificationType,
-          message: message,
         ),
       ),
     );

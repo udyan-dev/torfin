@@ -259,6 +259,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     return MultiSelectBar(
       selectAllValue: _getSelectAllValue(),
       onSelectAllToggle: _toggleSelectAll,
+      selectedCount: _selection.count,
       actions: [
         MultiSelectAction(
           icon: AppAssets.icDelete,

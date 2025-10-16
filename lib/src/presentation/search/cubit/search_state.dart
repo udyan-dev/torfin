@@ -22,6 +22,7 @@ sealed class SearchState with _$SearchState {
     @Default(<String>{}) Set<String> favoriteKeys,
     AppNotification? notification,
     String? fetchingMagnetForKey,
+    @Default(false) bool isBulkOperationInProgress,
   }) = _SearchState;
 }
 
