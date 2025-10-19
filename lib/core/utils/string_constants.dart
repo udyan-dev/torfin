@@ -277,3 +277,16 @@ const String torrentsWereNotDownloaded =
     'torrents were not downloaded due to insufficient coins';
 const String areYouSureYouWantToDeleteAllSelectedTorrents =
     'Are you sure you want to delete all selected torrents ?';
+const String oneCoinRequiredToDownload = '1 coin required to download';
+const String coinRequiredToDownload = 'coin required to download';
+const String coinsRequiredToDownload = 'coins required to download';
+const String addTorrent = 'Add Torrent';
+const String magnetOrHttpsHint = 'magnet:// or https://';
+const String selectTorrentFile = 'Select .torrent file';
+const String torrentAdded = 'Torrent added';
+const String torrentAlreadyAdded = 'Torrent already added';
+const String invalidTorrent = 'Invalid torrent';
+const String failedToReadTorrentFile = 'Failed to read torrent file';
+const String pleaseEnterMagnetOrSelectFile =
+    'Please enter a magnet link or select a .torrent file';
+const String or = 'or';

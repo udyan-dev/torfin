@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
@@ -7,7 +9,9 @@ import '../../src/data/engine/models/session.dart';
 import '../../src/data/engine/transmission/transmission.dart';
 import '../../src/data/repositories/storage_repository_impl.dart';
 import '../../src/data/repositories/torrent_repository_impl.dart';
+import '../../src/data/services/coins_sync_service.dart';
 import '../../src/data/sources/local/storage_service.dart';
+import '../../src/data/sources/remote/coins_remote_source.dart';
 import '../../src/data/sources/remote/dio_service.dart';
 import '../../src/domain/repositories/storage_repository.dart';
 import '../../src/domain/repositories/torrent_repository.dart';
@@ -25,6 +29,9 @@ import '../../src/presentation/search/cubit/search_cubit.dart';
 import '../../src/presentation/settings/cubit/settings_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
 import '../../src/presentation/widgets/coins/cubit/coins_cubit.dart';
+import '../services/connectivity_service.dart';
+import '../services/device_service.dart';
+import '../services/intent_handler.dart';
 import '../services/notification_service.dart';
 import '../services/theme_service.dart';
 import '../utils/string_constants.dart';
@@ -34,6 +41,7 @@ final di = GetIt.instance;
 Future<void> get initDI async {
   di.registerLazySingleton(() => const Uuid());
   di.registerLazySingleton(() => StorageService());
+  di.registerLazySingleton(() => ConnectivityService());
   di.registerFactory(() => CancelToken());
   di.registerLazySingleton(
     () => Dio(
@@ -45,21 +53,35 @@ Future<void> get initDI async {
   );
   di.registerLazySingleton(() => DioService(dio: di()));
   di.registerLazySingleton(() => SessionService());
+
+  di.registerLazySingleton(() => DeviceService(storageService: di()));
+  di.registerLazySingleton(() => CoinsRemoteSource(connectivityService: di()));
+
+  final storageRepo = StorageRepositoryImpl(storageService: di());
   di.registerSingleton<StorageRepository>(
-    StorageRepositoryImpl(storageService: di()),
+    storageRepo,
     dispose: (storageRepository) => storageRepository.dispose(),
   );
   di.registerLazySingleton<TorrentRepository>(
     () => TorrentRepositoryImpl(dioService: di()),
   );
 
-  final themeService = ThemeService(storageRepository: di());
-  await themeService.init();
-  di.registerSingleton<ThemeService>(themeService, dispose: (s) => s.dispose());
+  final coinsSyncService = CoinsSyncService(
+    deviceService: di(),
+    coinsRemoteSource: di(),
+    storageRepository: storageRepo,
+    connectivityService: di(),
+  );
+  di.registerSingleton(coinsSyncService);
+  storageRepo.setCoinsSyncService(coinsSyncService);
 
+  final themeService = ThemeService(storageRepository: di());
   final engine = TransmissionEngine();
-  await engine.init();
+
+  await Future.wait([themeService.init(), engine.init()]);
+
   await engine.restoreTorrentsResumeStatus();
+  di.registerSingleton<ThemeService>(themeService, dispose: (s) => s.dispose());
   di.registerSingleton<Engine>(engine, dispose: (e) => e.dispose());
 
   final notificationService = NotificationService(engine);
@@ -67,6 +89,13 @@ Future<void> get initDI async {
   di.registerSingleton<NotificationService>(
     notificationService,
     dispose: (s) => s.stop(),
+  );
+
+  final intentHandler = IntentHandler();
+  await intentHandler.init();
+  di.registerSingleton<IntentHandler>(
+    intentHandler,
+    dispose: (h) => h.dispose(),
   );
 
   di.registerLazySingleton(
@@ -81,7 +110,6 @@ Future<void> get initDI async {
   );
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
-  di.registerSingleton(CoinsCubit(storageRepository: di())..load());
   di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
   di.registerLazySingleton(
     () => AddTorrentUseCase(
@@ -96,11 +124,18 @@ Future<void> get initDI async {
       storageRepository: di(),
     ),
   );
+
+  di.registerSingleton(
+    CoinsCubit(storageRepository: di(), coinsSyncService: di())..load(),
+  );
+  unawaited(di<CoinsSyncService>().syncCoinsOnAppStart());
+
   di.registerFactory(
     () => HomeCubit(
       getTokenUseCase: di(),
       cancelToken: di(),
       notificationService: di(),
+      intentHandler: di(),
     ),
   );
   di.registerFactory(

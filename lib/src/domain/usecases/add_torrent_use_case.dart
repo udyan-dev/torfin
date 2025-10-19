@@ -27,13 +27,14 @@ class AddTorrentUseCase
   Future<DataState<TorrentAddedResponse>> call(
     AddTorrentUseCaseParams params, {
     required CancelToken cancelToken,
+    String? metainfo,
   }) async {
     try {
       final coinsResult = await _storageRepository.getCoins();
 
       return switch (coinsResult) {
         DataSuccess<int>(data: final coins?) when coins > 0 =>
-          await _addTorrent(params.magnetLink, coins),
+          await _addTorrent(params.magnetLink, coins, metainfo),
         DataSuccess<int>() => const DataFailed(
           BaseException(
             type: BaseExceptionType.insufficientCoins,
@@ -130,9 +131,10 @@ class AddTorrentUseCase
   Future<DataState<TorrentAddedResponse>> _addTorrent(
     String magnetLink,
     int coins,
+    String? metainfo,
   ) async {
     final downloadDir = await getDownloadDirectory();
-    final result = await _engine.addTorrent(magnetLink, null, downloadDir);
+    final result = await _engine.addTorrent(magnetLink, metainfo, downloadDir);
 
     if (result == TorrentAddedResponse.added) {
       await _storageRepository.setCoins(coins - 1);

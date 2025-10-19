@@ -14,6 +14,7 @@ import '../widgets/animated_switcher_widget.dart';
 import '../widgets/body_widget.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import '../widgets/coins/cubit/coins_cubit.dart';
+import '../widgets/download_button_widget.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/notification_widget.dart';
 import '../widgets/status_widget.dart';
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     if (!_homeCubit.isClosed) _homeCubit.close();
+    if (!_coinsCubit.isClosed) _coinsCubit.close();
     super.dispose();
   }
 
@@ -68,37 +70,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   break;
               }
             },
-            child: BodyWidget(
-              child: BlocBuilder<HomeCubit, HomeState>(
-                builder: (context, state) => AnimatedSwitcherWidget(
-                  child: switch (state.status) {
-                    DataStatus.initial ||
-                    DataStatus.loading => const StatusWidget(
-                      type: StatusType.loading,
-                      statusMessage: connectingToServer,
-                    ),
-                    DataStatus.success => const TabBarView(
-                      physics: NeverScrollableScrollPhysics(),
-                      children: [
-                        SearchScreen(),
-                        TrendingScreen(),
-                        DownloadScreen(),
-                        FavoriteScreen(),
-                        SettingsScreen(),
-                      ],
-                    ),
-                    DataStatus.error => EmptyStateWidget(
-                      center: true,
-                      emptyState: state.emptyState,
-                      iconColor: context.colors.supportError,
-                      onTap: () => context.read<HomeCubit>().getToken(),
-                    ),
-                  },
+            child: BlocListener<HomeCubit, HomeState>(
+              listenWhen: (p, c) => c.intentUri != null,
+              listener: (context, state) {
+                if (state.intentUri != null) {
+                  showAddTorrentDialog(context, initialUri: state.intentUri);
+                }
+              },
+              child: BodyWidget(
+                child: BlocBuilder<HomeCubit, HomeState>(
+                  builder: (context, state) => AnimatedSwitcherWidget(
+                    child: switch (state.status) {
+                      DataStatus.initial ||
+                      DataStatus.loading => const StatusWidget(
+                        type: StatusType.loading,
+                        statusMessage: connectingToServer,
+                      ),
+                      DataStatus.success => const TabBarView(
+                        physics: NeverScrollableScrollPhysics(),
+                        children: [
+                          SearchScreen(),
+                          TrendingScreen(),
+                          DownloadScreen(),
+                          FavoriteScreen(),
+                          SettingsScreen(),
+                        ],
+                      ),
+                      DataStatus.error => EmptyStateWidget(
+                        center: true,
+                        emptyState: state.emptyState,
+                        iconColor: context.colors.supportError,
+                        onTap: () => context.read<HomeCubit>().getToken(),
+                      ),
+                    },
+                  ),
                 ),
               ),
             ),
           ),
           bottomNavigationBar: const BottomNavigationBarWidget(),
+          floatingActionButton: const DownloadButtonWidget(),
         ),
       ),
     );

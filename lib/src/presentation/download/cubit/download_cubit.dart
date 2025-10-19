@@ -5,14 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/helpers/data_state.dart';
+import '../../../../core/utils/string_constants.dart';
 import '../../../data/engine/engine.dart';
 import '../../../data/engine/session.dart';
 import '../../../data/engine/torrent.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
-import '../../../../core/utils/string_constants.dart';
 
 part 'download_cubit.freezed.dart';
-
 part 'download_state.dart';
 
 class DownloadCubit extends Cubit<DownloadState> {

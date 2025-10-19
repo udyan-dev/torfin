@@ -44,4 +44,6 @@ class AppAssets {
   static const icPolicy = '${icons}ic_policy.svg';
   static const icCoinLottie = '${assets}lottie/coin.json';
   static const icAdd = '${icons}ic_add.svg';
+  static const icAddLarge = '${icons}ic_add_large.svg';
+  static const icFolder = '${icons}ic_folder.svg';
 }

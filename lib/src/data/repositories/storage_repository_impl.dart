@@ -7,17 +7,28 @@ import '../../../core/helpers/base_repository.dart';
 import '../../../core/helpers/data_state.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../domain/repositories/storage_repository.dart';
-import '../sources/local/storage_service.dart';
 import '../models/response/torrent/torrent_res.dart';
+import '../services/coins_sync_service.dart';
+import '../sources/local/storage_service.dart';
+
+const String _coinsTimestampKey = 'coinsTimestamp';
 
 class StorageRepositoryImpl extends BaseRepository
     implements StorageRepository {
-  StorageRepositoryImpl({required StorageService storageService})
-    : _storageService = storageService,
-      _coinsController = StreamController<int>.broadcast();
+  StorageRepositoryImpl({
+    required StorageService storageService,
+    CoinsSyncService? coinsSyncService,
+  }) : _storageService = storageService,
+       _coinsSyncService = coinsSyncService,
+       _coinsController = StreamController<int>.broadcast();
 
   final StorageService _storageService;
+  CoinsSyncService? _coinsSyncService;
   final StreamController<int> _coinsController;
+
+  void setCoinsSyncService(CoinsSyncService coinsSyncService) {
+    _coinsSyncService = coinsSyncService;
+  }
 
   Stream<int> get coinsStream => _coinsController.stream;
 
@@ -139,12 +150,27 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<bool>> setCoins(int coins) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
     final result = await getStateOf(
-      request: () => _storageService.set(coinsKey, coins),
+      request: () async {
+        final coinsSaved = await _storageService.set(coinsKey, coins);
+        if (coinsSaved) {
+          await _storageService.set(_coinsTimestampKey, timestamp);
+        }
+        return coinsSaved;
+      },
     );
     if (result is DataSuccess<bool> && result.data == true) {
       _emitCoins(coins);
+      unawaited(_coinsSyncService?.syncCoinsAfterChange(coins));
     }
     return result;
   }
+
+  @override
+  Future<DataState<int>> getCoinsTimestamp() => getStateOf(
+    request: () => _storageService
+        .get<int>(_coinsTimestampKey)
+        .then((value) => value ?? 0),
+  );
 }

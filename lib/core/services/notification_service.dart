@@ -250,10 +250,13 @@ class NotificationService {
         if (torrentId == null) return;
 
         final torrents = await _engine.fetchTorrents();
-        final torrent = torrents.cast<Torrent?>().firstWhere(
-          (t) => t?.id == torrentId,
-          orElse: () => null,
-        );
+        Torrent? torrent;
+        for (final t in torrents) {
+          if (t.id == torrentId) {
+            torrent = t;
+            break;
+          }
+        }
         if (torrent == null) return;
 
         isPause ? torrent.stop() : torrent.start();

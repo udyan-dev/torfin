@@ -31,12 +31,14 @@ Future<T?> showAppBottomSheet<T>({
 
 class DialogWidget extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget? content;
   final Widget actions;
 
   const DialogWidget({
     super.key,
     required this.title,
+    this.subtitle,
     this.content,
     required this.actions,
   });
@@ -55,7 +57,16 @@ class DialogWidget extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: AppText.heading03(title),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText.heading03(title),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 8),
+                  AppText.bodyCompact01(subtitle!, color: colors.textSecondary),
+                ],
+              ],
+            ),
           ),
           if (content != null) content!,
           actions,

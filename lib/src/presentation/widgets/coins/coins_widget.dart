@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../../core/bindings/env.dart';
 import '../../../../core/theme/app_styles.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/extensions.dart';
@@ -46,7 +47,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
     _isAdLoadingNotifier.value = true;
 
     RewardedAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      adUnitId: Env.adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
@@ -154,7 +155,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  border: Border.all(color: context.colors.supportCautionMajor),
+                  border: Border.all(color: context.colors.supportCautionMinor),
                   borderRadius: BorderRadius.circular(1000),
                 ),
                 child: Padding(
@@ -169,10 +170,10 @@ class _CoinsWidgetState extends State<CoinsWidget> {
                           colorFilter:
                               context.colors.supportCautionMinor.colorFilter,
                         ),
-                      SizedBox(width: showPlus ? 6 : 2),
+                      const SizedBox(width: 6),
                       AppText.bodyCompact01(
                         '${state.coins}',
-                        color: context.colors.supportCautionMajor,
+                        color: context.colors.supportCautionMinor,
                       ),
                       const SizedBox(width: kToolbarHeight / 2),
                     ],

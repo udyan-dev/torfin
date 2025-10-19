@@ -19,32 +19,34 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: Border(top: BorderSide(color: colors.borderSubtle00)),
-      ),
-      child: TabBar(
-        enableFeedback: true,
-        tabs: navigationItems
-            .mapIndexed(
-              (index, menu) => Tab(
-                icon: SvgPicture.asset(
-                  menu.icon,
-                  width: 24,
-                  height: 24,
-                  colorFilter: _selectedIndex == index
-                      ? colors.iconPrimary.colorFilter
-                      : colors.iconOnColorDisabled.colorFilter,
+    return SafeArea(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.background,
+          border: Border(top: BorderSide(color: colors.borderSubtle00)),
+        ),
+        child: TabBar(
+          enableFeedback: true,
+          tabs: navigationItems
+              .mapIndexed(
+                (index, menu) => Tab(
+                  icon: SvgPicture.asset(
+                    menu.icon,
+                    width: 24,
+                    height: 24,
+                    colorFilter: _selectedIndex == index
+                        ? colors.iconPrimary.colorFilter
+                        : colors.iconOnColorDisabled.colorFilter,
+                  ),
                 ),
-              ),
-            )
-            .toList(),
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+              )
+              .toList(),
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
     );
   }

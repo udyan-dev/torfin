@@ -8,20 +8,19 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../data/engine/engine.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../data/models/response/torrent/torrent_res.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
 import '../../../domain/usecases/get_magnet_use_case.dart';
 import '../../../domain/usecases/trending_torrent_use_case.dart';
-import '../../shared/notification_builders.dart';
+import '../../shared/torrent_cubit_mixin.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'trending_cubit.freezed.dart';
 part 'trending_state.dart';
 
-class TrendingCubit extends Cubit<TrendingState> {
+class TrendingCubit extends Cubit<TrendingState> with TorrentCubitMixin {
   TrendingCubit({
     required TrendingTorrentUseCase trendingUseCase,
     required FavoriteUseCase favoriteUseCase,
@@ -43,6 +42,15 @@ class TrendingCubit extends Cubit<TrendingState> {
   CancelToken? _token;
 
   CancelToken? _magnetCancelToken;
+
+  @override
+  FavoriteUseCase get favoriteUseCase => _favoriteUseCase;
+
+  @override
+  AddTorrentUseCase get addTorrentUseCase => _addTorrentUseCase;
+
+  @override
+  GetMagnetUseCase get getMagnetUseCase => _getMagnetUseCase;
 
   @override
   Future<void> close() {
@@ -285,145 +293,15 @@ class TrendingCubit extends Cubit<TrendingState> {
     return filterByCategory<TorrentRes>(list, raw, (t) => t.type, all: all);
   }
 
-  Future<void> _syncFavorites() async {
-    final res = await _favoriteUseCase(
-      const FavoriteParams(mode: FavoriteMode.getAll),
-      cancelToken: CancelToken(),
-    );
-    res.when(
-      success: (data) {
-        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
-        emit(state.copyWith(favoriteKeys: set));
-      },
-    );
-  }
+  Future<void> _syncFavorites() async => syncFavorites();
 
-  Future<void> toggleFavorite(TorrentRes torrent) async {
-    final k = torrent.identityKey;
-    final wasAdded = !state.favoriteKeys.contains(k);
-    final next = toggleKey(state.favoriteKeys, k);
-    emit(state.copyWith(favoriteKeys: next));
-    final response = await _favoriteUseCase(
-      FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
-      cancelToken: CancelToken(),
-    );
-    response.when(
-      success: (data) {
-        final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
-        emit(
-          state.copyWith(
-            favoriteKeys: set,
-            notification: favoriteNotification(torrent.name, wasAdded),
-          ),
-        );
-      },
-    );
-  }
+  Future<void> toggleFavorite(TorrentRes torrent) async =>
+      toggleFavoriteImpl(torrent);
 
-  void cancelMagnetFetch() {
-    _magnetCancelToken?.cancel();
-    _magnetCancelToken = null;
-    if (!isClosed && state.fetchingMagnetForKey != null) {
-      emit(state.copyWith(fetchingMagnetForKey: null));
-    }
-  }
+  void cancelMagnetFetch() => cancelMagnetFetchImpl();
 
-  Future<void> downloadTorrent(TorrentRes torrent) async {
-    final key = torrent.identityKey;
-    if (torrent.magnet.isEmpty) {
-      emit(state.copyWith(fetchingMagnetForKey: key));
-
-      _magnetCancelToken = CancelToken();
-      final res = await _getMagnetUseCase.call(
-        torrent.url,
-        cancelToken: _magnetCancelToken!,
-      );
-
-      if (isClosed) return;
-
-      String? magnet;
-      res.when(
-        success: (links) {
-          magnet = firstOrNull<String>(links);
-        },
-        failure: (error) {
-          _magnetCancelToken = null;
-          emit(
-            state.copyWith(
-              fetchingMagnetForKey: null,
-              notification: errorNotification(torrent.name, error.message),
-            ),
-          );
-        },
-      );
-
-      if (magnet == null || magnet!.isEmpty) {
-        _magnetCancelToken = null;
-        emit(
-          state.copyWith(
-            fetchingMagnetForKey: null,
-            notification: magnetNotFoundNotification(torrent.name),
-          ),
-        );
-        return;
-      }
-
-      final addRes = await _addTorrentUseCase.call(
-        AddTorrentUseCaseParams(magnetLink: magnet!),
-        cancelToken: CancelToken(),
-      );
-
-      addRes.when(
-        success: (response) {
-          _magnetCancelToken = null;
-          final isDuplicate = response == TorrentAddedResponse.duplicated;
-          emit(
-            state.copyWith(
-              fetchingMagnetForKey: null,
-              notification: addStartedNotification(torrent.name, isDuplicate),
-            ),
-          );
-        },
-        failure: (error) {
-          _magnetCancelToken = null;
-          emit(
-            state.copyWith(
-              fetchingMagnetForKey: null,
-              notification: error.type == BaseExceptionType.insufficientCoins
-                  ? insufficientCoinsNotification()
-                  : addFailedNotification(torrent.name, error.message),
-            ),
-          );
-        },
-      );
-      return;
-    }
-
-    final response = await _addTorrentUseCase.call(
-      AddTorrentUseCaseParams(magnetLink: torrent.magnet),
-      cancelToken: CancelToken(),
-    );
-
-    response.when(
-      success: (response) {
-        final isDuplicate = response == TorrentAddedResponse.duplicated;
-        emit(
-          state.copyWith(
-            notification: addStartedNotification(torrent.name, isDuplicate),
-          ),
-        );
-      },
-      failure: (error) {
-        emit(
-          state.copyWith(
-            notification: error.type == BaseExceptionType.insufficientCoins
-                ? insufficientCoinsNotification()
-                : addFailedNotification(torrent.name, error.message),
-          ),
-        );
-      },
-    );
-  }
+  Future<void> downloadTorrent(TorrentRes torrent) async =>
+      downloadTorrentImpl(torrent);
 
   Future<void> addMultipleToFavorites(Set<String> keys) async {
     if (keys.isEmpty) return;
@@ -510,5 +388,53 @@ class TrendingCubit extends Cubit<TrendingState> {
         ),
       ),
     );
+  }
+
+  @override
+  bool isFavorite(String key) => state.favoriteKeys.contains(key);
+
+  @override
+  Set<String> getFavoriteKeys() => state.favoriteKeys;
+
+  @override
+  CancelToken? getMagnetCancelToken() => _magnetCancelToken;
+
+  @override
+  void setMagnetCancelToken(CancelToken? token) {
+    _magnetCancelToken = token;
+  }
+
+  @override
+  String? getFetchingMagnetForKey() => state.fetchingMagnetForKey;
+
+  @override
+  void emitWithFavoriteKeys(Set<String> keys) {
+    emit(state.copyWith(favoriteKeys: keys));
+  }
+
+  @override
+  void emitWithFavoriteKeysAndNotification(
+    Set<String> keys,
+    AppNotification notification,
+  ) {
+    emit(state.copyWith(favoriteKeys: keys, notification: notification));
+  }
+
+  @override
+  void emitFetchingMagnet(String? key) {
+    emit(state.copyWith(fetchingMagnetForKey: key));
+  }
+
+  @override
+  void emitFetchingMagnetWithNotification(
+    String? key,
+    AppNotification notification,
+  ) {
+    emit(state.copyWith(fetchingMagnetForKey: key, notification: notification));
+  }
+
+  @override
+  void emitNotification(AppNotification notification) {
+    emit(state.copyWith(notification: notification));
   }
 }

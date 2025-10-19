@@ -9,8 +9,8 @@ import '../../../data/engine/engine.dart';
 import '../../../data/engine/models/session.dart';
 import '../../../data/engine/session.dart';
 import '../../../domain/repositories/storage_repository.dart';
-import '../../widgets/notification_widget.dart';
 import '../../shared/notification_builders.dart';
+import '../../widgets/notification_widget.dart';
 
 part 'settings_cubit.freezed.dart';
 part 'settings_state.dart';

@@ -37,7 +37,7 @@ class DioService {
       cancelToken: cancelToken,
       options: Options(headers: torrentHeaders),
     ),
-    extractor: (response) => response.data!,
+    extractor: (response) => response.data ?? emptyString,
   );
 
   Future<List<String>> getMagnetLinks({
@@ -50,7 +50,7 @@ class DioService {
       queryParameters: queryParams,
       cancelToken: cancelToken,
     ),
-    extractor: (response) => _extractMagnetLinks(response.data!),
+    extractor: (response) => _extractMagnetLinks(response.data ?? emptyString),
   );
 
   Future<T> _handleCollectionRequest<T>({
@@ -58,7 +58,7 @@ class DioService {
   }) async {
     try {
       final response = await request();
-      final result = _deserializeTorrentList(response.data!);
+      final result = _deserializeTorrentList(response.data ?? emptyString);
       return result as T;
     } on DioException catch (e) {
       throw BaseException.fromDioError(e);
@@ -132,11 +132,14 @@ class DioService {
       final matches = regexMagnet.allMatches(htmlContent);
       if (matches.isEmpty) return const <String>[];
 
-      return matches
-          .map((match) => match.group(0))
-          .where((link) => link != null)
-          .cast<String>()
-          .toList(growable: false);
+      final result = <String>[];
+      for (final match in matches) {
+        final link = match.group(0);
+        if (link != null) {
+          result.add(link);
+        }
+      }
+      return result;
     } catch (e) {
       throw BaseException(
         type: BaseExceptionType.parseError,

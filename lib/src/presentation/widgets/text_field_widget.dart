@@ -12,6 +12,7 @@ class TextFieldWidget extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final bool integerOnly;
   final TextInputType? keyboardType;
+  final List<Widget>? trailing;
 
   const TextFieldWidget({
     super.key,
@@ -23,6 +24,7 @@ class TextFieldWidget extends StatefulWidget {
     this.validator,
     this.integerOnly = false,
     this.keyboardType,
+    this.trailing,
   });
 
   @override
@@ -80,6 +82,7 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
               color: context.colors.textPlaceholder,
             ),
           ),
+          trailing: widget.trailing,
           onChanged: (value) {
             final text = value.trim();
             _validateInput(text);

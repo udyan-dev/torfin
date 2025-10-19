@@ -6,8 +6,8 @@ import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/action/action.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
 import 'action_sheet_widget.dart';
-import 'tag_widget.dart';
 import 'dialog_widget.dart';
+import 'tag_widget.dart';
 
 class SortWidget extends StatefulWidget {
   final Function(SortType sortType) onSort;

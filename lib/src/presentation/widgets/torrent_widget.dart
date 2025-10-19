@@ -7,9 +7,8 @@ import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
 import 'checkbox_widget.dart';
-import 'shimmer.dart';
-
 import 'dialog_widget.dart';
+import 'shimmer.dart';
 
 class TorrentWidget extends StatelessWidget {
   final bool isLoading;

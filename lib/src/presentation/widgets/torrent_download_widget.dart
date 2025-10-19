@@ -9,9 +9,8 @@ import '../../../core/utils/extensions.dart';
 import '../../data/engine/torrent.dart';
 import '../download/cubit/download_cubit.dart';
 import 'checkbox_widget.dart';
-import 'torrent_details_widget.dart';
-
 import 'dialog_widget.dart';
+import 'torrent_details_widget.dart';
 
 class TorrentDownloadWidget extends StatelessWidget {
   final Torrent torrent;

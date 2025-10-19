@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HomeState {
 
- DataStatus get status; EmptyState get emptyState; AppNotification? get notification;
+ DataStatus get status; EmptyState get emptyState; AppNotification? get notification; String? get intentUri;
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HomeStateCopyWith<HomeState> get copyWith => _$HomeStateCopyWithImpl<HomeState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&(identical(other.notification, notification) || other.notification == notification));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.intentUri, intentUri) || other.intentUri == intentUri));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,notification);
+int get hashCode => Object.hash(runtimeType,status,emptyState,notification,intentUri);
 
 @override
 String toString() {
-  return 'HomeState(status: $status, emptyState: $emptyState, notification: $notification)';
+  return 'HomeState(status: $status, emptyState: $emptyState, notification: $notification, intentUri: $intentUri)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HomeStateCopyWith<$Res>  {
   factory $HomeStateCopyWith(HomeState value, $Res Function(HomeState) _then) = _$HomeStateCopyWithImpl;
 @useResult
 $Res call({
- DataStatus status, EmptyState emptyState, AppNotification? notification
+ DataStatus status, EmptyState emptyState, AppNotification? notification, String? intentUri
 });
 
 
@@ -62,12 +62,13 @@ class _$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? emptyState = null,Object? notification = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? emptyState = null,Object? notification = freezed,Object? intentUri = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DataStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
 as EmptyState,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
-as AppNotification?,
+as AppNotification?,intentUri: freezed == intentUri ? _self.intentUri : intentUri // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of HomeState
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification,  String? intentUri)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.notification);case _:
+return $default(_that.status,_that.emptyState,_that.notification,_that.intentUri);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.status,_that.emptyState,_that.notification);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification,  String? intentUri)  $default,) {final _that = this;
 switch (_that) {
 case _HomeState():
-return $default(_that.status,_that.emptyState,_that.notification);}
+return $default(_that.status,_that.emptyState,_that.notification,_that.intentUri);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -196,10 +197,10 @@ return $default(_that.status,_that.emptyState,_that.notification);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DataStatus status,  EmptyState emptyState,  AppNotification? notification,  String? intentUri)?  $default,) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.status,_that.emptyState,_that.notification);case _:
+return $default(_that.status,_that.emptyState,_that.notification,_that.intentUri);case _:
   return null;
 
 }
@@ -211,12 +212,13 @@ return $default(_that.status,_that.emptyState,_that.notification);case _:
 
 
 class _HomeState implements HomeState {
-  const _HomeState({this.status = DataStatus.initial, this.emptyState = const EmptyState(), this.notification});
+  const _HomeState({this.status = DataStatus.initial, this.emptyState = const EmptyState(), this.notification, this.intentUri});
   
 
 @override@JsonKey() final  DataStatus status;
 @override@JsonKey() final  EmptyState emptyState;
 @override final  AppNotification? notification;
+@override final  String? intentUri;
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
@@ -228,16 +230,16 @@ _$HomeStateCopyWith<_HomeState> get copyWith => __$HomeStateCopyWithImpl<_HomeSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&(identical(other.notification, notification) || other.notification == notification));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.emptyState, emptyState) || other.emptyState == emptyState)&&(identical(other.notification, notification) || other.notification == notification)&&(identical(other.intentUri, intentUri) || other.intentUri == intentUri));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,emptyState,notification);
+int get hashCode => Object.hash(runtimeType,status,emptyState,notification,intentUri);
 
 @override
 String toString() {
-  return 'HomeState(status: $status, emptyState: $emptyState, notification: $notification)';
+  return 'HomeState(status: $status, emptyState: $emptyState, notification: $notification, intentUri: $intentUri)';
 }
 
 
@@ -248,7 +250,7 @@ abstract mixin class _$HomeStateCopyWith<$Res> implements $HomeStateCopyWith<$Re
   factory _$HomeStateCopyWith(_HomeState value, $Res Function(_HomeState) _then) = __$HomeStateCopyWithImpl;
 @override @useResult
 $Res call({
- DataStatus status, EmptyState emptyState, AppNotification? notification
+ DataStatus status, EmptyState emptyState, AppNotification? notification, String? intentUri
 });
 
 
@@ -265,12 +267,13 @@ class __$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? emptyState = null,Object? notification = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? emptyState = null,Object? notification = freezed,Object? intentUri = freezed,}) {
   return _then(_HomeState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DataStatus,emptyState: null == emptyState ? _self.emptyState : emptyState // ignore: cast_nullable_to_non_nullable
 as EmptyState,notification: freezed == notification ? _self.notification : notification // ignore: cast_nullable_to_non_nullable
-as AppNotification?,
+as AppNotification?,intentUri: freezed == intentUri ? _self.intentUri : intentUri // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

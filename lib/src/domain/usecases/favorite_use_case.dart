@@ -137,7 +137,9 @@ class BatchFavoriteResult {
   }
 
   bool get isError =>
-      error != null || (successCount == 0 && alreadyExistsCount == 0) || (successCount == 0 && alreadyExistsCount > 0);
+      error != null ||
+      (successCount == 0 && alreadyExistsCount == 0) ||
+      (successCount == 0 && alreadyExistsCount > 0);
 
   bool get hasPartialSuccess => alreadyExistsCount > 0 && successCount > 0;
 }

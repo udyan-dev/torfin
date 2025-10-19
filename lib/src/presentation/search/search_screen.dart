@@ -7,14 +7,16 @@ import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/empty_state/empty_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
+import '../shared/multi_select_screen_mixin.dart';
 import '../widgets/animated_switcher_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/bulk_operation_dialog.dart';
-import '../widgets/button_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/dialog_widget.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/list_with_multi_select_layout.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/magnet_loading_indicator.dart';
 import '../widgets/multi_select_bar.dart';
 import '../widgets/notification_widget.dart';
 import '../widgets/search_bar_widget.dart';
@@ -22,7 +24,9 @@ import '../widgets/selection_notifier.dart';
 import '../widgets/shimmer_list_widget.dart';
 import '../widgets/sort_widget.dart';
 import '../widgets/status_widget.dart';
-import '../widgets/torrent_widget.dart';
+import '../widgets/torrent_dialog_builder.dart';
+import '../widgets/torrent_item_builder.dart';
+import '../widgets/torrent_list_refresh_indicator.dart';
 import 'cubit/search_cubit.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -32,10 +36,17 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends State<SearchScreen>
+    with MultiSelectScreenMixin {
   late final ScrollController _scrollController;
   late final SearchCubit _cubit;
   late final SelectionNotifier _selection;
+
+  @override
+  SelectionNotifier get selection => _selection;
+
+  @override
+  int get torrentCount => _cubit.state.torrents.length;
 
   @override
   void initState() {
@@ -106,16 +117,10 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    return ListenableBuilder(
-      listenable: _selection,
-      builder: (context, _) {
-        return Column(
-          children: [
-            if (_selection.isActive) _buildMultiSelectBar(context),
-            Expanded(child: _buildTorrentList(context, state)),
-          ],
-        );
-      },
+    return ListWithMultiSelectLayout(
+      selection: _selection,
+      multiSelectBarBuilder: _buildMultiSelectBar,
+      listBuilder: (context) => _buildTorrentList(context, state),
     );
   }
 
@@ -123,13 +128,9 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_shouldShowShimmer(state)) {
       return const ShimmerListWidget();
     }
-    return RefreshIndicator(
-      color: context.colors.interactive,
-      backgroundColor: context.colors.background,
+    return TorrentListRefreshIndicator(
+      selection: _selection,
       onRefresh: () {
-        if (_selection.isActive) {
-          return Future.value();
-        }
         _cubit.search(search: state.search, isRefresh: true);
         return Future.value();
       },
@@ -142,99 +143,34 @@ class _SearchScreenState extends State<SearchScreen> {
     SearchState state,
     TorrentRes torrent,
   ) {
-    final key = torrent.identityKey;
-    final isSelected = _selection.isSelected(key);
-
-    return InkWell(
-      onTap: _selection.isActive ? () => _selection.toggle(key) : null,
-      onLongPress: () => _selection.toggle(key),
-      child: IgnorePointer(
-        ignoring: _selection.isActive,
-        child: TorrentWidget(
-          torrent: torrent,
-          isFavorite: state.isFavorite(torrent),
-          onSave: () => _cubit.toggleFavorite(torrent),
-          onDownload: () => _cubit.downloadTorrent(torrent),
-          onDialogClosed: _cubit.cancelMagnetFetch,
-          showCheckbox: _selection.isActive,
-          isSelected: isSelected,
-          onCheckboxTap: () => _selection.toggle(key),
-          dialogBuilder: (parentContext, dialogContext, t) =>
-              _buildDialog(t, dialogContext, state, torrent),
+    return TorrentItemBuilder(
+      torrent: torrent,
+      isFavorite: state.isFavorite(torrent),
+      onSave: () => _cubit.toggleFavorite(torrent),
+      onDownload: () => _cubit.downloadTorrent(torrent),
+      onDialogClosed: _cubit.cancelMagnetFetch,
+      selection: _selection,
+      dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
+        value: _cubit,
+        child: TorrentDialogBuilder(
+          torrent: t,
+          dialogContext: dialogContext,
+          isFavorite: state.isFavorite,
+          onToggleFavorite: _cubit.toggleFavorite,
+          onDownload: _cubit.downloadTorrent,
+          fetchingMagnetKey: () => state.fetchingMagnetForKey,
+          coinsInfo: oneCoinRequiredToDownload,
+          loadingIndicator: () => BlocBuilder<SearchCubit, SearchState>(
+            buildWhen: (p, c) =>
+                p.fetchingMagnetForKey != c.fetchingMagnetForKey,
+            builder: (context, s) => MagnetLoadingIndicator(
+              torrentIdentityKey: t.identityKey,
+              fetchingMagnetKey: () => s.fetchingMagnetForKey,
+            ),
+          ),
         ),
       ),
     );
-  }
-
-  Widget _buildDialog(
-    TorrentRes t,
-    BuildContext dialogContext,
-    SearchState state,
-    TorrentRes torrent,
-  ) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: DialogWidget(
-        title: t.name,
-        actions: Row(
-          children: [
-            Expanded(
-              child: ButtonWidget(
-                backgroundColor: dialogContext.colors.buttonSecondary,
-                buttonText: state.isFavorite(torrent) ? remove : save,
-                onTap: () {
-                  _cubit.toggleFavorite(torrent);
-                  Navigator.of(dialogContext).maybePop();
-                },
-              ),
-            ),
-            Expanded(
-              child: ButtonWidget(
-                backgroundColor: dialogContext.colors.buttonPrimary,
-                buttonText: download,
-                onTap: () {
-                  _cubit.downloadTorrent(t);
-                  if (t.magnet.isNotEmpty) {
-                    Navigator.of(dialogContext).maybePop();
-                  }
-                },
-                trailing: BlocBuilder<SearchCubit, SearchState>(
-                  buildWhen: (p, c) =>
-                      p.fetchingMagnetForKey != c.fetchingMagnetForKey,
-                  builder: (context, s) {
-                    return s.fetchingMagnetForKey == t.identityKey
-                        ? const LoadingWidget()
-                        : const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _selectAll() {
-    final keys = _cubit.state.torrents.map((t) => t.identityKey);
-    _selection.addAll(keys);
-  }
-
-  bool? _getSelectAllValue() {
-    final totalCount = _cubit.state.torrents.length;
-    final selectedCount = _selection.count;
-    if (selectedCount == 0) return false;
-    if (selectedCount == totalCount) return true;
-    return null;
-  }
-
-  void _toggleSelectAll() {
-    final value = _getSelectAllValue();
-    if (value == true) {
-      _selection.clear();
-    } else {
-      _selectAll();
-    }
   }
 
   Widget _buildActualList(BuildContext context, SearchState state) {
@@ -322,7 +258,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     return CategoryWidget(
                       categories: state.categoriesRaw,
                       selectedRaw: state.selectedCategoryRaw,
-                      onCategoryChange: (raw) => _cubit.search(category: raw),
+                      onCategoryChange: (raw) {
+                        _selection.clear();
+                        _cubit.search(category: raw);
+                      },
                     );
                   },
                 ),
@@ -391,8 +330,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildMultiSelectBar(BuildContext context) {
     return MultiSelectBar(
-      selectAllValue: _getSelectAllValue(),
-      onSelectAllToggle: _toggleSelectAll,
+      selectAllValue: getSelectAllValue(),
+      onSelectAllToggle: () =>
+          toggleSelectAll(_cubit.state.torrents.map((t) => t.identityKey)),
       selectedCount: _selection.count,
       actions: [
         MultiSelectAction(
@@ -448,8 +388,13 @@ class _SearchScreenState extends State<SearchScreen> {
             Navigator.of(dialogContext).maybePop();
           },
           builder: (context, state) {
+            final coinsCount = _selection.count;
+            final coinText = coinsCount == 1
+                ? coinRequiredToDownload
+                : coinsRequiredToDownload;
             return BulkOperationDialog(
               title: areYouSureYouWantToDownloadAllSelectedTorrents,
+              subtitle: '$coinsCount $coinText',
               confirmButtonText: downloadAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null

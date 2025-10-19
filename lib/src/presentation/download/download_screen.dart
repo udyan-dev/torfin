@@ -8,20 +8,20 @@ import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/empty_state/empty_state.dart';
+import '../shared/notification_builders.dart';
 import '../widgets/animated_switcher_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/bulk_operation_dialog.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/checkbox_widget.dart';
+import '../widgets/dialog_widget.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/list_with_multi_select_layout.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/multi_select_bar.dart';
+import '../widgets/notification_widget.dart';
 import '../widgets/selection_notifier.dart';
 import '../widgets/torrent_download_widget.dart';
-import '../widgets/dialog_widget.dart';
-import '../shared/notification_builders.dart';
-import '../widgets/notification_widget.dart';
-
 import 'cubit/download_cubit.dart';
 
 class DownloadScreen extends StatefulWidget {
@@ -49,16 +49,18 @@ class _DownloadScreenState extends State<DownloadScreen> {
     super.dispose();
   }
 
+  Set<String> _getKeysFromTorrents() =>
+      _downloadCubit.state.torrents.map((t) => t.id.toString()).toSet();
+
   void _selectAll() {
-    final state = _downloadCubit.state;
-    final allKeys = state.torrents.map((t) => t.id.toString()).toSet();
+    final allKeys = _getKeysFromTorrents();
     _selection.addAll(allKeys);
   }
 
   bool? _getSelectAllValue() {
-    final state = _downloadCubit.state;
-    if (state.torrents.isEmpty) return false;
-    final allKeys = state.torrents.map((t) => t.id.toString()).toSet();
+    final torrents = _downloadCubit.state.torrents;
+    if (torrents.isEmpty) return false;
+    final allKeys = _getKeysFromTorrents();
     final selectedCount = _selection.keys.where(allKeys.contains).length;
     if (selectedCount == 0) return false;
     if (selectedCount == allKeys.length) return true;
@@ -262,12 +264,11 @@ class _DownloadScreenState extends State<DownloadScreen> {
                                     state.selectedCategoryRaw,
                                   ),
                                 )
-                              : Column(
-                                  children: [
-                                    if (_selection.isActive)
-                                      _buildMultiSelectBar(context),
-                                    Expanded(child: _buildTorrentList(state)),
-                                  ],
+                              : ListWithMultiSelectLayout(
+                                  selection: _selection,
+                                  multiSelectBarBuilder: _buildMultiSelectBar,
+                                  listBuilder: (context) =>
+                                      _buildTorrentList(state),
                                 ),
                         DownloadStatus.error => EmptyStateWidget(
                           iconColor: context.colors.supportError,

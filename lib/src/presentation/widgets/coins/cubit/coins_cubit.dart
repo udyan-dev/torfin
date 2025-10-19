@@ -6,16 +6,20 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../../core/helpers/data_state.dart';
 import '../../../../../core/utils/string_constants.dart';
 import '../../../../data/repositories/storage_repository_impl.dart';
+import '../../../../data/services/coins_sync_service.dart';
 import '../../../../domain/repositories/storage_repository.dart';
 
-part 'coins_state.dart';
 part 'coins_cubit.freezed.dart';
+part 'coins_state.dart';
 
 class CoinsCubit extends Cubit<CoinsState> {
-  CoinsCubit({required StorageRepository storageRepository})
-    : _storageRepository = storageRepository,
-      _storageRepositoryImpl = storageRepository as StorageRepositoryImpl,
-      super(const CoinsState()) {
+  CoinsCubit({
+    required StorageRepository storageRepository,
+    CoinsSyncService? coinsSyncService,
+  }) : _storageRepository = storageRepository,
+       _storageRepositoryImpl = storageRepository as StorageRepositoryImpl,
+       _coinsSyncService = coinsSyncService,
+       super(const CoinsState()) {
     _subscription = _storageRepositoryImpl.coinsStream.listen((coins) {
       if (!isClosed) emit(state.copyWith(coins: coins));
     }, onError: (_) {});
@@ -23,6 +27,7 @@ class CoinsCubit extends Cubit<CoinsState> {
 
   final StorageRepository _storageRepository;
   final StorageRepositoryImpl _storageRepositoryImpl;
+  final CoinsSyncService? _coinsSyncService;
   StreamSubscription<int>? _subscription;
 
   Future<void> load() async {
@@ -54,6 +59,7 @@ class CoinsCubit extends Cubit<CoinsState> {
   @override
   Future<void> close() async {
     await _subscription?.cancel();
+    await _coinsSyncService?.syncCoinsOnAppClose();
     return super.close();
   }
 }

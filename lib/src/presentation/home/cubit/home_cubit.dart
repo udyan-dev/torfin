@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -6,13 +8,14 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/helpers/base_usecase.dart';
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/intent_handler.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../../core/utils/utils.dart';
-import '../../shared/notification_builders.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/get_token_use_case.dart';
+import '../../shared/notification_builders.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'home_cubit.freezed.dart';
@@ -23,18 +26,27 @@ class HomeCubit extends Cubit<HomeState> {
   final CancelToken _cancelToken;
   final ConnectivityService _connectivity;
   final NotificationService _notificationService;
+  final IntentHandler _intentHandler;
+  StreamSubscription<String>? _intentSub;
 
   HomeCubit({
     required GetTokenUseCase getTokenUseCase,
     required CancelToken cancelToken,
     required NotificationService notificationService,
+    required IntentHandler intentHandler,
     ConnectivityService? connectivity,
   }) : _getTokenUseCase = getTokenUseCase,
        _cancelToken = cancelToken,
        _notificationService = notificationService,
+       _intentHandler = intentHandler,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const HomeState()) {
     _notificationService.start();
+    _intentSub = _intentHandler.stream.listen((uri) {
+      if (state.status == DataStatus.success) {
+        emit(state.copyWith(intentUri: uri));
+      }
+    });
   }
 
   Future<void> getToken() async {
@@ -59,8 +71,12 @@ class HomeCubit extends Cubit<HomeState> {
         .call(NoParams(), cancelToken: _cancelToken)
         .then(
           (response) => response.when(
-            success: (token) =>
-                emit(state.copyWith(status: DataStatus.success)),
+            success: (token) {
+              emit(state.copyWith(status: DataStatus.success));
+              if (_intentHandler.hasPendingUri) {
+                _intentHandler.processPendingUri();
+              }
+            },
             failure: (error) => emit(
               state.copyWith(
                 status: DataStatus.error,
@@ -112,6 +128,7 @@ class HomeCubit extends Cubit<HomeState> {
 
   @override
   Future<void> close() async {
+    _intentSub?.cancel();
     _cancelToken.cancel();
     _notificationService.stop();
     return super.close();

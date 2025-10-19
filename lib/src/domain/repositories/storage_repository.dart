@@ -27,6 +27,7 @@ abstract class StorageRepository {
 
   Future<DataState<int>> getCoins();
   Future<DataState<bool>> setCoins(int coins);
+  Future<DataState<int>> getCoinsTimestamp();
 
   void dispose();
 }
