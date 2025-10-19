@@ -1,0 +1,38 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Code Consistency
+    - camel_case_types
+    - constant_identifier_names
+    - library_names
+    - prefer_final_locals
+    - prefer_final_fields
+    - unnecessary_this
+
+    # Performance
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_spread_collections
+    - sized_box_for_whitespace
+
+    # Null Safety
+    - avoid_init_to_null
+    - prefer_null_aware_operators
+    - avoid_dynamic_calls
+
+    # Error Prevention
+    - use_build_context_synchronously
+    - avoid_print
+    - avoid_empty_else
+    - use_rethrow_when_possible
+
+    # Flutter-Specific
+    - use_key_in_widget_constructors
+    - avoid_redundant_argument_values
+    - use_named_constants
+
+    # Modern Dart
+    - prefer_interpolation_to_compose_strings
+    - use_super_parameters

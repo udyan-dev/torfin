@@ -1,0 +1,59 @@
+import '../torrent.dart';
+
+enum TorrentResumeState { stopped, started }
+
+class TorrentsResumeStatus {
+  final List<TorrentResumeStatus> torrents;
+  const TorrentsResumeStatus(this.torrents);
+
+  TorrentsResumeStatus.fromJson(Map<String, dynamic> json)
+    : torrents = (json['torrents'] as List)
+          .map<TorrentResumeStatus>(
+            (e) => TorrentResumeStatus.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+
+  Map<String, dynamic> toJson() => {
+    'torrents': torrents
+        .map(
+          (t) => {
+            'name': t.name,
+            'status': t.status == TorrentResumeState.stopped
+                ? 'stopped'
+                : 'started',
+            'files': t.files,
+          },
+        )
+        .toList(),
+  };
+
+  TorrentsResumeStatus.fromTorrents(List<Torrent> torrentsInstances)
+    : torrents = torrentsInstances
+          .map(
+            (torrent) => TorrentResumeStatus(
+              torrent.name,
+              torrent.status == TorrentStatus.stopped
+                  ? TorrentResumeState.stopped
+                  : TorrentResumeState.started,
+              torrent.files.map((f) => f.wanted).toList(),
+            ),
+          )
+          .toList();
+}
+
+class TorrentResumeStatus {
+  final String name;
+  final TorrentResumeState status;
+  final List<bool> files;
+
+  const TorrentResumeStatus(this.name, this.status, this.files);
+
+  TorrentResumeStatus.fromJson(Map<String, dynamic> json)
+    : name = json['name'] as String,
+      status = json['status'] == TorrentResumeState.started.name
+          ? TorrentResumeState.started
+          : TorrentResumeState.stopped,
+      files = (json['files'] as List)
+          .map<bool>((wanted) => wanted as bool)
+          .toList();
+}
