@@ -66,6 +66,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
       },
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 80),
         itemCount: state.torrents.length,
         itemBuilder: (context, index) {
           final torrent = state.torrents[index];

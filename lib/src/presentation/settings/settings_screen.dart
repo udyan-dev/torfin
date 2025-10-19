@@ -58,6 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: BlocBuilder<SettingsCubit, SettingsState>(
                 builder: (context, state) => ListView.separated(
+                  padding: const EdgeInsets.only(bottom: 80),
                   itemCount: _buildSettingsItems(context, state).length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 16),

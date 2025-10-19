@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import '../bindings/env.dart';
 import 'app_assets.dart';
 
-const String appName = 'Torfin';
-const String zone = 'ZONE';
 const String ibmPlexMono = 'IBM Plex Mono';
 const String ibmPlexSans = 'IBM Plex Sans';
 const List<({String label, String icon})> navigationItems = [
@@ -31,7 +29,6 @@ final RegExp regexForKey = RegExp('findNextItem.*?"(.*?)"', dotAll: true);
 final RegExp regexForJs = RegExp('(b.min.js.*)(?=")');
 final RegExp regexMagnet = RegExp('magnet:\\?xt=urn:btih:[a-zA-Z0-9]+');
 const String emptyString = '';
-const String unsupportedTypeError = 'Unsupported Type Error !';
 const String tokenKey = 'token';
 const String themeKey = 'theme';
 const String nsfwKey = 'nsfw';
@@ -86,8 +83,6 @@ final Map<String, String> torrentHeaders = {
   secFetchSiteHeader: secFetchSiteValue,
   xRequestedWithHeader: xRequestedWithValue,
 };
-const String torrentDio = 'torrentDio';
-const String generalDio = 'generalDio';
 const String repositoryError = 'Repository Error !';
 const String apiKeyExtractionError = 'Failed to extract API key from response';
 const String tokenExtractionError = 'Failed to extract token from response';
@@ -196,7 +191,6 @@ const String streamingMightNotWorkCorrectly =
 const String downloadSpeedKbps = 'Download Speed ( KBps )';
 const String uploadSpeedKbps = 'Upload Speed ( KBps )';
 const String enterANumber = 'Enter a number';
-const String enterSpeedLimit = 'Enter speed limit';
 const String downloadSpeedLimit = 'Download speed limit';
 const String uploadSpeedLimit = 'Upload speed limit';
 const String maximumActiveDownloads = 'Maximum active downloads';
@@ -208,7 +202,6 @@ const String resetTorrentSettings = 'Reset torrent settings';
 const String areYouSureResetSettings =
     'Are you sure you want to reset all torrent settings?';
 const String yes = 'Yes';
-const String settingsResetSuccessfully = 'Settings reset successfully';
 const String failedToResetSettings = 'Failed to reset settings: ';
 const String rateTheApp = 'Support us by rating the app !';
 const String failedToOpenPlayStore = 'Failed to open Play Store';
@@ -224,7 +217,6 @@ const String nsfwEnabledValue = '1';
 const String nsfwDisabledValue = '0';
 const String notificationChannelId = 'torrent_downloads';
 const String notificationChannelName = 'Torrent Downloads';
-const String notificationDownloading = 'Downloading';
 const String notificationActive = 'Active';
 const String notificationPaused = 'Paused';
 const String notificationPause = 'Pause';
@@ -241,6 +233,7 @@ const String all = 'All';
 const String downloadAll = 'Download All';
 const String removeAll = 'Remove All';
 const String saveAll = 'Save All';
+const String deleteAll = 'Delete All';
 const String areYouSureYouWantToDownloadAllSelectedTorrents =
     'Are you sure you want to download all selected torrents ?';
 const String areYouSureYouWantToRemoveAllSelectedTorrents =
@@ -257,16 +250,14 @@ const String torrentsWereAlreadyInFavorites =
     'Torrents were already in favorites';
 const String torrentsWereAddedToDownload = 'Torrents were added to download';
 const String successSuffix = 'success';
-const String failedSuffix = 'failed';
 const String failedToDownloadTorrents = 'failed to download torrents';
 const String torrentsWereDeleted = 'Torrents were deleted';
 const String insufficientCoins = 'Insufficient coins';
 const String watchAdForCoins = 'Watch Ad for Coins';
 const String watchAdMessage =
     'Watch a rewarded ad to get $coinsPerAd coins and continue downloading.';
-const String watch = 'Watch';
+const String watchAd = 'Watch Ad';
 const String coinsAdded = 'Coins added successfully';
-const String adNotReady = 'Ad not ready. Please try again.';
 const String adFailedToLoad = 'Failed to load ad';
 const String failedToDeleteTorrents = 'Failed to delete torrents';
 const String failedToRetrieveCoins = 'Failed to retrieve coins';

@@ -70,6 +70,7 @@ class _TrendingScreenState extends State<TrendingScreen>
       },
       child: ListView.separated(
         key: ValueKey(state.selectedCategoryRaw),
+        padding: const EdgeInsets.only(bottom: 80),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: state.torrents.length,
         itemBuilder: (context, index) {

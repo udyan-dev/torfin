@@ -198,6 +198,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
   Future<DataState<TorrentAddedResponse>?> _downloadFile() async {
     try {
       if (_filePath == null || _filePath!.isEmpty) {
+        if (mounted) Navigator.of(context).pop();
         _notify(
           const AppNotification(
             type: NotificationType.error,
@@ -215,6 +216,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
       );
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop();
         _notify(
           AppNotification(
             type: NotificationType.error,
@@ -230,6 +232,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
     try {
       final link = _controller.text.trim();
       if (link.isEmpty) {
+        if (mounted) Navigator.of(context).pop();
         _notify(
           const AppNotification(
             type: NotificationType.error,
@@ -239,6 +242,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
         return null;
       }
       if (!_isValidLink(link)) {
+        if (mounted) Navigator.of(context).pop();
         _notify(
           const AppNotification(
             type: NotificationType.error,
@@ -253,6 +257,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
       );
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop();
         _notify(
           AppNotification(
             type: NotificationType.error,
@@ -268,6 +273,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
     try {
       result.when(
         success: (response) {
+          if (mounted) Navigator.of(context).pop();
           _notify(
             AppNotification(
               title: response == TorrentAddedResponse.duplicated
@@ -281,9 +287,9 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
                   : downloadStartedSuccessfully,
             ),
           );
-          if (mounted) Navigator.of(context).pop();
         },
         failure: (error) {
+          if (mounted) Navigator.of(context).pop();
           _notify(
             error.type == BaseExceptionType.insufficientCoins
                 ? insufficientCoinsNotification()
@@ -296,6 +302,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
       );
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop();
         _notify(
           AppNotification(
             type: NotificationType.error,

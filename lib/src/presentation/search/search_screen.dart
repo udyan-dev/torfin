@@ -73,7 +73,7 @@ class _SearchScreenState extends State<SearchScreen>
     if (!_scrollController.hasClients || _cubit.isClosed) return;
 
     final position = _scrollController.position;
-    if (position.pixels < position.maxScrollExtent - 100) return;
+    if (position.pixels < position.maxScrollExtent) return;
 
     final state = _cubit.state;
     if (state.canLoadMore && !state.isPaginating && !state.isAutoLoadingMore) {
@@ -178,6 +178,7 @@ class _SearchScreenState extends State<SearchScreen>
 
     return ListView.separated(
       controller: _scrollController,
+      padding: const EdgeInsets.only(bottom: 80),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: itemCount,
       itemBuilder: (context, index) {

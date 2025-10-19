@@ -99,6 +99,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
   }
 
   Widget _buildTorrentList(DownloadState state) => ListView.separated(
+    padding: const EdgeInsets.only(bottom: 80),
     itemCount: state.torrents.length,
     itemBuilder: (_, i) => _buildTorrentItem(context, state, i),
     separatorBuilder: (context, _) =>
@@ -167,7 +168,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
           builder: (context, state) {
             return BulkOperationDialog(
               title: areYouSureYouWantToDeleteAllSelectedTorrents,
-              confirmButtonText: delete,
+              confirmButtonText: deleteAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
                   : () {

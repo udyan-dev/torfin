@@ -69,6 +69,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                     ),
                   ),
                 InkWell(
+                  customBorder: const CircleBorder(),
                   onTap: () async {
                     if (torrent.errorString.isNotEmpty) {
                       torrent.remove(true);

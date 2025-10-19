@@ -246,7 +246,7 @@ class _AdDialogContent extends StatelessWidget {
               Expanded(
                 child: ButtonWidget(
                   backgroundColor: context.colors.buttonPrimary,
-                  buttonText: watch,
+                  buttonText: watchAd,
                   onTap: isLoading ? null : onWatch,
                   trailing: isLoading ? const LoadingWidget() : null,
                 ),
