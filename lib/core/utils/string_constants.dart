@@ -259,6 +259,10 @@ const String watchAdMessage =
 const String watchAd = 'Watch Ad';
 const String coinsAdded = 'Coins added successfully';
 const String adFailedToLoad = 'Failed to load ad';
+const String adBlockerOrInternetMessage =
+    'Please disable AdBlocker or check your internet connection to load the ad';
+const String coinsInfoMessage =
+    'Each download costs 1 coin. Watch ads when coins reach zero to continue downloading.';
 const String failedToDeleteTorrents = 'Failed to delete torrents';
 const String failedToRetrieveCoins = 'Failed to retrieve coins';
 const String failedToAddTorrent = 'Failed to add torrent';

@@ -119,12 +119,16 @@ class _CoinsWidgetState extends State<CoinsWidget> {
     );
   }
 
-  void _showErrorNotification(String message) {
+  void _showErrorNotification(String errorMessage) {
     if (!mounted) return;
     NotificationWidget.notify(
       context,
-      errorNotification(adFailedToLoad, message),
+      errorNotification(errorMessage, adBlockerOrInternetMessage),
     );
+  }
+
+  void _showCoinsInfo() {
+    NotificationWidget.notify(context, infoNotification(coinsInfoMessage));
   }
 
   void _closeDialog(BuildContext dialogContext) {
@@ -149,7 +153,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
       builder: (context, state) {
         final showPlus = state.canWatchAd;
         return InkWell(
-          onTap: showPlus ? _showAdDialog : null,
+          onTap: showPlus ? _showAdDialog : _showCoinsInfo,
           borderRadius: BorderRadius.circular(1000),
           child: Stack(
             children: [
@@ -159,7 +163,12 @@ class _CoinsWidgetState extends State<CoinsWidget> {
                   borderRadius: BorderRadius.circular(1000),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: EdgeInsets.only(
+                    top: 6,
+                    right: 6,
+                    bottom: 6,
+                    left: showPlus ? 6 : 4,
+                  ),
                   child: Row(
                     children: [
                       if (showPlus)
