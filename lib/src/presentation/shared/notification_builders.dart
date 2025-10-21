@@ -74,3 +74,8 @@ AppNotification successNotification(String message) => AppNotification(
   type: NotificationType.downloadStarted,
   message: emptyString,
 );
+
+AppNotification infoNotification(String message) => AppNotification(
+  type: NotificationType.downloadStarted,
+  message: message,
+);
