@@ -90,7 +90,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
       onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent),
+      onDownload: () => _cubit.downloadTorrent(torrent, context),
       onDialogClosed: _cubit.cancelMagnetFetch,
       selection: _selection,
       dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
@@ -100,7 +100,10 @@ class _FavoriteScreenState extends State<FavoriteScreen>
           dialogContext: dialogContext,
           isFavorite: state.isFavorite,
           onToggleFavorite: _cubit.toggleFavorite,
-          onDownload: _cubit.downloadTorrent,
+          onDownload: (torrent) =>
+              _cubit.downloadTorrent(torrent, dialogContext),
+          onShare: (torrent, dialogContext) =>
+              _cubit.shareTorrent(torrent, dialogContext),
           fetchingMagnetKey: () => state.fetchingMagnetForKey,
           coinsInfo: oneCoinRequiredToDownload,
           loadingIndicator: () => BlocBuilder<FavoriteCubit, FavoriteState>(
@@ -144,7 +147,10 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                 const AppBarWidget(title: favorite),
                 SearchBarWidget(
                   onSearch: (q) => _cubit.load(query: q),
-                  onFetchSuggestions: (q) async => _cubit.load(query: q),
+                  onFetchSuggestions: (q) async {
+                    await _cubit.load(query: q);
+                    return const <String>[];
+                  },
                 ),
                 Expanded(
                   child: BlocBuilder<FavoriteCubit, FavoriteState>(

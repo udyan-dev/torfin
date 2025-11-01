@@ -13,6 +13,7 @@ class IconWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      customBorder: const CircleBorder(),
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: SvgPicture.asset(

@@ -95,7 +95,7 @@ class _TrendingScreenState extends State<TrendingScreen>
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
       onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent),
+      onDownload: () => _cubit.downloadTorrent(torrent, context),
       onDialogClosed: _cubit.cancelMagnetFetch,
       selection: _selection,
       dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
@@ -105,7 +105,10 @@ class _TrendingScreenState extends State<TrendingScreen>
           dialogContext: dialogContext,
           isFavorite: state.isFavorite,
           onToggleFavorite: _cubit.toggleFavorite,
-          onDownload: _cubit.downloadTorrent,
+          onDownload: (torrent) =>
+              _cubit.downloadTorrent(torrent, dialogContext),
+          onShare: (torrent, dialogContext) =>
+              _cubit.shareTorrent(torrent, dialogContext),
           fetchingMagnetKey: () => state.fetchingMagnetForKey,
           coinsInfo: oneCoinRequiredToDownload,
           loadingIndicator: () => BlocBuilder<TrendingCubit, TrendingState>(

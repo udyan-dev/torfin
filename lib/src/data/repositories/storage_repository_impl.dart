@@ -12,6 +12,7 @@ import '../services/coins_sync_service.dart';
 import '../sources/local/storage_service.dart';
 
 const String _coinsTimestampKey = 'coinsTimestamp';
+const String _shareCountTimestampKey = 'shareCountTimestamp';
 
 class StorageRepositoryImpl extends BaseRepository
     implements StorageRepository {
@@ -171,6 +172,37 @@ class StorageRepositoryImpl extends BaseRepository
   Future<DataState<int>> getCoinsTimestamp() => getStateOf(
     request: () => _storageService
         .get<int>(_coinsTimestampKey)
+        .then((value) => value ?? 0),
+  );
+
+  @override
+  Future<DataState<int>> getShareCount() => getStateOf(
+    request: () =>
+        _storageService.get<int>(shareCountKey).then((value) => value ?? 0),
+  );
+
+  @override
+  Future<DataState<bool>> setShareCount(int count) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final result = await getStateOf(
+      request: () async {
+        final countSaved = await _storageService.set(shareCountKey, count);
+        if (countSaved) {
+          await _storageService.set(_shareCountTimestampKey, timestamp);
+        }
+        return countSaved;
+      },
+    );
+    if (result is DataSuccess<bool> && result.data == true) {
+      unawaited(_coinsSyncService?.syncShareCountAfterChange(count));
+    }
+    return result;
+  }
+
+  @override
+  Future<DataState<int>> getShareCountTimestamp() => getStateOf(
+    request: () => _storageService
+        .get<int>(_shareCountTimestampKey)
         .then((value) => value ?? 0),
   );
 }

@@ -6,6 +6,7 @@ import 'package:pretty_bytes/pretty_bytes.dart';
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/extensions.dart';
+import '../../../core/utils/string_constants.dart';
 import '../../data/engine/torrent.dart';
 import '../download/cubit/download_cubit.dart';
 import 'checkbox_widget.dart';
@@ -121,7 +122,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                     spacing: 4,
                     children: [
                       AppText.headingCompact01(
-                        torrent.name,
+                        torrent.files.isEmpty ? gettingTorrentMetadata : torrent.name,
                         textAlign: TextAlign.start,
                         color: colors.textPrimary,
                         maxLines: 3,

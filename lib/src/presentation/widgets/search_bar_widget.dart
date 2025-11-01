@@ -30,7 +30,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       textEditingController: _controller,
       focusNode: _focusNode,
       optionsBuilder: (textEditingValue) async {
-        return await widget.onFetchSuggestions.call(textEditingValue.text);
+        final result = await widget.onFetchSuggestions.call(
+          textEditingValue.text,
+        );
+        if (result is Iterable<String>) return result;
+        return const <String>[];
       },
       onSelected: (value) {
         widget.onSearch?.call(value);
