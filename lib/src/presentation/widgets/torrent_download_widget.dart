@@ -122,7 +122,9 @@ class TorrentDownloadWidget extends StatelessWidget {
                     spacing: 4,
                     children: [
                       AppText.headingCompact01(
-                        torrent.files.isEmpty ? gettingTorrentMetadata : torrent.name,
+                        torrent.files.isEmpty
+                            ? gettingTorrentMetadata
+                            : torrent.name,
                         textAlign: TextAlign.start,
                         color: colors.textPrimary,
                         maxLines: 3,

@@ -20,37 +20,45 @@ class ShareTorrentUseCase extends BaseUseCase<void, ShareTorrentUseCaseParams> {
   }) async {
     try {
       final coinsResult = await _storageRepository.getCoins();
-
-      if (coinsResult case DataSuccess<int>(:final data?) when data <= 0) {
-        return const DataFailed(
-          BaseException(
-            type: BaseExceptionType.insufficientCoins,
-            message: insufficientCoins,
-          ),
-        );
-      }
-
       final shareCountResult = await _storageRepository.getShareCount();
 
-      if (shareCountResult case DataSuccess<int>(:final data?)) {
-        final currentCount = data;
-        final newCount = currentCount + 1;
+      if (coinsResult case DataSuccess<int>(:final data?)) {
+        final coins = data;
 
-        if (newCount % sharesPerCoin == 0) {
-          final coins = coinsResult is DataSuccess<int>
-              ? coinsResult.data ?? 0
-              : 0;
-          await _storageRepository.setCoins(coins - 1);
+        if (shareCountResult case DataSuccess<int>(:final data?)) {
+          final currentCount = data;
+          final newCount = currentCount + 1;
+          final willCostCoin = newCount % sharesPerCoin == 0;
+
+          if (coins <= 0 || (willCostCoin && coins < 1)) {
+            return const DataFailed(
+              BaseException(
+                type: BaseExceptionType.insufficientCoins,
+                message: insufficientCoins,
+              ),
+            );
+          }
+
+          if (willCostCoin) {
+            await _storageRepository.setCoins(coins - 1);
+          }
+
+          final countToSave = willCostCoin ? 0 : newCount;
+          await _storageRepository.setShareCount(countToSave);
+
+          await SharePlus.instance.share(
+            ShareParams(text: params.magnetLink, subject: params.torrentName),
+          );
+
+          return const DataSuccess(null);
         }
 
-        final countToSave = newCount % sharesPerCoin == 0 ? 0 : newCount;
-        await _storageRepository.setShareCount(countToSave);
-
-        await SharePlus.instance.share(
-          ShareParams(text: params.magnetLink, subject: params.torrentName),
+        return const DataFailed(
+          BaseException(
+            type: BaseExceptionType.unknown,
+            message: failedToRetrieveShareCount,
+          ),
         );
-
-        return const DataSuccess(null);
       }
 
       return const DataFailed(
