@@ -21,6 +21,7 @@ import '../../src/domain/usecases/favorite_use_case.dart';
 import '../../src/domain/usecases/get_magnet_use_case.dart';
 import '../../src/domain/usecases/get_token_use_case.dart';
 import '../../src/domain/usecases/search_torrent_use_case.dart';
+import '../../src/domain/usecases/share_torrent_use_case.dart';
 import '../../src/domain/usecases/trending_torrent_use_case.dart';
 import '../../src/presentation/download/cubit/download_cubit.dart';
 import '../../src/presentation/favorite/cubit/favorite_cubit.dart';
@@ -124,6 +125,7 @@ Future<void> get initDI async {
       storageRepository: di(),
     ),
   );
+  di.registerLazySingleton(() => ShareTorrentUseCase(storageRepository: di()));
 
   di.registerSingleton(
     CoinsCubit(storageRepository: di(), coinsSyncService: di())..load(),
@@ -145,6 +147,7 @@ Future<void> get initDI async {
       favoriteUseCase: di(),
       addTorrentUseCase: di(),
       getMagnetUseCase: di(),
+      shareTorrentUseCase: di(),
       storageRepository: di(),
     ),
   );
@@ -154,6 +157,7 @@ Future<void> get initDI async {
       favoriteUseCase: di(),
       addTorrentUseCase: di(),
       getMagnetUseCase: di(),
+      shareTorrentUseCase: di(),
     ),
   );
   di.registerFactory(
@@ -161,6 +165,7 @@ Future<void> get initDI async {
       favoriteUseCase: di(),
       addTorrentUseCase: di(),
       getMagnetUseCase: di(),
+      shareTorrentUseCase: di(),
     ),
   );
   di.registerFactory(

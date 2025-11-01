@@ -42,6 +42,8 @@ const String coinsKey = 'coins';
 const int initialCoins = 10;
 const int coinsPerAd = 10;
 const int maxCoins = 10;
+const String shareCountKey = 'shareCount';
+const int sharesPerCoin = 4;
 const String userAgentHeader = 'user-agent';
 const String acceptHeader = 'accept';
 const String acceptLanguageHeader = 'accept-language';
@@ -255,14 +257,15 @@ const String torrentsWereDeleted = 'Torrents were deleted';
 const String insufficientCoins = 'Insufficient coins';
 const String watchAdForCoins = 'Watch Ad for Coins';
 const String watchAdMessage =
-    'Watch a rewarded ad to get $coinsPerAd coins and continue downloading.';
+    'Watch a rewarded ad to get $coinsPerAd coins and continue downloading and sharing !';
 const String watchAd = 'Watch Ad';
 const String coinsAdded = 'Coins added successfully';
-const String adFailedToLoad = 'Failed to load ad';
+const String adFailedToLoad =
+    'Failed to load ad. Please try again after some time.';
 const String adBlockerOrInternetMessage =
     'Please disable AdBlocker or check your internet connection to load the ad';
 const String coinsInfoMessage =
-    'Each download costs 1 coin. Watch ads when coins reach zero to continue downloading.';
+    'Each download costs 1 coin. Each share costs 0.25 coins. Watch ads when coins reach zero to continue.';
 const String failedToDeleteTorrents = 'Failed to delete torrents';
 const String failedToRetrieveCoins = 'Failed to retrieve coins';
 const String failedToAddTorrent = 'Failed to add torrent';
@@ -272,7 +275,8 @@ const String torrentsWereNotDownloaded =
     'torrents were not downloaded due to insufficient coins';
 const String areYouSureYouWantToDeleteAllSelectedTorrents =
     'Are you sure you want to delete all selected torrents ?';
-const String oneCoinRequiredToDownload = '1 coin required to download';
+const String oneCoinRequiredToDownload =
+    '1 coin required to download and 0.25 coins required to share torrent';
 const String coinRequiredToDownload = 'coin required to download';
 const String coinsRequiredToDownload = 'coins required to download';
 const String addTorrent = 'Add Torrent';
@@ -285,3 +289,6 @@ const String failedToReadTorrentFile = 'Failed to read torrent file';
 const String pleaseEnterMagnetOrSelectFile =
     'Please enter a magnet link or select a .torrent file';
 const String or = 'or';
+const String failedToRetrieveShareCount = 'Failed to retrieve share count';
+const String shareFailedPrefix = 'Share failed: ';
+const String gettingTorrentMetadata = 'Getting torrent metadata...';

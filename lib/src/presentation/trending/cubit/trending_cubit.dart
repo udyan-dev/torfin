@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -13,6 +14,7 @@ import '../../../data/models/response/torrent/torrent_res.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
 import '../../../domain/usecases/favorite_use_case.dart';
 import '../../../domain/usecases/get_magnet_use_case.dart';
+import '../../../domain/usecases/share_torrent_use_case.dart';
 import '../../../domain/usecases/trending_torrent_use_case.dart';
 import '../../shared/torrent_cubit_mixin.dart';
 import '../../widgets/notification_widget.dart';
@@ -26,11 +28,13 @@ class TrendingCubit extends Cubit<TrendingState> with TorrentCubitMixin {
     required FavoriteUseCase favoriteUseCase,
     required AddTorrentUseCase addTorrentUseCase,
     required GetMagnetUseCase getMagnetUseCase,
+    required ShareTorrentUseCase shareTorrentUseCase,
     ConnectivityService? connectivity,
   }) : _trendingUseCase = trendingUseCase,
        _favoriteUseCase = favoriteUseCase,
        _addTorrentUseCase = addTorrentUseCase,
        _getMagnetUseCase = getMagnetUseCase,
+       _shareTorrentUseCase = shareTorrentUseCase,
        _connectivity = connectivity ?? ConnectivityService(),
        super(const TrendingState());
 
@@ -38,6 +42,7 @@ class TrendingCubit extends Cubit<TrendingState> with TorrentCubitMixin {
   final FavoriteUseCase _favoriteUseCase;
   final AddTorrentUseCase _addTorrentUseCase;
   final GetMagnetUseCase _getMagnetUseCase;
+  final ShareTorrentUseCase _shareTorrentUseCase;
   final ConnectivityService _connectivity;
   CancelToken? _token;
 
@@ -51,6 +56,9 @@ class TrendingCubit extends Cubit<TrendingState> with TorrentCubitMixin {
 
   @override
   GetMagnetUseCase get getMagnetUseCase => _getMagnetUseCase;
+
+  @override
+  ShareTorrentUseCase get shareTorrentUseCase => _shareTorrentUseCase;
 
   @override
   Future<void> close() {
@@ -300,8 +308,15 @@ class TrendingCubit extends Cubit<TrendingState> with TorrentCubitMixin {
 
   void cancelMagnetFetch() => cancelMagnetFetchImpl();
 
-  Future<void> downloadTorrent(TorrentRes torrent) async =>
-      downloadTorrentImpl(torrent);
+  Future<void> downloadTorrent(
+    TorrentRes torrent,
+    BuildContext context,
+  ) async => downloadTorrentImpl(torrent, context);
+
+  Future<void> shareTorrent(
+    TorrentRes torrent,
+    BuildContext dialogContext,
+  ) async => shareTorrentImpl(torrent, dialogContext);
 
   Future<void> addMultipleToFavorites(Set<String> keys) async {
     if (keys.isEmpty) return;

@@ -51,7 +51,7 @@ class DownloadCubit extends Cubit<DownloadState> {
         ),
       );
       startAutoRefresh();
-    } catch (_) {
+    } catch (e) {
       emit(state.copyWith(status: DownloadStatus.error));
     }
   }

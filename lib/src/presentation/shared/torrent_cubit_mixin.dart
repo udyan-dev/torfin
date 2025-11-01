@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/helpers/base_exception.dart';
 import '../../../core/helpers/data_state.dart';
@@ -8,6 +9,7 @@ import '../../data/models/response/torrent/torrent_res.dart';
 import '../../domain/usecases/add_torrent_use_case.dart';
 import '../../domain/usecases/favorite_use_case.dart';
 import '../../domain/usecases/get_magnet_use_case.dart';
+import '../../domain/usecases/share_torrent_use_case.dart';
 import '../shared/notification_builders.dart';
 import '../widgets/notification_widget.dart';
 
@@ -15,6 +17,7 @@ mixin TorrentCubitMixin {
   FavoriteUseCase get favoriteUseCase;
   AddTorrentUseCase get addTorrentUseCase;
   GetMagnetUseCase get getMagnetUseCase;
+  ShareTorrentUseCase get shareTorrentUseCase;
 
   Future<void> syncFavorites() async {
     final res = await favoriteUseCase(
@@ -57,7 +60,10 @@ mixin TorrentCubitMixin {
     }
   }
 
-  Future<void> downloadTorrentImpl(TorrentRes torrent) async {
+  Future<void> downloadTorrentImpl(
+    TorrentRes torrent,
+    BuildContext context,
+  ) async {
     final key = torrent.identityKey;
     if (torrent.magnet.isEmpty) {
       emitFetchingMagnet(key);
@@ -109,12 +115,20 @@ mixin TorrentCubitMixin {
         },
         failure: (error) {
           setMagnetCancelToken(null);
-          emitFetchingMagnetWithNotification(
-            null,
-            error.type == BaseExceptionType.insufficientCoins
-                ? insufficientCoinsNotification()
-                : addFailedNotification(torrent.name, error.message),
-          );
+          if (error.type == BaseExceptionType.insufficientCoins) {
+            emitFetchingMagnet(null);
+            if (context.mounted) {
+              NotificationWidget.notify(
+                context,
+                insufficientCoinsNotification(),
+              );
+            }
+          } else {
+            emitFetchingMagnetWithNotification(
+              null,
+              addFailedNotification(torrent.name, error.message),
+            );
+          }
         },
       );
       return;
@@ -131,11 +145,56 @@ mixin TorrentCubitMixin {
         emitNotification(addStartedNotification(torrent.name, isDuplicate));
       },
       failure: (error) {
-        emitNotification(
-          error.type == BaseExceptionType.insufficientCoins
-              ? insufficientCoinsNotification()
-              : addFailedNotification(torrent.name, error.message),
-        );
+        if (error.type == BaseExceptionType.insufficientCoins) {
+          if (context.mounted) {
+            NotificationWidget.notify(context, insufficientCoinsNotification());
+          }
+        } else {
+          emitNotification(addFailedNotification(torrent.name, error.message));
+        }
+      },
+    );
+  }
+
+  Future<void> shareTorrentImpl(
+    TorrentRes torrent,
+    BuildContext dialogContext,
+  ) async {
+    final result = await shareTorrentUseCase.call(
+      ShareTorrentUseCaseParams(
+        magnetLink: torrent.magnet,
+        torrentName: torrent.name,
+      ),
+      cancelToken: CancelToken(),
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      success: (_) {
+        if (dialogContext.mounted) {
+          Navigator.of(dialogContext).maybePop();
+        }
+      },
+      failure: (error) {
+        if (dialogContext.mounted) {
+          Navigator.of(dialogContext).maybePop();
+        }
+        if (error.type == BaseExceptionType.insufficientCoins) {
+          if (dialogContext.mounted) {
+            NotificationWidget.notify(
+              dialogContext,
+              insufficientCoinsNotification(),
+            );
+          }
+        } else {
+          emitNotification(
+            AppNotification(
+              type: NotificationType.error,
+              message: error.message,
+            ),
+          );
+        }
       },
     );
   }
