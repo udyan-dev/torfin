@@ -169,7 +169,11 @@ Future<void> get initDI async {
     ),
   );
   di.registerFactory(
-    () => DownloadCubit(engine: di(), addTorrentUseCase: di()),
+    () => DownloadCubit(
+      engine: di(),
+      addTorrentUseCase: di(),
+      shareTorrentUseCase: di(),
+    ),
   );
   di.registerFactory(
     () => SettingsCubit(

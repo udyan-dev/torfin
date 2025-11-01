@@ -1,15 +1,20 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/helpers/base_exception.dart';
 import '../../../../core/helpers/data_state.dart';
 import '../../../../core/utils/string_constants.dart';
 import '../../../data/engine/engine.dart';
 import '../../../data/engine/session.dart';
 import '../../../data/engine/torrent.dart';
 import '../../../domain/usecases/add_torrent_use_case.dart';
+import '../../../domain/usecases/share_torrent_use_case.dart';
+import '../../shared/notification_builders.dart';
+import '../../widgets/notification_widget.dart';
 
 part 'download_cubit.freezed.dart';
 part 'download_state.dart';
@@ -17,6 +22,7 @@ part 'download_state.dart';
 class DownloadCubit extends Cubit<DownloadState> {
   final Engine _engine;
   final AddTorrentUseCase _addTorrentUseCase;
+  final ShareTorrentUseCase _shareTorrentUseCase;
   Timer? _refreshTimer;
 
   List<Torrent> _allTorrents = const <Torrent>[];
@@ -25,8 +31,10 @@ class DownloadCubit extends Cubit<DownloadState> {
   DownloadCubit({
     required Engine engine,
     required AddTorrentUseCase addTorrentUseCase,
+    required ShareTorrentUseCase shareTorrentUseCase,
   }) : _engine = engine,
        _addTorrentUseCase = addTorrentUseCase,
+       _shareTorrentUseCase = shareTorrentUseCase,
        super(const DownloadState());
 
   @override
@@ -193,5 +201,45 @@ class DownloadCubit extends Cubit<DownloadState> {
     } catch (e) {
       emit(state.copyWith(isBulkOperationInProgress: false));
     }
+  }
+
+  Future<void> shareTorrent(Torrent torrent, BuildContext context) async {
+    final result = await _shareTorrentUseCase.call(
+      ShareTorrentUseCaseParams(
+        magnetLink: torrent.magnetLink,
+        torrentName: torrent.name,
+      ),
+      cancelToken: CancelToken(),
+    );
+
+    if (isClosed) return;
+
+    result.when(
+      success: (_) {
+        if (context.mounted) {
+          Navigator.of(context).maybePop();
+        }
+      },
+      failure: (error) {
+        if (context.mounted) {
+          Navigator.of(context).maybePop();
+        }
+        if (error.type == BaseExceptionType.insufficientCoins) {
+          if (context.mounted) {
+            NotificationWidget.notify(context, insufficientCoinsNotification());
+          }
+        } else {
+          if (context.mounted) {
+            NotificationWidget.notify(
+              context,
+              AppNotification(
+                type: NotificationType.error,
+                message: error.message,
+              ),
+            );
+          }
+        }
+      },
+    );
   }
 }
