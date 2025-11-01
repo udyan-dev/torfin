@@ -14,7 +14,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: context.colors.background,
-      title: AppText.heading05(title, color: context.colors.textPrimary),
+      title: AppText.heading04(title, color: context.colors.textPrimary),
       actionsPadding: const EdgeInsets.only(right: 14),
       actions: [
         if (actions != null) ...[...?actions, const SizedBox(width: 8)],

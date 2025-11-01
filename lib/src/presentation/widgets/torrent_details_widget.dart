@@ -411,7 +411,7 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
           tabs: const [files, details].map((menu) => Tab(text: menu)).toList(),
         ),
         Positioned(
-          right: 56,
+          right: 96,
           top: 14,
           child: BlocSelector<DownloadCubit, DownloadState, Torrent?>(
             selector: (state) =>
@@ -439,6 +439,24 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
                 ),
               );
             },
+          ),
+        ),
+        Positioned(
+          right: 56,
+          top: 14,
+          child: InkWell(
+            onTap: () async {
+              await context.read<DownloadCubit>().shareTorrent(
+                torrent,
+                context,
+              );
+            },
+            child: SvgPicture.asset(
+              AppAssets.icShare,
+              width: 20,
+              height: 20,
+              colorFilter: context.colors.iconPrimary.colorFilter,
+            ),
           ),
         ),
         Positioned(
