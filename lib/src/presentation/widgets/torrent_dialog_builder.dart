@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/app_assets.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
 import 'button_widget.dart';
 import 'dialog_widget.dart';
+import 'icon_widget.dart';
 import 'loading_widget.dart';
 
 typedef IsFavoriteFn = bool Function(TorrentRes torrent);
 typedef OnToggleFavoriteFn = void Function(TorrentRes torrent);
 typedef OnDownloadFn = void Function(TorrentRes torrent);
+typedef OnShareFn =
+    void Function(TorrentRes torrent, BuildContext dialogContext);
 typedef FetchingMagnetKeyFn = String? Function();
 
 class TorrentDialogBuilder extends StatelessWidget {
@@ -18,6 +22,7 @@ class TorrentDialogBuilder extends StatelessWidget {
   final IsFavoriteFn isFavorite;
   final OnToggleFavoriteFn onToggleFavorite;
   final OnDownloadFn onDownload;
+  final OnShareFn onShare;
   final FetchingMagnetKeyFn fetchingMagnetKey;
   final Widget Function()? loadingIndicator;
   final String? coinsInfo;
@@ -29,6 +34,7 @@ class TorrentDialogBuilder extends StatelessWidget {
     required this.isFavorite,
     required this.onToggleFavorite,
     required this.onDownload,
+    required this.onShare,
     required this.fetchingMagnetKey,
     this.loadingIndicator,
     this.coinsInfo,
@@ -39,6 +45,10 @@ class TorrentDialogBuilder extends StatelessWidget {
     return DialogWidget(
       title: torrent.name,
       subtitle: coinsInfo,
+      trailing: IconWidget(
+        icon: AppAssets.icShare,
+        onTap: () => onShare(torrent, dialogContext),
+      ),
       actions: Row(
         children: [
           Expanded(

@@ -24,7 +24,7 @@ class CoinsWidget extends StatefulWidget {
 }
 
 class _CoinsWidgetState extends State<CoinsWidget> {
-  RewardedAd? _rewardedAd;
+  RewardedInterstitialAd? _rewardedInterstitialAd;
   final _isAdLoadingNotifier = ValueNotifier<bool>(false);
   bool _isAdShowing = false;
   int _rewardAmount = 0;
@@ -37,25 +37,25 @@ class _CoinsWidgetState extends State<CoinsWidget> {
   }
 
   void _disposeAd() {
-    _rewardedAd?.dispose();
-    _rewardedAd = null;
+    _rewardedInterstitialAd?.dispose();
+    _rewardedInterstitialAd = null;
   }
 
   void _loadRewardedAd(BuildContext dialogContext) {
-    if (_isAdLoadingNotifier.value || _rewardedAd != null) return;
+    if (_isAdLoadingNotifier.value || _rewardedInterstitialAd != null) return;
 
     _isAdLoadingNotifier.value = true;
 
-    RewardedAd.load(
+    RewardedInterstitialAd.load(
       adUnitId: Env.adUnitId,
       request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           if (!mounted || !_isAdLoadingNotifier.value) {
             ad.dispose();
             return;
           }
-          _rewardedAd = ad;
+          _rewardedInterstitialAd = ad;
           _configureAdCallbacks();
           _isAdLoadingNotifier.value = false;
           _showRewardedAd(dialogContext);
@@ -79,7 +79,8 @@ class _CoinsWidgetState extends State<CoinsWidget> {
   }
 
   void _configureAdCallbacks() {
-    _rewardedAd?.fullScreenContentCallback = FullScreenContentCallback(
+    _rewardedInterstitialAd
+        ?.fullScreenContentCallback = FullScreenContentCallback(
       onAdShowedFullScreenContent: (ad) {
         _isAdShowing = true;
       },
@@ -110,9 +111,9 @@ class _CoinsWidgetState extends State<CoinsWidget> {
   }
 
   void _showRewardedAd(BuildContext dialogContext) {
-    if (_rewardedAd == null || _isAdShowing) return;
+    if (_rewardedInterstitialAd == null || _isAdShowing) return;
 
-    _rewardedAd?.show(
+    _rewardedInterstitialAd?.show(
       onUserEarnedReward: (ad, reward) {
         _rewardAmount = reward.amount.toInt();
       },
@@ -227,43 +228,50 @@ class _AdDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: isAdLoadingNotifier,
-      builder: (context, isLoading, child) {
-        return DialogWidget(
-          title: watchAdForCoins,
-          content: Padding(
-            padding: const EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              bottom: 16.0,
-            ),
-            child: AppText.body01(
-              watchAdMessage,
-              color: context.colors.textSecondary,
-            ),
-          ),
-          actions: Row(
-            children: [
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonSecondary,
-                  buttonText: cancel,
-                  onTap: onCancel,
-                ),
-              ),
-              Expanded(
-                child: ButtonWidget(
-                  backgroundColor: context.colors.buttonPrimary,
-                  buttonText: watchAd,
-                  onTap: isLoading ? null : onWatch,
-                  trailing: isLoading ? const LoadingWidget() : null,
-                ),
-              ),
-            ],
-          ),
-        );
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          onCancel();
+        }
       },
+      child: ValueListenableBuilder<bool>(
+        valueListenable: isAdLoadingNotifier,
+        builder: (context, isLoading, child) {
+          return DialogWidget(
+            title: watchAdForCoins,
+            content: Padding(
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: 16.0,
+              ),
+              child: AppText.body01(
+                watchAdMessage,
+                color: context.colors.textSecondary,
+              ),
+            ),
+            actions: Row(
+              children: [
+                Expanded(
+                  child: ButtonWidget(
+                    backgroundColor: context.colors.buttonSecondary,
+                    buttonText: cancel,
+                    onTap: onCancel,
+                  ),
+                ),
+                Expanded(
+                  child: ButtonWidget(
+                    backgroundColor: context.colors.buttonPrimary,
+                    buttonText: watchAd,
+                    onTap: isLoading ? null : onWatch,
+                    trailing: isLoading ? const LoadingWidget() : null,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -34,6 +34,7 @@ class DialogWidget extends StatelessWidget {
   final String? subtitle;
   final Widget? content;
   final Widget actions;
+  final Widget? trailing;
 
   const DialogWidget({
     super.key,
@@ -41,6 +42,7 @@ class DialogWidget extends StatelessWidget {
     this.subtitle,
     this.content,
     required this.actions,
+    this.trailing,
   });
 
   @override
@@ -60,7 +62,14 @@ class DialogWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText.heading03(title),
+                Row(
+                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(child: AppText.heading03(title)),
+                    ?trailing,
+                  ],
+                ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 8),
                   AppText.bodyCompact01(subtitle!, color: colors.textSecondary),

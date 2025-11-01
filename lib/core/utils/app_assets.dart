@@ -46,4 +46,5 @@ class AppAssets {
   static const icAdd = '${icons}ic_add.svg';
   static const icAddLarge = '${icons}ic_add_large.svg';
   static const icFolder = '${icons}ic_folder.svg';
+  static const icShare = '${icons}ic_share.svg';
 }
