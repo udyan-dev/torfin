@@ -1,0 +1,123 @@
+name: Build and Release APK
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ${{ github.workspace }}/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache Android build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            android/app/build/intermediates
+            android/app/build/generated
+          key: ${{ runner.os }}-android-build-${{ hashFiles('android/**/*.gradle*', 'pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-android-build-
+
+      - name: Setup secrets
+        env:
+          SECRETS_REPO_TOKEN: ${{ secrets.SECRETS_REPO_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git clone https://$SECRETS_REPO_TOKEN@github.com/udyan-dev/secrets.git ../secrets
+          cp ../secrets/torfin/key.properties android/key.properties
+          cp ../secrets/torfin/google-services.json android/app/google-services.json
+          cp ../secrets/torfin/upload-keystore.jks upload-keystore.jks
+          cp ../secrets/torfin/firebase_options.dart lib/firebase_options.dart
+          cp ../secrets/torfin/secrets.env secrets.env
+          cp ../secrets/torfin/firebase.json firebase.json
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (All ABIs)
+        run: flutter build apk --dart-define-from-file=secrets.env -v --release --obfuscate --split-debug-info=build/app/outputs/symbols --split-per-abi
+
+      - name: Build Universal APK
+        run: flutter build apk --dart-define-from-file=secrets.env -v --release --obfuscate --split-debug-info=build/app/outputs/symbols
+
+      - name: Get version from pubspec.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Rename APK files
+        run: |
+          mkdir -p release-apks
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk release-apks/torfin-armeabi-v7a.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk release-apks/torfin-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk release-apks/torfin-x86_64.apk
+          cp build/app/outputs/flutter-apk/app-release.apk release-apks/torfin-universal.apk
+
+      - name: Create GitHub Release and Upload APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.version }}
+          files: |
+            release-apks/torfin-universal.apk
+            release-apks/torfin-arm64-v8a.apk
+            release-apks/torfin-armeabi-v7a.apk
+            release-apks/torfin-x86_64.apk
+          draft: false
+          prerelease: false
+          make_latest: true
+
+      - name: Upload Universal APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_CREDENTIALS }}
+          groups: testers
+          file: release-apks/torfin-universal.apk
+
