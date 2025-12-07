@@ -1,24 +1,44 @@
-import 'dart:async';
+import 'dart:async' show Timer;
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:duration/duration.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pretty_bytes/pretty_bytes.dart';
 
 import '../../src/data/engine/engine.dart';
 import '../../src/data/engine/torrent.dart';
+import '../../src/domain/usecases/add_torrent_use_case.dart';
 import '../theme/app_colors.dart';
 import '../utils/string_constants.dart';
+import 'background_download_service.dart';
+
+const _kNotificationId = 1001;
+const _kMaxEta = 0x7FFFFFFF;
+const _kInsufficientCoinsIdKey = 'insufficientCoinsId';
+const _kInsufficientCoinsTimeKey = 'insufficientCoinsTime';
+const _kInsufficientCoinsDuration = 3000;
 
 class NotificationService {
   final Engine _engine;
+  AddTorrentUseCase? _addTorrentUseCase;
   final _notifications = FlutterLocalNotificationsPlugin();
+  final _storage = const FlutterSecureStorage();
   Timer? _timer;
+  bool _isUpdating = false;
+  int? initialTabIndex;
+  void Function(int)? onNavigateToTab;
 
   NotificationService(this._engine);
+
+  void setAddTorrentUseCase(AddTorrentUseCase useCase) {
+    _addTorrentUseCase = useCase;
+  }
 
   Future<void> init() async {
     await _notifications.initialize(
@@ -27,10 +47,14 @@ class NotificationService {
       ),
       onDidReceiveNotificationResponse: _handleAction,
     );
+    final launchDetails =
+        await _notifications.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      initialTabIndex = 2;
+    }
     await _notifications
         .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(
           const AndroidNotificationChannel(
             notificationChannelId,
@@ -54,15 +78,60 @@ class NotificationService {
   void start() {
     if (_timer?.isActive ?? false) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
+    FlutterForegroundTask.addTaskDataCallback(_onTaskData);
   }
 
   void stop() {
     _timer?.cancel();
     _timer = null;
-    _notifications.cancel(1001);
+    _notifications.cancel(_kNotificationId);
+  }
+
+  void dispose() {
+    stop();
+    FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
+  }
+
+  void _onTaskData(Object data) {
+    if (data is! String) return;
+    if (data == 'open_downloads') {
+      onNavigateToTab?.call(2);
+      return;
+    }
+    _processAction(data);
+  }
+
+  Future<void> _processAction(String action) async {
+    try {
+      final torrents = await _engine.fetchTorrents();
+      switch (action) {
+        case 'pause':
+          for (final t in torrents) {
+            if (t.status == TorrentStatus.downloading ||
+                t.status == TorrentStatus.checking) {
+              t.stop();
+            }
+          }
+        case 'resume':
+          for (final t in torrents) {
+            if (t.status == TorrentStatus.stopped) {
+              t.start();
+            }
+          }
+        case 'stop':
+          for (final t in torrents) {
+            t.stop();
+          }
+          await BackgroundDownloadService.stop();
+          _notifications.cancel(_kNotificationId);
+      }
+      _update();
+    } catch (_) {}
   }
 
   Future<void> _update() async {
+    if (_isUpdating) return;
+    _isUpdating = true;
     try {
       final active = (await _engine.fetchTorrents())
           .where(
@@ -73,38 +142,74 @@ class NotificationService {
                 t.status == TorrentStatus.stopped,
           )
           .toList();
-
       if (active.isEmpty) {
-        _notifications.cancel(1001);
-      } else if (active.length == 1) {
-        _showSingle(active.first);
+        _notifications.cancel(_kNotificationId);
+        await BackgroundDownloadService.stop();
       } else {
-        _showMultiple(active);
+        await BackgroundDownloadService.start();
+        active.length == 1
+            ? await _showSingle(active.first)
+            : await _showMultiple(active);
       }
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _isUpdating = false;
+    }
   }
 
-  void _showSingle(Torrent t) {
+  String _formatEta(int eta) => eta < 0 || eta == _kMaxEta
+      ? notificationInfinity
+      : Duration(seconds: eta).pretty(abbreviated: true, delimiter: ' ');
+
+  String _formatSubText(int progress, String speed, String eta) =>
+      '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta';
+
+  Future<String> _torrentTitle(Torrent t) async {
+    final insufficientIdStr =
+        await _storage.read(key: _kInsufficientCoinsIdKey);
+    final insufficientTimeStr =
+        await _storage.read(key: _kInsufficientCoinsTimeKey);
+    if (insufficientIdStr != null && insufficientTimeStr != null) {
+      final insufficientId = int.tryParse(insufficientIdStr);
+      final insufficientTime = int.tryParse(insufficientTimeStr);
+      if (insufficientId == t.id && insufficientTime != null) {
+        final elapsed =
+            DateTime.now().millisecondsSinceEpoch - insufficientTime;
+        if (elapsed < _kInsufficientCoinsDuration) {
+          return insufficientCoins;
+        }
+        await _storage.delete(key: _kInsufficientCoinsIdKey);
+        await _storage.delete(key: _kInsufficientCoinsTimeKey);
+      }
+    }
+    return t.errorString.isNotEmpty
+        ? t.errorString
+        : t.files.isEmpty
+            ? gettingTorrentMetadata
+            : t.name;
+  }
+
+  Future<void> _showSingle(Torrent t) async {
     final progress = (t.progress * 100).clamp(0, 100).toInt();
-    final isActive =
-        t.status == TorrentStatus.downloading ||
+    final isActive = t.status == TorrentStatus.downloading ||
         t.status == TorrentStatus.checking;
     final speed = prettyBytes(t.rateDownload.toDouble());
-    final eta = t.eta < 0 || t.eta == 0x7FFFFFFF
-        ? notificationInfinity
-        : Duration(seconds: t.eta).pretty(abbreviated: true, delimiter: ' ');
+    final eta = _formatEta(t.eta);
+    final colors = AppColors.fromBrightness(
+      PlatformDispatcher.instance.platformBrightness,
+    );
+    final title = await _torrentTitle(t);
+    final hasError = t.errorString.isNotEmpty || title == insufficientCoins;
 
     _notifications.show(
-      1001,
-      t.name,
+      _kNotificationId,
+      title,
       emptyString,
       NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
-          color: AppColors.fromBrightness(
-            PlatformDispatcher.instance.platformBrightness,
-          ).interactive,
+          color: hasError ? colors.supportError : colors.interactive,
           importance: Importance.low,
           priority: Priority.low,
           ongoing: true,
@@ -112,18 +217,21 @@ class NotificationService {
           showProgress: true,
           maxProgress: 100,
           progress: progress,
-          subText:
-              '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta',
+          subText: _formatSubText(progress, speed, eta),
           number: isActive ? 1 : 0,
           actions: [
             AndroidNotificationAction(
-              '${isActive ? notificationPause.toLowerCase() : notificationResume.toLowerCase()}_${t.id}',
-              isActive ? notificationPause : notificationResume,
-              titleColor: AppColors.fromBrightness(
-                PlatformDispatcher.instance.platformBrightness,
-              ).interactive,
+              hasError
+                  ? 'retry_${t.id}'
+                  : '${isActive ? 'pause' : 'resume'}_${t.id}',
+              hasError
+                  ? retry
+                  : isActive
+                      ? notificationPause
+                      : notificationResume,
+              titleColor:
+                  hasError ? colors.supportError : colors.interactive,
               cancelNotification: false,
-              showsUserInterface: true,
             ),
           ],
         ),
@@ -131,55 +239,57 @@ class NotificationService {
     );
   }
 
-  void _showMultiple(List<Torrent> torrents) {
-    final progress =
-        ((torrents.fold<double>(0, (sum, t) => sum + t.progress) /
-                    torrents.length) *
-                100)
-            .clamp(0, 100)
-            .toInt();
-    final totalSpeed = torrents.fold<int>(0, (sum, t) => sum + t.rateDownload);
-    final speed = prettyBytes(totalSpeed.toDouble());
-
+  Future<void> _showMultiple(List<Torrent> torrents) async {
+    final progress = ((torrents.fold<double>(0, (s, t) => s + t.progress) /
+                torrents.length) *
+            100)
+        .clamp(0, 100)
+        .toInt();
+    final speed = prettyBytes(
+      torrents.fold<int>(0, (s, t) => s + t.rateDownload).toDouble(),
+    );
     final activeCount = torrents
-        .where(
-          (t) =>
-              t.status == TorrentStatus.downloading ||
-              t.status == TorrentStatus.checking,
-        )
+        .where((t) =>
+            t.status == TorrentStatus.downloading ||
+            t.status == TorrentStatus.checking)
         .length;
-    final pausedCount = torrents
-        .where((t) => t.status == TorrentStatus.stopped)
-        .length;
+    final pausedCount =
+        torrents.where((t) => t.status == TorrentStatus.stopped).length;
     final hasActive = activeCount > 0;
-
     final maxEta = torrents.fold<int>(
       -1,
-      (max, t) => (t.eta > max && t.eta != 0x7FFFFFFF) ? t.eta : max,
+      (m, t) => (t.eta > m && t.eta != _kMaxEta) ? t.eta : m,
     );
-    final eta = maxEta < 0 || maxEta == 0x7FFFFFFF
-        ? notificationInfinity
-        : Duration(seconds: maxEta).pretty(abbreviated: true, delimiter: ' ');
+    final eta = _formatEta(maxEta);
+    final color = AppColors.fromBrightness(
+      PlatformDispatcher.instance.platformBrightness,
+    ).interactive;
+    final title = [
+      if (activeCount > 0)
+        '$activeCount $notificationActive ${activeCount == 1 ? torrentSuffix : torrentsSuffix}',
+      if (pausedCount > 0)
+        '$pausedCount $notificationPaused ${pausedCount == 1 ? torrentSuffix : torrentsSuffix}',
+    ].join(notificationSeparator);
 
-    final contentTitleParts = <String>[];
-    if (activeCount > 0) {
-      final torrentWord = activeCount == 1 ? torrentSuffix : torrentsSuffix;
-      contentTitleParts.add('$activeCount $notificationActive $torrentWord');
+    final inboxLines = <String>[];
+    for (final t in torrents) {
+      final tTitle = await _torrentTitle(t);
+      final tProgress = (t.progress * 100).toInt();
+      final tSpeed = prettyBytes(t.rateDownload.toDouble());
+      inboxLines.add(
+        '$tTitle$notificationSeparator$tProgress$notificationPercentSuffix$notificationSeparator$tSpeed$notificationSpeedSuffix',
+      );
     }
-    if (pausedCount > 0) {
-      final torrentWord = pausedCount == 1 ? torrentSuffix : torrentsSuffix;
-      contentTitleParts.add('$pausedCount $notificationPaused $torrentWord');
-    }
-    final contentTitle = contentTitleParts.join(notificationSeparator);
 
     _notifications.show(
-      1001,
-      contentTitle,
+      _kNotificationId,
+      title,
       eta,
       NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
+          color: color,
           importance: Importance.low,
           priority: Priority.low,
           ongoing: true,
@@ -187,32 +297,18 @@ class NotificationService {
           showProgress: true,
           maxProgress: 100,
           progress: progress,
-          subText:
-              '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta',
           number: activeCount,
-          color: AppColors.fromBrightness(
-            PlatformDispatcher.instance.platformBrightness,
-          ).interactive,
+          subText: _formatSubText(progress, speed, eta),
           styleInformation: InboxStyleInformation(
-            torrents
-                .map(
-                  (t) =>
-                      '${t.name}$notificationSeparator${(t.progress * 100).toInt()}$notificationPercentSuffix$notificationSeparator${prettyBytes(t.rateDownload.toDouble())}$notificationSpeedSuffix',
-                )
-                .toList(),
-            contentTitle: contentTitle,
+            inboxLines,
+            contentTitle: title,
           ),
           actions: [
             AndroidNotificationAction(
-              hasActive
-                  ? '${notificationPause.toLowerCase()}_all'
-                  : '${notificationResume.toLowerCase()}_all',
+              '${hasActive ? 'pause' : 'resume'}_all',
               hasActive ? notificationPauseAll : notificationResumeAll,
-              titleColor: AppColors.fromBrightness(
-                PlatformDispatcher.instance.platformBrightness,
-              ).interactive,
+              titleColor: color,
               cancelNotification: false,
-              showsUserInterface: true,
             ),
           ],
         ),
@@ -222,44 +318,64 @@ class NotificationService {
 
   Future<void> _handleAction(NotificationResponse response) async {
     final actionId = response.actionId;
-    final pausePrefix = notificationPause.toLowerCase();
-    final resumePrefix = notificationResume.toLowerCase();
-
-    if (actionId == null ||
-        (!actionId.startsWith('${pausePrefix}_') &&
-            !actionId.startsWith('${resumePrefix}_'))) {
+    if (actionId == null || actionId.isEmpty) {
+      onNavigateToTab?.call(2);
       return;
     }
-
+    if (actionId == 'cancel') {
+      final torrents = await _engine.fetchTorrents();
+      for (final t in torrents) {
+        t.stop();
+      }
+      await BackgroundDownloadService.stop();
+      _notifications.cancel(_kNotificationId);
+      return;
+    }
     try {
-      if (actionId == '${pausePrefix}_all' ||
-          actionId == '${resumePrefix}_all') {
-        final torrents = await _engine.fetchTorrents();
-        final isPause = actionId == '${pausePrefix}_all';
-        for (final torrent in torrents) {
-          isPause ? torrent.stop() : torrent.start();
+      final torrents = await _engine.fetchTorrents();
+      if (actionId.startsWith('retry_')) {
+        final id = int.tryParse(actionId.substring(6));
+        if (id == null) return;
+        final t = torrents.cast<Torrent?>().firstWhere(
+              (t) => t?.id == id,
+              orElse: () => null,
+            );
+        if (t == null) return;
+        final magnetLink = t.magnetLink;
+        // Check coins before removing
+        final hasCoins = await _addTorrentUseCase?.hasCoins() ?? false;
+        if (!hasCoins) {
+          await _storage.write(key: _kInsufficientCoinsIdKey, value: '$id');
+          await _storage.write(
+            key: _kInsufficientCoinsTimeKey,
+            value: '${DateTime.now().millisecondsSinceEpoch}',
+          );
+          _update();
+          return;
         }
-      } else {
-        final isPause = actionId.startsWith(pausePrefix);
-        final torrentId = int.tryParse(
-          actionId.replaceFirst(
-            isPause ? '${pausePrefix}_' : '${resumePrefix}_',
-            emptyString,
-          ),
+        await _storage.delete(key: _kInsufficientCoinsIdKey);
+        await _storage.delete(key: _kInsufficientCoinsTimeKey);
+        await t.remove(true);
+        await _addTorrentUseCase?.call(
+          AddTorrentUseCaseParams(magnetLink: magnetLink),
+          cancelToken: CancelToken(),
         );
-        if (torrentId == null) return;
-
-        final torrents = await _engine.fetchTorrents();
-        Torrent? torrent;
+      } else if (actionId == 'pause_all' || actionId == 'resume_all') {
+        final isPause = actionId == 'pause_all';
         for (final t in torrents) {
-          if (t.id == torrentId) {
-            torrent = t;
-            break;
-          }
+          isPause ? t.stop() : t.start();
         }
-        if (torrent == null) return;
-
-        isPause ? torrent.stop() : torrent.start();
+      } else if (actionId.startsWith('pause_') ||
+          actionId.startsWith('resume_')) {
+        final isPause = actionId.startsWith('pause');
+        final id = int.tryParse(actionId.substring(isPause ? 6 : 7));
+        if (id == null) return;
+        final t = torrents.cast<Torrent?>().firstWhere(
+              (t) => t?.id == id,
+              orElse: () => null,
+            );
+        if (t == null) return;
+        isPause ? t.stop() : t.start();
       }
       _update();
     } catch (_) {}

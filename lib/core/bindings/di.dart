@@ -30,6 +30,7 @@ import '../../src/presentation/search/cubit/search_cubit.dart';
 import '../../src/presentation/settings/cubit/settings_cubit.dart';
 import '../../src/presentation/trending/cubit/trending_cubit.dart';
 import '../../src/presentation/widgets/coins/cubit/coins_cubit.dart';
+import '../services/background_download_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/device_service.dart';
 import '../services/intent_handler.dart';
@@ -82,6 +83,8 @@ Future<void> get initDI async {
   await Future.wait([themeService.init(), engine.init()]);
 
   await engine.restoreTorrentsResumeStatus();
+  await BackgroundDownloadService.init();
+
   di.registerSingleton<ThemeService>(themeService, dispose: (s) => s.dispose());
   di.registerSingleton<Engine>(engine, dispose: (e) => e.dispose());
 
@@ -89,7 +92,7 @@ Future<void> get initDI async {
   await notificationService.init();
   di.registerSingleton<NotificationService>(
     notificationService,
-    dispose: (s) => s.stop(),
+    dispose: (s) => s.dispose(),
   );
 
   final intentHandler = IntentHandler();
@@ -112,13 +115,13 @@ Future<void> get initDI async {
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
   di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
-  di.registerLazySingleton(
-    () => AddTorrentUseCase(
-      engine: di(),
-      storageRepository: di(),
-      getMagnetUseCase: di(),
-    ),
+  final addTorrentUseCase = AddTorrentUseCase(
+    engine: di(),
+    storageRepository: di(),
+    getMagnetUseCase: di(),
   );
+  di.registerSingleton(addTorrentUseCase);
+  notificationService.setAddTorrentUseCase(addTorrentUseCase);
   di.registerLazySingleton(
     () => TrendingTorrentUseCase(
       torrentRepository: di(),

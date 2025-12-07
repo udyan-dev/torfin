@@ -14,10 +14,12 @@ import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 import '../../data/engine/torrent.dart';
 import '../download/cubit/download_cubit.dart';
+import '../shared/notification_builders.dart';
 import 'button_widget.dart';
 import 'checkbox_widget.dart';
 import 'dialog_widget.dart';
 import 'icon_widget.dart';
+import 'notification_widget.dart';
 
 class TorrentDetailsWidget extends StatefulWidget {
   final Torrent torrent;
@@ -108,7 +110,7 @@ class _FilesTabWidget extends StatelessWidget {
                 itemCount: t.files.length,
                 itemBuilder: (context, index) {
                   final file = t.files[index];
-                  final completed = file.bytesCompleted == file.length;
+                  // final completed = file.bytesCompleted == file.length;
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(
@@ -125,19 +127,29 @@ class _FilesTabWidget extends StatelessWidget {
                             color: context.colors.textPrimary,
                           ),
                         ),
-                        if (completed)
-                          IconWidget(
-                            icon: AppAssets.icOpen,
-                            iconColor: context.colors.iconPrimary,
-                            onTap: () {
-                              if (completed) {
-                                OpenFilex.open(
-                                  path.join(torrent.location, file.name),
-                                  type: lookupMimeType(file.name),
+                        IconWidget(
+                          icon: AppAssets.icOpen,
+                          iconColor: context.colors.iconPrimary,
+                          onTap: () async {
+                            final result = await OpenFilex.open(
+                              path.join(torrent.location, file.name),
+                              type: lookupMimeType(file.name),
+                            );
+                            if (result.type != ResultType.done &&
+                                context.mounted) {
+                              Navigator.of(context).pop();
+                              if (context.mounted) {
+                                NotificationWidget.notify(
+                                  context,
+                                  errorNotification(
+                                    failedToOpenFile,
+                                    result.message,
+                                  ),
                                 );
                               }
-                            },
-                          ),
+                            }
+                          },
+                        ),
                         CheckBoxWidget(
                           value: file.wanted,
                           side: BorderSide(color: context.colors.iconPrimary),
@@ -351,10 +363,12 @@ Future<bool?> _showTorrentDeleteDialog(
             child: ButtonWidget(
               backgroundColor: dialogContext.colors.buttonPrimary,
               buttonText: delete,
-              onTap: () {
+              onTap: () async {
                 final withData = !keepFiles.value;
-                torrent.remove(withData);
-                Navigator.of(dialogContext).pop(true);
+                await torrent.remove(withData);
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop(true);
+                }
               },
             ),
           ),

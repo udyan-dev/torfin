@@ -24,6 +24,7 @@ class DownloadCubit extends Cubit<DownloadState> {
   final AddTorrentUseCase _addTorrentUseCase;
   final ShareTorrentUseCase _shareTorrentUseCase;
   Timer? _refreshTimer;
+  bool _isFetching = false;
 
   List<Torrent> _allTorrents = const <Torrent>[];
   TorrentDownloadStatus _filterStatus = TorrentDownloadStatus.all;
@@ -64,20 +65,24 @@ class DownloadCubit extends Cubit<DownloadState> {
     }
   }
 
-  void startAutoRefresh({
-    Duration interval = const Duration(milliseconds: 250),
-  }) {
+  void startAutoRefresh({Duration interval = const Duration(seconds: 1)}) {
     _refreshTimer?.cancel();
     _refreshTimer = Timer.periodic(interval, (_) async {
+      if (_isFetching || isClosed) return;
+      _isFetching = true;
       try {
         final torrents = await _engine.fetchTorrents();
+        if (isClosed) return;
         _allTorrents = torrents;
         emit(
           state.copyWith(
             torrents: _filterByStatus(_allTorrents, _filterStatus),
           ),
         );
-      } catch (_) {}
+      } catch (_) {
+      } finally {
+        _isFetching = false;
+      }
     });
   }
 
@@ -98,13 +103,15 @@ class DownloadCubit extends Cubit<DownloadState> {
     TorrentAddedResponse? result;
     response.when(
       success: (torrentResponse) async {
-        final torrents = await _engine.fetchTorrents();
-        _allTorrents = torrents;
-        emit(
-          state.copyWith(
-            torrents: _filterByStatus(_allTorrents, _filterStatus),
-          ),
-        );
+        try {
+          final torrents = await _engine.fetchTorrents();
+          _allTorrents = torrents;
+          emit(
+            state.copyWith(
+              torrents: _filterByStatus(_allTorrents, _filterStatus),
+            ),
+          );
+        } catch (_) {}
         result = torrentResponse;
       },
       failure: (_) {
@@ -113,6 +120,22 @@ class DownloadCubit extends Cubit<DownloadState> {
       },
     );
     return result;
+  }
+
+  /// Retries a torrent with an error. Checks for coins first.
+  /// Returns true if retry was successful, false if insufficient coins.
+  Future<bool> retryTorrent(Torrent torrent, BuildContext context) async {
+    final hasCoins = await _addTorrentUseCase.hasCoins();
+    if (!hasCoins) {
+      if (context.mounted) {
+        NotificationWidget.notify(context, insufficientCoinsNotification());
+      }
+      return false;
+    }
+    final magnetLink = torrent.magnetLink;
+    await torrent.remove(true);
+    await addTorrent(magnetLink);
+    return true;
   }
 
   bool _matchesFilter(
@@ -186,7 +209,7 @@ class DownloadCubit extends Cubit<DownloadState> {
     try {
       final withData = !keepFiles;
       for (int i = 0; i < torrentsToRemove.length; i++) {
-        torrentsToRemove[i].remove(withData);
+        await torrentsToRemove[i].remove(withData);
       }
 
       final torrents = await _engine.fetchTorrents();

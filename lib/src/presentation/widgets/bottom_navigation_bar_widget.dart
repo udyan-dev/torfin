@@ -6,7 +6,8 @@ import '../../../core/utils/extensions.dart';
 import '../../../core/utils/string_constants.dart';
 
 class BottomNavigationBarWidget extends StatefulWidget {
-  const BottomNavigationBarWidget({super.key});
+  final TabController controller;
+  const BottomNavigationBarWidget({super.key, required this.controller});
 
   @override
   State<BottomNavigationBarWidget> createState() =>
@@ -14,11 +15,26 @@ class BottomNavigationBarWidget extends StatefulWidget {
 }
 
 class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
-  int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onTabChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final selectedIndex = widget.controller.index;
     return SafeArea(
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -26,6 +42,7 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
           border: Border(top: BorderSide(color: colors.borderSubtle00)),
         ),
         child: TabBar(
+          controller: widget.controller,
           enableFeedback: true,
           tabs: navigationItems
               .mapIndexed(
@@ -34,18 +51,13 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
                     menu.icon,
                     width: 24,
                     height: 24,
-                    colorFilter: _selectedIndex == index
+                    colorFilter: selectedIndex == index
                         ? colors.iconPrimary.colorFilter
                         : colors.iconOnColorDisabled.colorFilter,
                   ),
                 ),
               )
               .toList(),
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
         ),
       ),
     );

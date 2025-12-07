@@ -5,14 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/utils/string_constants.dart';
 
 class StorageService {
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      keyCipherAlgorithm:
-          KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
-      storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
-      resetOnError: true,
-    ),
-  );
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<T?> get<T>(String key) async {
     try {

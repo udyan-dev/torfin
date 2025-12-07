@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_torrent/flutter_torrent.dart' as flutter_torrent;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -78,19 +79,18 @@ TransmissionTorrent createTransmissionTorrentFromJson(
     magnetLink: torrent.magnetLink,
     isPrivate: torrent.isPrivate,
     location: torrent.location,
-    files: torrent.files
-        .asMap()
-        .entries
-        .map(
-          (entry) => torrent_file.File(
-            name: entry.value.name,
-            length: entry.value.length,
-            bytesCompleted: entry.value.bytesCompleted,
-            wanted: torrent.fileStats[entry.key].wanted,
-            piecesRange: torrent.fileStats[entry.key].piecesRange,
-          ),
-        )
-        .toList(),
+    files: torrent.files.asMap().entries.map((entry) {
+      final stats = entry.key < torrent.fileStats.length
+          ? torrent.fileStats[entry.key]
+          : null;
+      return torrent_file.File(
+        name: entry.value.name,
+        length: entry.value.length,
+        bytesCompleted: entry.value.bytesCompleted,
+        wanted: stats?.wanted ?? true,
+        piecesRange: stats?.piecesRange ?? const [],
+      );
+    }).toList(),
     downloadedEver: torrent.downloadedEver,
     uploadedEver: torrent.uploadedEver,
     eta: torrent.eta,
@@ -104,39 +104,6 @@ TransmissionTorrent createTransmissionTorrentFromJson(
     doneDate: torrent.doneDate,
   );
 }
-
-final TorrentGetRequest torrentGetRequest = TorrentGetRequest(
-  arguments: TorrentGetRequestArguments(
-    fields: [
-      TorrentField.id,
-      TorrentField.name,
-      TorrentField.percentDone,
-      TorrentField.status,
-      TorrentField.totalSize,
-      TorrentField.rateDownload,
-      TorrentField.rateUpload,
-      TorrentField.labels,
-      TorrentField.addedDate,
-      TorrentField.errorString,
-      TorrentField.isPrivate,
-      TorrentField.downloadDir,
-      TorrentField.files,
-      TorrentField.fileStats,
-      TorrentField.downloadedEver,
-      TorrentField.uploadedEver,
-      TorrentField.eta,
-      TorrentField.pieces,
-      TorrentField.pieceSize,
-      TorrentField.pieceCount,
-      TorrentField.comment,
-      TorrentField.creator,
-      TorrentField.peersConnected,
-      TorrentField.magnetLink,
-      TorrentField.sequentialDownload,
-      TorrentField.doneDate,
-    ],
-  ),
-);
 
 class TransmissionTorrent extends Torrent {
   TransmissionTorrent({
@@ -186,14 +153,14 @@ class TransmissionTorrent extends Torrent {
   }
 
   @override
-  remove(bool withData) {
+  Future<void> remove(bool withData) async {
     final request = TorrentRemoveRequest(
       arguments: TorrentRemoveRequestArguments(
         ids: [id],
         deleteLocalData: withData,
       ),
     );
-    flutter_torrent.requestAsync(jsonEncode(request));
+    await flutter_torrent.requestAsync(jsonEncode(request));
   }
 
   @override
@@ -299,8 +266,12 @@ class TransmissionSession extends Session {
 class TransmissionEngine extends Engine {
   @override
   init() async {
-    final configDir = await getConfigDir();
-    flutter_torrent.initSession(configDir.path, 'transmission');
+    final serviceRunning =
+        Platform.isAndroid && await FlutterForegroundTask.isRunningService;
+    if (!serviceRunning) {
+      final configDir = await getConfigDir();
+      flutter_torrent.initSession(configDir.path, 'transmission');
+    }
     if (Platform.isAndroid) {
       await android.initDefaultDownloadDir(this);
     }
@@ -377,6 +348,10 @@ class TransmissionEngine extends Engine {
     final TorrentGetResponse decodedRes = TorrentGetResponse.fromJson(
       jsonDecode(res),
     );
+
+    if (decodedRes.arguments.torrents.isEmpty) {
+      throw StateError('Torrent with id $id not found');
+    }
 
     return createTransmissionTorrentFromJson(
       decodedRes.arguments.torrents.first,

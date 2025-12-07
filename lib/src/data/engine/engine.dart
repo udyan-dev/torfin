@@ -56,9 +56,11 @@ abstract class Engine {
 
       final torrents = await fetchTorrents();
       for (final torrentResumeStatus in torrentResumeStatus.torrents) {
-        final torrentInstance = torrents.firstWhere(
-          (t) => t.name == torrentResumeStatus.name,
+        final torrentInstance = torrents.cast<Torrent?>().firstWhere(
+          (t) => t?.name == torrentResumeStatus.name,
+          orElse: () => null,
         );
+        if (torrentInstance == null) continue;
 
         if (torrentResumeStatus.status == TorrentResumeState.started) {
           torrentInstance.start();
@@ -72,6 +74,7 @@ abstract class Engine {
         for (final (index, fileResumeStatus)
             in torrentResumeStatus.files.indexed) {
           if (fileResumeStatus &&
+              index < torrentInstance.files.length &&
               torrentInstance.files[index].wanted == false) {
             torrentInstance.toggleFileWanted(index, true);
           }
