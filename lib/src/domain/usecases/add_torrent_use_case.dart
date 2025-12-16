@@ -23,6 +23,11 @@ class AddTorrentUseCase
   final StorageRepository _storageRepository;
   final GetMagnetUseCase? _getMagnetUseCase;
 
+  Future<bool> hasCoins() async {
+    final result = await _storageRepository.getCoins();
+    return result is DataSuccess<int> && (result.data ?? 0) > 0;
+  }
+
   @override
   Future<DataState<TorrentAddedResponse>> call(
     AddTorrentUseCaseParams params, {

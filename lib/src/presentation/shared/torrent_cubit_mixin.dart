@@ -24,6 +24,7 @@ mixin TorrentCubitMixin {
       const FavoriteParams(mode: FavoriteMode.getAll),
       cancelToken: CancelToken(),
     );
+    if (isClosed) return;
     res.when(
       success: (data) {
         final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
@@ -41,6 +42,7 @@ mixin TorrentCubitMixin {
       FavoriteParams(mode: FavoriteMode.toggle, torrent: torrent),
       cancelToken: CancelToken(),
     );
+    if (isClosed) return;
     res.when(
       success: (data) {
         final set = toKeySet<TorrentRes>(data, (t) => t.identityKey);
@@ -67,15 +69,12 @@ mixin TorrentCubitMixin {
     final key = torrent.identityKey;
     if (torrent.magnet.isEmpty) {
       emitFetchingMagnet(key);
-
       setMagnetCancelToken(CancelToken());
       final res = await getMagnetUseCase.call(
         torrent.url,
         cancelToken: getMagnetCancelToken()!,
       );
-
       if (isClosed) return;
-
       String? magnet;
       res.when(
         success: (links) {
@@ -89,7 +88,6 @@ mixin TorrentCubitMixin {
           );
         },
       );
-
       if (magnet == null || magnet!.isEmpty) {
         setMagnetCancelToken(null);
         emitFetchingMagnetWithNotification(
@@ -98,12 +96,11 @@ mixin TorrentCubitMixin {
         );
         return;
       }
-
       final addRes = await addTorrentUseCase.call(
         AddTorrentUseCaseParams(magnetLink: magnet!),
         cancelToken: CancelToken(),
       );
-
+      if (isClosed) return;
       addRes.when(
         success: (response) {
           setMagnetCancelToken(null);
@@ -133,12 +130,11 @@ mixin TorrentCubitMixin {
       );
       return;
     }
-
     final response = await addTorrentUseCase.call(
       AddTorrentUseCaseParams(magnetLink: torrent.magnet),
       cancelToken: CancelToken(),
     );
-
+    if (isClosed) return;
     response.when(
       success: (response) {
         final isDuplicate = response == TorrentAddedResponse.duplicated;
@@ -167,9 +163,7 @@ mixin TorrentCubitMixin {
       ),
       cancelToken: CancelToken(),
     );
-
     if (isClosed) return;
-
     result.when(
       success: (_) {
         if (dialogContext.mounted) {
@@ -201,6 +195,7 @@ mixin TorrentCubitMixin {
 
   bool isFavorite(String key);
   Set<String> getFavoriteKeys();
+  List<TorrentRes> getTorrents();
   CancelToken? getMagnetCancelToken();
   void setMagnetCancelToken(CancelToken? token);
   String? getFetchingMagnetForKey();

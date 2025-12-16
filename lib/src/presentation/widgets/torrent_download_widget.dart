@@ -73,10 +73,12 @@ class TorrentDownloadWidget extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   onTap: () async {
                     if (torrent.errorString.isNotEmpty) {
-                      torrent.remove(true);
-                      context.read<DownloadCubit>().addTorrent(
-                        torrent.magnetLink,
-                      );
+                      if (context.mounted) {
+                        context.read<DownloadCubit>().retryTorrent(
+                          torrent,
+                          context,
+                        );
+                      }
                     } else {
                       torrent.status == TorrentStatus.stopped
                           ? torrent.start()

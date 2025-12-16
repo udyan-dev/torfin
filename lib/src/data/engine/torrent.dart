@@ -77,7 +77,7 @@ abstract class Torrent extends TorrentBase {
 
   void start();
   void stop();
-  void remove(bool withData);
+  Future<void> remove(bool withData);
   Future<void> update(TorrentBase torrent);
   Future<void> toggleFileWanted(int fileIndex, bool wanted);
   Future<void> toggleAllFilesWanted(bool wanted);
@@ -85,7 +85,7 @@ abstract class Torrent extends TorrentBase {
   Future<void> setSequentialDownloadFromPiece(int sequentialDownloadFromPiece);
 
   bool hasLoadedPieces(List<int> piecesToTest) =>
-      piecesToTest.every((p) => pieces[p]);
+      piecesToTest.every((p) => p < pieces.length && pieces[p]);
 
   Future openFolder(BuildContext context) async {
     final folderPath = files.length == 1

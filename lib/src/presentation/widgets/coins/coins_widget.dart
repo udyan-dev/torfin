@@ -63,7 +63,9 @@ class _CoinsWidgetState extends State<CoinsWidget> {
         onAdFailedToLoad: (error) {
           if (!mounted || !_isAdLoadingNotifier.value) return;
           _isAdLoadingNotifier.value = false;
-          _closeDialog(dialogContext);
+          if (dialogContext.mounted) {
+            _closeDialog(dialogContext);
+          }
           _showErrorNotification(error.message);
         },
       ),

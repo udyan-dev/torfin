@@ -37,10 +37,13 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen>
-    with MultiSelectScreenMixin {
+    with MultiSelectScreenMixin, AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
   late final SearchCubit _cubit;
   late final SelectionNotifier _selection;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   SelectionNotifier get selection => _selection;
@@ -212,6 +215,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocProvider.value(
       value: _cubit,
       child: BlocListener<SearchCubit, SearchState>(

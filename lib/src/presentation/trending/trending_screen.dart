@@ -36,9 +36,12 @@ class TrendingScreen extends StatefulWidget {
 }
 
 class _TrendingScreenState extends State<TrendingScreen>
-    with MultiSelectScreenMixin {
+    with MultiSelectScreenMixin, AutomaticKeepAliveClientMixin {
   late final TrendingCubit _cubit;
   late final SelectionNotifier _selection;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   SelectionNotifier get selection => _selection;
@@ -126,6 +129,7 @@ class _TrendingScreenState extends State<TrendingScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocProvider.value(
       value: _cubit,
       child: BlocListener<TrendingCubit, TrendingState>(

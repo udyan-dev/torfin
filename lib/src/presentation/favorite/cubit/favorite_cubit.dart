@@ -210,38 +210,29 @@ class FavoriteCubit extends Cubit<FavoriteState> with TorrentCubitMixin {
 
   Future<void> downloadMultipleTorrents(Set<String> keys) async {
     if (keys.isEmpty) return;
-
     final items = state.torrents
         .where((t) => keys.contains(t.identityKey))
         .map((t) => BatchTorrentItem(url: t.url, magnet: t.magnet))
         .toList();
-
     if (items.isEmpty) return;
-
     emit(state.copyWith(isBulkOperationInProgress: true));
-
     _magnetCancelToken?.cancel();
     _magnetCancelToken = CancelToken();
-
-    final result = await _addTorrentUseCase.callBatch(
+    final result = await addTorrentUseCase.callBatch(
       items,
       _magnetCancelToken!,
     );
-
     if (_magnetCancelToken?.isCancelled ?? true) {
       emit(state.copyWith(isBulkOperationInProgress: false));
       _magnetCancelToken = null;
       return;
     }
-
     _magnetCancelToken = null;
-
     final notificationType = result.isError
         ? NotificationType.error
         : result.hasPartialSuccess
         ? NotificationType.partialSuccess
         : NotificationType.downloadStarted;
-
     emit(
       state.copyWith(
         isBulkOperationInProgress: false,
@@ -261,49 +252,44 @@ class FavoriteCubit extends Cubit<FavoriteState> with TorrentCubitMixin {
   Set<String> getFavoriteKeys() => state.favoriteKeys;
 
   @override
+  List<TorrentRes> getTorrents() => state.torrents;
+
+  @override
   CancelToken? getMagnetCancelToken() => _magnetCancelToken;
 
   @override
-  void setMagnetCancelToken(CancelToken? token) {
-    _magnetCancelToken = token;
-  }
+  void setMagnetCancelToken(CancelToken? token) => _magnetCancelToken = token;
 
   @override
   String? getFetchingMagnetForKey() => state.fetchingMagnetForKey;
 
   @override
-  void emitWithFavoriteKeys(Set<String> keys) {
-    _updateStateWithFavorites(
-      state.all.where((t) => keys.contains(t.identityKey)).toList(),
-    );
-  }
+  void emitWithFavoriteKeys(Set<String> keys) => _updateStateWithFavorites(
+    state.all.where((t) => keys.contains(t.identityKey)).toList(),
+  );
 
   @override
   void emitWithFavoriteKeysAndNotification(
     Set<String> keys,
     AppNotification notification,
-  ) {
-    _updateStateWithFavorites(
-      state.all.where((t) => keys.contains(t.identityKey)).toList(),
-      notification: notification,
-    );
-  }
+  ) => _updateStateWithFavorites(
+    state.all.where((t) => keys.contains(t.identityKey)).toList(),
+    notification: notification,
+  );
 
   @override
-  void emitFetchingMagnet(String? key) {
-    emit(state.copyWith(fetchingMagnetForKey: key));
-  }
+  void emitFetchingMagnet(String? key) =>
+      emit(state.copyWith(fetchingMagnetForKey: key));
 
   @override
   void emitFetchingMagnetWithNotification(
     String? key,
     AppNotification notification,
-  ) {
-    emit(state.copyWith(fetchingMagnetForKey: key, notification: notification));
-  }
+  ) => emit(
+    state.copyWith(fetchingMagnetForKey: key, notification: notification),
+  );
 
   @override
-  void emitNotification(AppNotification notification) {
-    emit(state.copyWith(notification: notification));
-  }
+  void emitNotification(AppNotification notification) =>
+      emit(state.copyWith(notification: notification));
 }
