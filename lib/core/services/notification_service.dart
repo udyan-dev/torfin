@@ -47,14 +47,15 @@ class NotificationService {
       ),
       onDidReceiveNotificationResponse: _handleAction,
     );
-    final launchDetails =
-        await _notifications.getNotificationAppLaunchDetails();
+    final launchDetails = await _notifications
+        .getNotificationAppLaunchDetails();
     if (launchDetails?.didNotificationLaunchApp ?? false) {
       initialTabIndex = 2;
     }
     await _notifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(
           const AndroidNotificationChannel(
             notificationChannelId,
@@ -165,10 +166,12 @@ class NotificationService {
       '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta';
 
   Future<String> _torrentTitle(Torrent t) async {
-    final insufficientIdStr =
-        await _storage.read(key: _kInsufficientCoinsIdKey);
-    final insufficientTimeStr =
-        await _storage.read(key: _kInsufficientCoinsTimeKey);
+    final insufficientIdStr = await _storage.read(
+      key: _kInsufficientCoinsIdKey,
+    );
+    final insufficientTimeStr = await _storage.read(
+      key: _kInsufficientCoinsTimeKey,
+    );
     if (insufficientIdStr != null && insufficientTimeStr != null) {
       final insufficientId = int.tryParse(insufficientIdStr);
       final insufficientTime = int.tryParse(insufficientTimeStr);
@@ -185,13 +188,14 @@ class NotificationService {
     return t.errorString.isNotEmpty
         ? t.errorString
         : t.files.isEmpty
-            ? gettingTorrentMetadata
-            : t.name;
+        ? gettingTorrentMetadata
+        : t.name;
   }
 
   Future<void> _showSingle(Torrent t) async {
     final progress = (t.progress * 100).clamp(0, 100).toInt();
-    final isActive = t.status == TorrentStatus.downloading ||
+    final isActive =
+        t.status == TorrentStatus.downloading ||
         t.status == TorrentStatus.checking;
     final speed = prettyBytes(t.rateDownload.toDouble());
     final eta = _formatEta(t.eta);
@@ -227,10 +231,9 @@ class NotificationService {
               hasError
                   ? retry
                   : isActive
-                      ? notificationPause
-                      : notificationResume,
-              titleColor:
-                  hasError ? colors.supportError : colors.interactive,
+                  ? notificationPause
+                  : notificationResume,
+              titleColor: hasError ? colors.supportError : colors.interactive,
               cancelNotification: false,
             ),
           ],
@@ -240,21 +243,25 @@ class NotificationService {
   }
 
   Future<void> _showMultiple(List<Torrent> torrents) async {
-    final progress = ((torrents.fold<double>(0, (s, t) => s + t.progress) /
-                torrents.length) *
-            100)
-        .clamp(0, 100)
-        .toInt();
+    final progress =
+        ((torrents.fold<double>(0, (s, t) => s + t.progress) /
+                    torrents.length) *
+                100)
+            .clamp(0, 100)
+            .toInt();
     final speed = prettyBytes(
       torrents.fold<int>(0, (s, t) => s + t.rateDownload).toDouble(),
     );
     final activeCount = torrents
-        .where((t) =>
-            t.status == TorrentStatus.downloading ||
-            t.status == TorrentStatus.checking)
+        .where(
+          (t) =>
+              t.status == TorrentStatus.downloading ||
+              t.status == TorrentStatus.checking,
+        )
         .length;
-    final pausedCount =
-        torrents.where((t) => t.status == TorrentStatus.stopped).length;
+    final pausedCount = torrents
+        .where((t) => t.status == TorrentStatus.stopped)
+        .length;
     final hasActive = activeCount > 0;
     final maxEta = torrents.fold<int>(
       -1,
@@ -337,9 +344,9 @@ class NotificationService {
         final id = int.tryParse(actionId.substring(6));
         if (id == null) return;
         final t = torrents.cast<Torrent?>().firstWhere(
-              (t) => t?.id == id,
-              orElse: () => null,
-            );
+          (t) => t?.id == id,
+          orElse: () => null,
+        );
         if (t == null) return;
         final magnetLink = t.magnetLink;
         // Check coins before removing
@@ -371,9 +378,9 @@ class NotificationService {
         final id = int.tryParse(actionId.substring(isPause ? 6 : 7));
         if (id == null) return;
         final t = torrents.cast<Torrent?>().firstWhere(
-              (t) => t?.id == id,
-              orElse: () => null,
-            );
+          (t) => t?.id == id,
+          orElse: () => null,
+        );
         if (t == null) return;
         isPause ? t.stop() : t.start();
       }

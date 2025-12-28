@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../../core/bindings/env.dart';
+import '../../../../core/services/consent_service.dart';
 import '../../../../core/theme/app_styles.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/extensions.dart';
@@ -44,6 +45,12 @@ class _CoinsWidgetState extends State<CoinsWidget> {
   void _loadRewardedAd(BuildContext dialogContext) {
     if (_isAdLoadingNotifier.value || _rewardedInterstitialAd != null) return;
 
+    if (!ConsentService.canRequestAds) {
+      _closeDialog(dialogContext);
+      _showErrorNotification(adConsentRequired);
+      return;
+    }
+
     _isAdLoadingNotifier.value = true;
 
     RewardedInterstitialAd.load(
@@ -72,12 +79,12 @@ class _CoinsWidgetState extends State<CoinsWidget> {
     );
   }
 
-  void _cancelAdLoading(BuildContext dialogContext) {
+  void _cancelAdLoading(BuildContext dialogContext, {bool shouldClose = true}) {
     if (_isAdLoadingNotifier.value) {
       _isAdLoadingNotifier.value = false;
       _disposeAd();
     }
-    _closeDialog(dialogContext);
+    if (shouldClose) _closeDialog(dialogContext);
   }
 
   void _configureAdCallbacks() {
@@ -135,7 +142,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
   }
 
   void _closeDialog(BuildContext dialogContext) {
-    if (!mounted) return;
+    if (!mounted || !dialogContext.mounted) return;
     Navigator.of(dialogContext).maybePop();
   }
 
@@ -145,6 +152,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
       builder: (dialogContext) => _AdDialogContent(
         isAdLoadingNotifier: _isAdLoadingNotifier,
         onCancel: () => _cancelAdLoading(dialogContext),
+        onPopCancel: () => _cancelAdLoading(dialogContext, shouldClose: false),
         onWatch: () => _loadRewardedAd(dialogContext),
       ),
     );
@@ -220,11 +228,13 @@ class _CoinsWidgetState extends State<CoinsWidget> {
 class _AdDialogContent extends StatelessWidget {
   final ValueNotifier<bool> isAdLoadingNotifier;
   final VoidCallback onCancel;
+  final VoidCallback onPopCancel;
   final VoidCallback onWatch;
 
   const _AdDialogContent({
     required this.isAdLoadingNotifier,
     required this.onCancel,
+    required this.onPopCancel,
     required this.onWatch,
   });
 
@@ -233,7 +243,7 @@ class _AdDialogContent extends StatelessWidget {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
-          onCancel();
+          onPopCancel();
         }
       },
       child: ValueListenableBuilder<bool>(

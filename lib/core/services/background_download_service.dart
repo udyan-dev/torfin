@@ -99,20 +99,23 @@ Future<void> _onNotificationAction(NotificationResponse response) async {
   } else if (action.startsWith('retry_')) {
     await _handleRetry(action);
   } else if (action.startsWith('pause')) {
-    final id =
-        action == 'pause_all' ? null : int.tryParse(action.substring(6));
+    final id = action == 'pause_all' ? null : int.tryParse(action.substring(6));
     final args = id == null
         ? <String, Object>{}
-        : <String, Object>{'ids': [id]};
+        : <String, Object>{
+            'ids': [id],
+          };
     torrent.request(jsonEncode({'method': 'torrent-stop', 'arguments': args}));
   } else if (action.startsWith('resume')) {
-    final id =
-        action == 'resume_all' ? null : int.tryParse(action.substring(7));
+    final id = action == 'resume_all'
+        ? null
+        : int.tryParse(action.substring(7));
     final args = id == null
         ? <String, Object>{}
-        : <String, Object>{'ids': [id]};
-    torrent
-        .request(jsonEncode({'method': 'torrent-start', 'arguments': args}));
+        : <String, Object>{
+            'ids': [id],
+          };
+    torrent.request(jsonEncode({'method': 'torrent-start', 'arguments': args}));
   }
 }
 
@@ -235,8 +238,9 @@ class _TaskHandler extends TaskHandler {
     final id = t['id'] as int;
     const storage = FlutterSecureStorage();
     final insufficientIdStr = await storage.read(key: _kInsufficientCoinsIdKey);
-    final insufficientTimeStr =
-        await storage.read(key: _kInsufficientCoinsTimeKey);
+    final insufficientTimeStr = await storage.read(
+      key: _kInsufficientCoinsTimeKey,
+    );
     if (insufficientIdStr != null && insufficientTimeStr != null) {
       final insufficientId = int.tryParse(insufficientIdStr);
       final insufficientTime = int.tryParse(insufficientTimeStr);
@@ -290,16 +294,13 @@ class _TaskHandler extends TaskHandler {
           subText: _formatSubText(progress, speed, eta),
           actions: [
             AndroidNotificationAction(
-              hasError
-                  ? 'retry_$id'
-                  : '${isActive ? 'pause' : 'resume'}_$id',
+              hasError ? 'retry_$id' : '${isActive ? 'pause' : 'resume'}_$id',
               hasError
                   ? retry
                   : isActive
-                      ? notificationPause
-                      : notificationResume,
-              titleColor:
-                  hasError ? colors.supportError : colors.interactive,
+                  ? notificationPause
+                  : notificationResume,
+              titleColor: hasError ? colors.supportError : colors.interactive,
               cancelNotification: false,
             ),
             AndroidNotificationAction(
@@ -315,19 +316,20 @@ class _TaskHandler extends TaskHandler {
   }
 
   Future<void> _showMultiple(List<Map<String, dynamic>> torrents) async {
-    final progress = ((torrents.fold<double>(
-                    0, (s, t) => s + (t['percentDone'] as num)) /
-                torrents.length) *
-            100)
-        .clamp(0, 100)
-        .toInt();
+    final progress =
+        ((torrents.fold<double>(0, (s, t) => s + (t['percentDone'] as num)) /
+                    torrents.length) *
+                100)
+            .clamp(0, 100)
+            .toInt();
     final speed = prettyBytes(
       torrents
           .fold<int>(0, (s, t) => s + (t['rateDownload'] as int))
           .toDouble(),
     );
-    final activeCount =
-        torrents.where((t) => t['status'] == 4 || t['status'] == 2).length;
+    final activeCount = torrents
+        .where((t) => t['status'] == 4 || t['status'] == 2)
+        .length;
     final pausedCount = torrents.where((t) => t['status'] == 0).length;
     final hasActive = activeCount > 0;
     final maxEta = torrents.fold<int>(-1, (m, t) {
@@ -410,5 +412,9 @@ class _TaskHandler extends TaskHandler {
   void onNotificationDismissed() {}
 
   @override
-  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {}
+  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
+    try {
+      await _notifications.cancel(_kNotificationId);
+    } catch (_) {}
+  }
 }

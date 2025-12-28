@@ -39,9 +39,9 @@ const String reverseSortKey = 'reverseSort';
 const String storageExceptionPrefix = 'StorageException: ';
 const String downloadLocationKey = 'downloadLocation';
 const String coinsKey = 'coins';
-const int initialCoins = 10;
-const int coinsPerAd = 10;
-const int maxCoins = 10;
+const int initialCoins = 5;
+const int coinsPerAd = 5;
+const int maxCoins = 5;
 const String shareCountKey = 'shareCount';
 const int sharesPerCoin = 4;
 const String userAgentHeader = 'user-agent';
@@ -265,6 +265,8 @@ const String adFailedToLoad =
     'Failed to load ad. Please try again after some time.';
 const String adBlockerOrInternetMessage =
     'Please disable AdBlocker or check your internet connection to load the ad';
+const String adConsentRequired =
+    'Ad consent is required to watch ads. Please restart the app and accept the consent.';
 const String coinsInfoMessage =
     'Each download costs 1 coin. Each share costs 0.25 coins. Watch ads when coins reach zero to continue.';
 const String failedToDeleteTorrents = 'Failed to delete torrents';

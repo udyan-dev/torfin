@@ -38,7 +38,12 @@ class CoinsRemoteSource {
     }
   }
 
-  Future<bool> setCoins(String deviceId, int coins, {int? share}) async {
+  Future<bool> setCoins(
+    String deviceId,
+    int coins, {
+    int? share,
+    required int timestamp,
+  }) async {
     try {
       if (!await _connectivityService.hasInternet) return false;
 
@@ -49,17 +54,16 @@ class CoinsRemoteSource {
 
         final snapshot = await transaction.get(docRef);
         final remoteTimestamp = snapshot.data()?['timestamp'] as int? ?? 0;
-        final localTimestamp = DateTime.now().millisecondsSinceEpoch;
 
-        if (localTimestamp > remoteTimestamp) {
+        if (timestamp > remoteTimestamp) {
           final data = <String, dynamic>{
             'coins': coins,
-            'timestamp': localTimestamp,
+            'timestamp': timestamp,
           };
 
           if (share != null) {
             data['share'] = share;
-            data['shareTimestamp'] = localTimestamp;
+            data['shareTimestamp'] = timestamp;
           }
 
           transaction.set(docRef, data, SetOptions(merge: true));

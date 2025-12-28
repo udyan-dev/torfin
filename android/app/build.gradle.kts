@@ -67,11 +67,15 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release") // FOR RELEASE
-            firebaseCrashlytics {
-                mappingFileUploadEnabled = true
-            }
 //            signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+// Firebase Crashlytics configuration for release builds
+android.buildTypes.getByName("release") {
+    configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+        mappingFileUploadEnabled = true
     }
 }
 

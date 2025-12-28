@@ -163,7 +163,7 @@ class StorageRepositoryImpl extends BaseRepository
     );
     if (result is DataSuccess<bool> && result.data == true) {
       _emitCoins(coins);
-      unawaited(_coinsSyncService?.syncCoinsAfterChange(coins));
+      unawaited(_coinsSyncService?.syncCoinsAfterChange(coins, timestamp));
     }
     return result;
   }
@@ -194,7 +194,7 @@ class StorageRepositoryImpl extends BaseRepository
       },
     );
     if (result is DataSuccess<bool> && result.data == true) {
-      unawaited(_coinsSyncService?.syncShareCountAfterChange(count));
+      unawaited(_coinsSyncService?.syncShareCountAfterChange(count, timestamp));
     }
     return result;
   }

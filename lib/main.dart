@@ -8,6 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/bindings/di.dart';
 import 'core/services/background_download_service.dart';
+import 'core/services/consent_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/theme_service.dart';
@@ -20,6 +21,7 @@ void main() {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
       FlutterForegroundTask.initCommunicationPort();
+      await ConsentService.initialize();
       unawaited(MobileAds.instance.initialize());
       await Future.wait([
         SystemChrome.setPreferredOrientations(const [

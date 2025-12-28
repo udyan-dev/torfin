@@ -1,5 +1,3 @@
-import 'dart:async' show unawaited;
-
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
@@ -130,10 +128,13 @@ Future<void> get initDI async {
   );
   di.registerLazySingleton(() => ShareTorrentUseCase(storageRepository: di()));
 
-  di.registerSingleton(
-    CoinsCubit(storageRepository: di(), coinsSyncService: di())..load(),
+  final coinsCubit = CoinsCubit(
+    storageRepository: di(),
+    coinsSyncService: di(),
   );
-  unawaited(di<CoinsSyncService>().syncCoinsOnAppStart());
+  di.registerSingleton(coinsCubit);
+  await di<CoinsSyncService>().syncCoinsOnAppStart();
+  await coinsCubit.load();
 
   di.registerFactory(
     () => HomeCubit(
