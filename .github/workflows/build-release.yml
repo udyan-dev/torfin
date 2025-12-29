@@ -1,5 +1,8 @@
 name: Build and Release APK
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     types: [closed]
@@ -10,6 +13,8 @@ on:
 jobs:
   build:
     name: Build APK
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
 
