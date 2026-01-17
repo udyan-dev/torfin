@@ -51,22 +51,22 @@ class CoinsRemoteSource {
         final docRef = FirebaseFirestore.instance
             .collection('users')
             .doc(deviceId);
-
         final snapshot = await transaction.get(docRef);
-        final remoteTimestamp = snapshot.data()?['timestamp'] as int? ?? 0;
 
-        if (timestamp > remoteTimestamp) {
-          final data = <String, dynamic>{
-            'coins': coins,
-            'timestamp': timestamp,
-          };
+        final data = <String, dynamic>{'coins': coins, 'timestamp': timestamp};
 
-          if (share != null) {
-            data['share'] = share;
-            data['shareTimestamp'] = timestamp;
+        if (share != null) {
+          data['share'] = share;
+          data['shareTimestamp'] = timestamp;
+        }
+
+        if (snapshot.exists) {
+          final remoteTimestamp = snapshot.data()?['timestamp'] as int? ?? 0;
+          if (timestamp > remoteTimestamp) {
+            transaction.update(docRef, data);
           }
-
-          transaction.set(docRef, data, SetOptions(merge: true));
+        } else {
+          transaction.set(docRef, data);
         }
       });
       return true;

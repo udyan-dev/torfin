@@ -95,6 +95,7 @@ Future<void> _onNotificationAction(NotificationResponse response) async {
 
   if (action == 'cancel') {
     torrent.request('{"method":"torrent-stop","arguments":{}}');
+    FlutterForegroundTask.sendDataToTask('stop_task');
     FlutterForegroundTask.stopService();
   } else if (action.startsWith('retry_')) {
     await _handleRetry(action);
@@ -170,6 +171,7 @@ Future<void> _handleRetry(String action) async {
 class _TaskHandler extends TaskHandler {
   DateTime _lastHeartbeat = DateTime.now();
   late final FlutterLocalNotificationsPlugin _notifications;
+  bool _isStopping = false;
 
   bool get _isMainAlive =>
       DateTime.now().difference(_lastHeartbeat).inSeconds < _kHeartbeatTimeout;
@@ -196,11 +198,16 @@ class _TaskHandler extends TaskHandler {
 
   @override
   void onReceiveData(Object data) {
-    if (data == _kHeartbeat) _lastHeartbeat = DateTime.now();
+    if (data == _kHeartbeat) {
+      _lastHeartbeat = DateTime.now();
+    } else if (data == 'stop_task') {
+      _isStopping = true;
+    }
   }
 
   @override
   void onRepeatEvent(DateTime timestamp) {
+    if (_isStopping) return;
     if (!_isMainAlive) _updateNotification();
   }
 
