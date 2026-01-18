@@ -1,7 +1,7 @@
 name: torfin
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.2.4+18
+version: 2.2.5+19
 
 environment:
   sdk: ^3.10.7
@@ -43,7 +43,7 @@ dependencies:
   google_mobile_ads: ^7.0.0
   flutter_secure_storage: ^10.0.0
   cloud_firestore: ^6.0.3
-  file_picker: ^10.3.3
+  image_picker: ^1.2.1
   content_resolver: ^0.3.6
   app_links: ^7.0.0
   share_plus: ^12.0.1

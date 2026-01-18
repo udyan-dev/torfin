@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:content_resolver/content_resolver.dart';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/helpers/base_exception.dart';
@@ -66,6 +66,7 @@ class _AddTorrentDialog extends StatefulWidget {
 class _AddTorrentDialogState extends State<_AddTorrentDialog> {
   late final AddTorrentUseCase _addTorrentUseCase;
   late final TextEditingController _controller;
+  final ImagePicker _picker = ImagePicker();
   String? _filePath;
   String? _fileName;
   bool _isLoading = false;
@@ -116,13 +117,9 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
 
   Future<void> _pickFile() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['torrent'],
-      );
-      if (result == null || result.files.isEmpty) return;
-      final file = result.files.first;
-      if (file.path == null) return;
+      final result = await _picker.pickMedia();
+      if (result == null) return;
+      final file = result;
       setState(() {
         _filePath = file.path;
         _fileName = file.name;

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/helpers/base_usecase.dart';
 import '../../../../core/helpers/data_state.dart';
@@ -12,10 +11,8 @@ import '../../../../core/services/intent_handler.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/string_constants.dart';
-import '../../../../core/utils/utils.dart';
 import '../../../data/models/response/empty_state/empty_state.dart';
 import '../../../domain/usecases/get_token_use_case.dart';
-import '../../shared/notification_builders.dart';
 import '../../widgets/notification_widget.dart';
 
 part 'home_cubit.freezed.dart';
@@ -96,34 +93,6 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       await _notificationService.requestPermission();
     } catch (_) {}
-  }
-
-  Future<void> checkDownloadPermission() async {
-    try {
-      final sdk = await getAndroidSdkVersion();
-      if (sdk <= 29) {
-        if (!await Permission.storage.isGranted &&
-            await Permission.storage.request() != PermissionStatus.granted) {
-          emit(
-            state.copyWith(
-              notification: errorNotification(
-                storagePermissionNotGranted,
-                pleaseGrantStoragePermission,
-              ),
-            ),
-          );
-        }
-      }
-    } catch (_) {
-      emit(
-        state.copyWith(
-          notification: errorNotification(
-            storagePermissionNotGranted,
-            somethingWentWrong,
-          ),
-        ),
-      );
-    }
   }
 
   @override

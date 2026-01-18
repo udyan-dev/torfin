@@ -51,8 +51,7 @@ class _HomeScreenState extends State<HomeScreen>
     _coinsCubit = di<CoinsCubit>();
     _homeCubit = di<HomeCubit>()
       ..getToken()
-      ..checkNotificationPermission()
-      ..checkDownloadPermission();
+      ..checkNotificationPermission();
     _lifecycleListener = AppLifecycleListener(onResume: _coinsCubit.load);
   }
 
