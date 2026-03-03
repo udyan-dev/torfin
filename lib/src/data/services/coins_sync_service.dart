@@ -33,24 +33,21 @@ class CoinsSyncService {
       final deviceId = await _deviceService.getDeviceId();
       if (deviceId == null) return;
 
-      final (
-        localCoinsResult,
-        localShareResult,
-        localCoinsTs,
-        localShareTs,
-      ) = await (
+      final results = await Future.wait([
         _storageRepository.getCoins(),
         _storageRepository.getShareCount(),
         _getTimestamp(_storageRepository.getCoinsTimestamp),
         _getTimestamp(_storageRepository.getShareCountTimestamp),
-      ).wait;
+      ]);
 
-      final localCoins = localCoinsResult is DataSuccess<int>
-          ? localCoinsResult.data ?? initialCoins
+      final localCoins = results[0] is DataSuccess<int>
+          ? (results[0] as DataSuccess<int>).data ?? initialCoins
           : initialCoins;
-      final localShare = localShareResult is DataSuccess<int>
-          ? localShareResult.data ?? 0
+      final localShare = results[1] is DataSuccess<int>
+          ? (results[1] as DataSuccess<int>).data ?? 0
           : 0;
+      final localCoinsTs = results[2] as int;
+      final localShareTs = results[3] as int;
       final localTimestamp = localCoinsTs > localShareTs
           ? localCoinsTs
           : localShareTs;
@@ -101,11 +98,8 @@ class CoinsSyncService {
   }
 
   Future<int> _getTimestamp(Future<DataState<int>> Function() getter) async {
-    try {
-      final result = await getter();
-      if (result case DataSuccess<int>(:final data?)) return data;
-    } catch (_) {}
-    return 0;
+    final result = await getter();
+    return result is DataSuccess<int> ? result.data ?? 0 : 0;
   }
 
   Future<void> syncCoinsAfterChange(int coins, int timestamp) async {
@@ -117,14 +111,11 @@ class CoinsSyncService {
         final pending = _pendingCoinsSync!;
         _pendingCoinsSync = null;
 
-        final (hasInternet, deviceId, shareResult) = await (
-          _connectivityService.hasInternet,
-          _deviceService.getDeviceId(),
-          _storageRepository.getShareCount(),
-        ).wait;
-
+        final hasInternet = await _connectivityService.hasInternet;
+        final deviceId = await _deviceService.getDeviceId();
         if (!hasInternet || deviceId == null) break;
 
+        final shareResult = await _storageRepository.getShareCount();
         final share = shareResult is DataSuccess<int>
             ? shareResult.data ?? 0
             : 0;
@@ -135,10 +126,8 @@ class CoinsSyncService {
           timestamp: pending.timestamp,
         );
       }
-    } catch (_) {
     } finally {
       _isCoinsSyncing = false;
-      _pendingCoinsSync = null;
     }
   }
 
@@ -151,15 +140,14 @@ class CoinsSyncService {
         final pending = _pendingShareSync!;
         _pendingShareSync = null;
 
-        final (hasInternet, deviceId, coinsResult, coinsTs) = await (
-          _connectivityService.hasInternet,
-          _deviceService.getDeviceId(),
-          _storageRepository.getCoins(),
-          _getTimestamp(_storageRepository.getCoinsTimestamp),
-        ).wait;
-
+        final hasInternet = await _connectivityService.hasInternet;
+        final deviceId = await _deviceService.getDeviceId();
         if (!hasInternet || deviceId == null) break;
 
+        final coinsResult = await _storageRepository.getCoins();
+        final coinsTs = await _getTimestamp(
+          _storageRepository.getCoinsTimestamp,
+        );
         final coins = coinsResult is DataSuccess<int>
             ? coinsResult.data ?? 0
             : 0;
@@ -171,30 +159,29 @@ class CoinsSyncService {
           timestamp: ts,
         );
       }
-    } catch (_) {
     } finally {
       _isShareSyncing = false;
-      _pendingShareSync = null;
     }
   }
 
   Future<void> syncCoinsOnAppClose() async {
     try {
-      final (deviceId, localCoins, localShare, coinsTs, shareTs) = await (
-        _deviceService.getDeviceId(),
-        _storageRepository.getCoins(),
-        _storageRepository.getShareCount(),
-        _getTimestamp(_storageRepository.getCoinsTimestamp),
-        _getTimestamp(_storageRepository.getShareCountTimestamp),
-      ).wait;
-
+      final deviceId = await _deviceService.getDeviceId();
       if (deviceId == null) return;
-      if (localCoins case DataSuccess<int>(:final data?)) {
-        final share = localShare is DataSuccess<int> ? localShare.data ?? 0 : 0;
+      final coinsResult = await _storageRepository.getCoins();
+      if (coinsResult is DataSuccess<int> && coinsResult.data != null) {
+        final shareResult = await _storageRepository.getShareCount();
+        final share = shareResult is DataSuccess<int>
+            ? shareResult.data ?? 0
+            : 0;
+        final coinsTs = await _getTimestamp(
+          _storageRepository.getCoinsTimestamp,
+        );
+        final shareTs = await _getTimestamp(
+          _storageRepository.getShareCountTimestamp,
+        );
         final ts = coinsTs > shareTs ? coinsTs : shareTs;
-        if (ts > 0) {
-          unawaited(_syncToRemote(deviceId, data, share, ts));
-        }
+        if (ts > 0) await _syncToRemote(deviceId, coinsResult.data!, share, ts);
       }
     } catch (_) {}
   }

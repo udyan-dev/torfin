@@ -19,46 +19,43 @@ class ShareTorrentUseCase extends BaseUseCase<void, ShareTorrentUseCaseParams> {
     required CancelToken cancelToken,
   }) async {
     try {
-      final coinsResult = await _storageRepository.getCoins();
-      final shareCountResult = await _storageRepository.getShareCount();
+      final results = await Future.wait([
+        _storageRepository.getCoins(),
+        _storageRepository.getShareCount(),
+      ]);
 
-      if (coinsResult case DataSuccess<int>(:final data?)) {
-        final coins = data;
+      final coinsState = results[0];
+      final shareState = results[1];
 
-        if (shareCountResult case DataSuccess<int>(:final data?)) {
-          final currentCount = data;
-          final newCount = currentCount + 1;
-          final willCostCoin = newCount % sharesPerCoin == 0;
+      if (coinsState is DataSuccess<int> && shareState is DataSuccess<int>) {
+        final coins = coinsState.data ?? 0;
+        final currentCount = shareState.data ?? 0;
 
-          if (coins <= 0 || (willCostCoin && coins < 1)) {
-            return const DataFailed(
-              BaseException(
-                type: BaseExceptionType.insufficientCoins,
-                message: insufficientCoins,
-              ),
-            );
-          }
+        final nextCount = currentCount + 1;
+        final isMilestone = nextCount % sharesPerCoin == 0;
 
-          if (willCostCoin) {
-            await _storageRepository.setCoins(coins - 1);
-          }
-
-          final countToSave = willCostCoin ? 0 : newCount;
-          await _storageRepository.setShareCount(countToSave);
-
-          await SharePlus.instance.share(
-            ShareParams(text: params.magnetLink, subject: params.torrentName),
+        if (coins <= 0 || (isMilestone && coins < 1)) {
+          return const DataFailed(
+            BaseException(
+              type: BaseExceptionType.insufficientCoins,
+              message: insufficientCoins,
+            ),
           );
-
-          return const DataSuccess(null);
         }
 
-        return const DataFailed(
-          BaseException(
-            type: BaseExceptionType.unknown,
-            message: failedToRetrieveShareCount,
-          ),
+        final updates = <Future>[];
+        if (isMilestone) updates.add(_storageRepository.setCoins(coins - 1));
+        updates.add(
+          _storageRepository.setShareCount(isMilestone ? 0 : nextCount),
         );
+
+        await Future.wait(updates);
+
+        await SharePlus.instance.share(
+          ShareParams(text: params.magnetLink, subject: params.torrentName),
+        );
+
+        return const DataSuccess(null);
       }
 
       return const DataFailed(

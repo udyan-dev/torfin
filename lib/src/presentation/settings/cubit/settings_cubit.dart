@@ -114,8 +114,11 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> resetTorrentSettings() async {
     try {
-      await _engine.resetSettings();
-      await _sessionService.fetchSession();
+      await Future.wait([
+        _engine.resetSettings(),
+        _sessionService.fetchSession(),
+        _storageRepository.clearAll(),
+      ]);
 
       final session = _sessionService.session;
       final enableSpeedLimits =

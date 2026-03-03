@@ -209,7 +209,7 @@ const String rateTheApp = 'Support us by rating the app !';
 const String failedToOpenPlayStore = 'Failed to open Play Store';
 const String failedToOpenFile = 'Failed to open file';
 const String appVersion = 'App version';
-const String appVersionNumber = '2.0.0';
+const String appVersionNumber = '2.2.7+21';
 const String privacyPolicy = 'Privacy policy';
 const String privacyPolicyUrl =
     'https://udyan-dev.github.io/torfin-privacy-policy/';

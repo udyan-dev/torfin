@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../core/helpers/data_state.dart';
 import '../../data/models/response/torrent/torrent_res.dart';
+import '../../data/services/coins_sync_service.dart';
 
 abstract class StorageRepository {
+  void setCoinsSyncService(CoinsSyncService service);
+
   Future<DataState<String>> getToken();
   Future<DataState<bool>> setToken(String token);
   Future<DataState<bool>> clearToken();
@@ -33,5 +36,6 @@ abstract class StorageRepository {
   Future<DataState<bool>> setShareCount(int count);
   Future<DataState<int>> getShareCountTimestamp();
 
+  Stream<int> get coinsStream;
   void dispose();
 }

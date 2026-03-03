@@ -8,6 +8,7 @@ class ThemeService {
     : _storageRepository = storageRepository;
 
   final StorageRepository _storageRepository;
+
   final ValueNotifier<ThemeMode> _notifier = ValueNotifier(ThemeMode.system);
 
   ValueNotifier<ThemeMode> get themeNotifier => _notifier;
@@ -17,7 +18,7 @@ class ThemeService {
     try {
       final result = await _storageRepository.getTheme();
       if (result is DataSuccess<ThemeMode>) {
-        _notifier.value = result.data!;
+        _notifier.value = result.data ?? ThemeMode.system;
       }
     } catch (_) {
       _notifier.value = ThemeMode.system;
@@ -26,12 +27,11 @@ class ThemeService {
 
   Future<void> setTheme(ThemeMode theme) async {
     if (_notifier.value == theme) return;
+
     try {
       final result = await _storageRepository.setTheme(theme);
-      if (result is DataSuccess<bool>) {
+      if (result is DataSuccess<bool> && result.data == true) {
         _notifier.value = theme;
-      } else {
-        _notifier.value = ThemeMode.system;
       }
     } catch (_) {
       _notifier.value = ThemeMode.system;
