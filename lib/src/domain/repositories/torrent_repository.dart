@@ -13,7 +13,7 @@ abstract class TorrentRepository {
     required CancelToken cancelToken,
   });
 
-  Future<DataState<dynamic>> autoComplete({
+  Future<DataState<String>> autoComplete({
     required String search,
     required CancelToken cancelToken,
   });

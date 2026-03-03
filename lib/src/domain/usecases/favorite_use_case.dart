@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-
+import 'package:flutter/foundation.dart';
 import '../../../core/helpers/base_usecase.dart';
 import '../../../core/helpers/data_state.dart';
 import '../../../core/utils/string_constants.dart';
@@ -20,75 +20,79 @@ class FavoriteUseCase extends BaseUseCase<List<TorrentRes>, FavoriteParams> {
     switch (params.mode) {
       case FavoriteMode.getAll:
         return _storageRepository.getFavorites();
+
       case FavoriteMode.toggle:
         final current = await _storageRepository.getFavorites();
-        final list = current.data ?? const <TorrentRes>[];
+        final list = current.data ?? const [];
         final torrent = params.torrent;
         if (torrent == null) return DataSuccess(list);
+
         final key = torrent.identityKey;
-        final found = list.any((t) => t.identityKey == key);
-        final next = found
+        final exists = list.any((t) => t.identityKey == key);
+        final next = exists
             ? list.where((t) => t.identityKey != key).toList(growable: false)
-            : (List<TorrentRes>.from(list)..add(torrent));
+            : [...list, torrent];
+
         final setRes = await _storageRepository.setFavorites(next);
-        return setRes is DataSuccess<bool>
+        return setRes is DataSuccess
             ? DataSuccess(next)
             : DataFailed(setRes.error!);
+
       case FavoriteMode.removeMultiple:
         final current = await _storageRepository.getFavorites();
-        final list = current.data ?? const <TorrentRes>[];
-        final torrentsToRemove = params.torrents ?? const <TorrentRes>[];
-        if (torrentsToRemove.isEmpty) return DataSuccess(list);
-        final keysToRemove = torrentsToRemove.map((t) => t.identityKey).toSet();
+        final list = current.data ?? const [];
+        final toRemove = params.torrents ?? const [];
+        if (toRemove.isEmpty) return DataSuccess(list);
+
+        final removeKeys = toRemove.map((t) => t.identityKey).toSet();
         final next = list
-            .where((t) => !keysToRemove.contains(t.identityKey))
+            .where((t) => !removeKeys.contains(t.identityKey))
             .toList(growable: false);
+
         final setRes = await _storageRepository.setFavorites(next);
-        return setRes is DataSuccess<bool>
+        return setRes is DataSuccess
             ? DataSuccess(next)
             : DataFailed(setRes.error!);
+
       case FavoriteMode.addMultiple:
-        final current = await _storageRepository.getFavorites();
-        return DataSuccess(current.data ?? const <TorrentRes>[]);
+        return _storageRepository.getFavorites();
     }
   }
 
   Future<BatchFavoriteResult> callBatch(List<TorrentRes> torrentsToAdd) async {
-    final current = await _storageRepository.getFavorites();
-    final list = current.data ?? const <TorrentRes>[];
-
     if (torrentsToAdd.isEmpty) {
       return const BatchFavoriteResult(successCount: 0, alreadyExistsCount: 0);
     }
+
+    final current = await _storageRepository.getFavorites();
+    final list = current.data ?? const [];
 
     final existingKeys = list.map((t) => t.identityKey).toSet();
     final newTorrents = torrentsToAdd
         .where((t) => !existingKeys.contains(t.identityKey))
         .toList();
-    final alreadyExistsCount = torrentsToAdd.length - newTorrents.length;
+    final existsCount = torrentsToAdd.length - newTorrents.length;
 
     if (newTorrents.isEmpty) {
       return BatchFavoriteResult(
         successCount: 0,
-        alreadyExistsCount: alreadyExistsCount,
+        alreadyExistsCount: existsCount,
       );
     }
 
-    final next = List<TorrentRes>.from(list)..addAll(newTorrents);
+    final next = [...list, ...newTorrents];
     final setRes = await _storageRepository.setFavorites(next);
 
-    if (setRes is DataSuccess<bool>) {
-      return BatchFavoriteResult(
-        successCount: newTorrents.length,
-        alreadyExistsCount: alreadyExistsCount,
-      );
-    } else {
-      return BatchFavoriteResult(
-        successCount: 0,
-        alreadyExistsCount: alreadyExistsCount,
-        error: setRes.error?.message,
-      );
-    }
+    return setRes is DataSuccess
+        ? BatchFavoriteResult(
+            successCount: newTorrents.length,
+            alreadyExistsCount: existsCount,
+          )
+        : BatchFavoriteResult(
+            successCount: 0,
+            alreadyExistsCount: existsCount,
+            error: setRes.error?.message,
+          );
   }
 }
 
@@ -101,6 +105,7 @@ class FavoriteParams {
   const FavoriteParams({required this.mode, this.torrent, this.torrents});
 }
 
+@immutable
 class BatchFavoriteResult {
   final int successCount;
   final int alreadyExistsCount;
@@ -113,33 +118,21 @@ class BatchFavoriteResult {
   });
 
   String get title {
-    if (error != null) {
-      return failedToAddFavorites;
-    }
-    if (alreadyExistsCount > 0 && successCount == 0) {
-      return '$alreadyExistsCount ${alreadyExistsCount == 1 ? torrentWasAlreadyInFavorites : torrentsWereAlreadyInFavorites}';
-    }
-    if (alreadyExistsCount > 0 && successCount > 0) {
-      return '$successCount $torrentsWereAddedToFavorites';
-    }
-    if (successCount > 0) {
-      return '$successCount $torrentsWereAddedToFavorites';
-    }
-    return failedToAddFavorites;
+    if (error != null) return failedToAddFavorites;
+    if (alreadyExistsCount > 0 && successCount == 0)
+      return '$alreadyExistsCount $torrentsWereAlreadyInFavorites';
+    return successCount > 0
+        ? '$successCount $torrentsWereAddedToFavorites'
+        : failedToAddFavorites;
   }
 
-  String? get message {
-    if (error != null) return error;
-    if (alreadyExistsCount > 0 && successCount > 0) {
-      return '$alreadyExistsCount ${alreadyExistsCount == 1 ? torrentWasAlreadyInFavorites : torrentsWereAlreadyInFavorites}';
-    }
-    return null;
-  }
+  String? get message =>
+      error ??
+      (hasPartialSuccess
+          ? '$alreadyExistsCount $torrentsWereAlreadyInFavorites'
+          : null);
 
-  bool get isError =>
-      error != null ||
-      (successCount == 0 && alreadyExistsCount == 0) ||
-      (successCount == 0 && alreadyExistsCount > 0);
+  bool get isError => error != null || (successCount == 0);
 
   bool get hasPartialSuccess => alreadyExistsCount > 0 && successCount > 0;
 }

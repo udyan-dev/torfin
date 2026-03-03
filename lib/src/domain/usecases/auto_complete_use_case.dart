@@ -11,7 +11,7 @@ class AutoCompleteUseCase extends BaseUseCase<dynamic, String> {
   final TorrentRepository _torrentRepository;
 
   @override
-  Future<DataState<dynamic>> call(
+  Future<DataState<String>> call(
     String params, {
     required CancelToken cancelToken,
   }) async {

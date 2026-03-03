@@ -27,33 +27,33 @@ class SearchTorrentUseCase
   Future<DataState<List<TorrentRes>>> call(
     SearchTorrentUseCaseParams params, {
     required CancelToken cancelToken,
-  }) {
-    return Future.wait([
+  }) async {
+    final values = await Future.wait([
       _storageRepository.getToken(),
       _storageRepository.getNsfw(),
-    ]).then((values) {
-      final token = values.first.data ?? emptyString;
-      if (token.isEmpty) {
-        return const DataFailed<List<TorrentRes>>(
-          BaseException(
-            type: BaseExceptionType.parseError,
-            message: getTokenError,
-          ),
-        );
-      }
+    ]);
 
-      return _torrentRepository.search(
-        searchReq: SearchReq(
-          token: token,
-          uuid: uuid.v4().substring(0, 8),
-          sort: params.sort,
-          nsfw: values.last.data ?? emptyString,
-          search: params.search,
-          page: params.page,
+    final token = values[0].data ?? emptyString;
+    if (token.isEmpty) {
+      return const DataFailed(
+        BaseException(
+          type: BaseExceptionType.parseError,
+          message: getTokenError,
         ),
-        cancelToken: cancelToken,
       );
-    });
+    }
+
+    return _torrentRepository.search(
+      searchReq: SearchReq(
+        token: token,
+        uuid: uuid.v4().substring(0, 8),
+        sort: params.sort,
+        nsfw: values[1].data ?? emptyString,
+        search: params.search,
+        page: params.page,
+      ),
+      cancelToken: cancelToken,
+    );
   }
 }
 

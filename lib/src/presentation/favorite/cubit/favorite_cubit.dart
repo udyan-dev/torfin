@@ -141,7 +141,7 @@ class FavoriteCubit extends Cubit<FavoriteState> with TorrentCubitMixin {
     );
   }
 
-  Future<void> toggleFavorite(TorrentRes torrent) async =>
+  Future<void> toggleFavorite(TorrentRes torrent) =>
       toggleFavoriteImpl(torrent);
 
   List<TorrentRes> _filter(List<TorrentRes> list, String query) {
@@ -158,15 +158,11 @@ class FavoriteCubit extends Cubit<FavoriteState> with TorrentCubitMixin {
 
   void cancelMagnetFetch() => cancelMagnetFetchImpl();
 
-  Future<void> downloadTorrent(
-    TorrentRes torrent,
-    BuildContext context,
-  ) async => downloadTorrentImpl(torrent, context);
+  Future<void> downloadTorrent(TorrentRes torrent, BuildContext context) =>
+      downloadTorrentImpl(torrent, context);
 
-  Future<void> shareTorrent(
-    TorrentRes torrent,
-    BuildContext dialogContext,
-  ) async => shareTorrentImpl(torrent, dialogContext);
+  Future<void> shareTorrent(TorrentRes torrent, BuildContext dialogContext) =>
+      shareTorrentImpl(torrent, dialogContext);
 
   Future<void> removeMultipleFromFavorites(Set<String> keys) async {
     if (keys.isEmpty) return;

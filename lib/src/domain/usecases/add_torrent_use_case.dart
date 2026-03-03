@@ -22,6 +22,7 @@ class AddTorrentUseCase
   final Engine _engine;
   final StorageRepository _storageRepository;
   final GetMagnetUseCase? _getMagnetUseCase;
+  String? _cachedDownloadDir;
 
   Future<bool> hasCoins() async {
     final result = await _storageRepository.getCoins();
@@ -37,22 +38,28 @@ class AddTorrentUseCase
     try {
       final coinsResult = await _storageRepository.getCoins();
 
-      return switch (coinsResult) {
-        DataSuccess<int>(data: final coins?) when coins > 0 =>
-          await _addTorrent(params.magnetLink, coins, metainfo),
-        DataSuccess<int>() => const DataFailed(
-          BaseException(
-            type: BaseExceptionType.insufficientCoins,
-            message: insufficientCoins,
-          ),
+      if (coinsResult case DataSuccess<int>(
+        data: final coins?,
+      ) when coins > 0) {
+        _cachedDownloadDir ??= await getDownloadDirectory();
+        return await _addTorrent(
+          params.magnetLink,
+          coins,
+          metainfo,
+          _cachedDownloadDir!,
+        );
+      }
+
+      return DataFailed(
+        BaseException(
+          type: coinsResult is DataSuccess
+              ? BaseExceptionType.insufficientCoins
+              : BaseExceptionType.unknown,
+          message: coinsResult is DataSuccess
+              ? insufficientCoins
+              : failedToRetrieveCoins,
         ),
-        _ => const DataFailed(
-          BaseException(
-            type: BaseExceptionType.unknown,
-            message: failedToRetrieveCoins,
-          ),
-        ),
-      };
+      );
     } catch (e) {
       return DataFailed(
         BaseException(
@@ -68,12 +75,11 @@ class AddTorrentUseCase
     CancelToken cancelToken,
   ) async {
     final coinsResult = await _storageRepository.getCoins();
-    final availableCoins =
-        coinsResult is DataSuccess<int> && coinsResult.data != null
-        ? coinsResult.data!
+    final availableCoins = coinsResult is DataSuccess<int>
+        ? (coinsResult.data ?? 0)
         : 0;
 
-    if (availableCoins == 0) {
+    if (availableCoins == 0 || items.isEmpty) {
       return BatchAddResult(
         successCount: 0,
         failureCount: 0,
@@ -81,15 +87,15 @@ class AddTorrentUseCase
       );
     }
 
-    final maxDownloads = availableCoins < items.length
+    final maxProcess = availableCoins < items.length
         ? availableCoins
         : items.length;
-    final skippedCount = items.length - maxDownloads;
-
     int successCount = 0;
     int failureCount = 0;
 
-    for (int i = 0; i < maxDownloads; i++) {
+    _cachedDownloadDir ??= await getDownloadDirectory();
+
+    for (int i = 0; i < maxProcess; i++) {
       if (cancelToken.isCancelled) break;
 
       final item = items[i];
@@ -100,27 +106,24 @@ class AddTorrentUseCase
           item.url,
           cancelToken: cancelToken,
         );
-        res.when(
-          success: (links) =>
-              magnetLink = links.isNotEmpty ? links.first : null,
-          failure: (_) => magnetLink = null,
-        );
+        if (res is DataSuccess<List<String>> && res.data!.isNotEmpty) {
+          magnetLink = res.data!.first;
+        }
       }
 
-      if (magnetLink == null || magnetLink!.isEmpty) {
+      if (magnetLink.isEmpty) {
         failureCount++;
         continue;
       }
 
-      final response = await call(
-        AddTorrentUseCaseParams(magnetLink: magnetLink!),
-        cancelToken: cancelToken,
+      final response = await _engine.addTorrent(
+        magnetLink,
+        null,
+        _cachedDownloadDir!,
       );
-
-      if (response case DataSuccess<TorrentAddedResponse>(:final data)) {
-        data == TorrentAddedResponse.duplicated
-            ? failureCount++
-            : successCount++;
+      if (response == TorrentAddedResponse.added) {
+        successCount++;
+        await _storageRepository.setCoins(availableCoins - successCount);
       } else {
         failureCount++;
       }
@@ -129,7 +132,7 @@ class AddTorrentUseCase
     return BatchAddResult(
       successCount: successCount,
       failureCount: failureCount,
-      skippedCount: skippedCount,
+      skippedCount: items.length - (successCount + failureCount),
     );
   }
 
@@ -137,14 +140,12 @@ class AddTorrentUseCase
     String magnetLink,
     int coins,
     String? metainfo,
+    String downloadDir,
   ) async {
-    final downloadDir = await getDownloadDirectory();
     final result = await _engine.addTorrent(magnetLink, metainfo, downloadDir);
-
     if (result == TorrentAddedResponse.added) {
       await _storageRepository.setCoins(coins - 1);
     }
-
     return DataSuccess(result);
   }
 }

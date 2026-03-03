@@ -1,10 +1,10 @@
 name: torfin
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.2.6+20
+version: 2.2.8+23
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.11.1
 
 dependencies:
   flutter:
@@ -37,7 +37,7 @@ dependencies:
   pretty_bytes: ^6.3.0
   duration: ^4.0.3
   in_app_review: ^2.0.11
-  flutter_local_notifications: ^19.4.2
+  flutter_local_notifications: ^20.1.0
   url_launcher: ^6.3.2
   lottie: ^3.3.2
   google_mobile_ads: ^7.0.0

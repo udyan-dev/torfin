@@ -180,8 +180,7 @@ class _TaskHandler extends TaskHandler {
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _lastHeartbeat = DateTime.now();
     _notifications = FlutterLocalNotificationsPlugin();
-    await _notifications.initialize(
-      const InitializationSettings(
+    await _notifications.initialize(settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
       onDidReceiveNotificationResponse: _onNotificationAction,
@@ -224,7 +223,7 @@ class _TaskHandler extends TaskHandler {
         .toList();
 
     if (torrents.isEmpty) {
-      _notifications.cancel(_kNotificationId);
+      _notifications.cancel(id: _kNotificationId);
       FlutterForegroundTask.stopService();
       return;
     }
@@ -283,10 +282,10 @@ class _TaskHandler extends TaskHandler {
     final hasError = errorString.isNotEmpty || title == insufficientCoins;
 
     _notifications.show(
-      _kNotificationId,
-      title,
-      emptyString,
-      NotificationDetails(
+      id: _kNotificationId,
+      title: title,
+      body: emptyString,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
@@ -365,10 +364,10 @@ class _TaskHandler extends TaskHandler {
     }
 
     _notifications.show(
-      _kNotificationId,
-      title,
-      eta,
-      NotificationDetails(
+      id: _kNotificationId,
+      title: title,
+      body: eta,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
@@ -421,7 +420,7 @@ class _TaskHandler extends TaskHandler {
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     try {
-      await _notifications.cancel(_kNotificationId);
+      await _notifications.cancel(id: _kNotificationId);
     } catch (_) {}
   }
 }

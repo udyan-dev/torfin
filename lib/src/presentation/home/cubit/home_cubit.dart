@@ -19,6 +19,21 @@ part 'home_cubit.freezed.dart';
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
+  HomeCubit({
+    required GetTokenUseCase getTokenUseCase,
+    required CancelToken cancelToken,
+    required NotificationService notificationService,
+    required IntentHandler intentHandler,
+    required ConnectivityService connectivity,
+  }) : _getTokenUseCase = getTokenUseCase,
+       _cancelToken = cancelToken,
+       _notificationService = notificationService,
+       _intentHandler = intentHandler,
+       _connectivity = connectivity,
+       super(const HomeState()) {
+    _init();
+  }
+
   final GetTokenUseCase _getTokenUseCase;
   final CancelToken _cancelToken;
   final ConnectivityService _connectivity;
@@ -26,19 +41,9 @@ class HomeCubit extends Cubit<HomeState> {
   final IntentHandler _intentHandler;
   StreamSubscription<String>? _intentSub;
 
-  HomeCubit({
-    required GetTokenUseCase getTokenUseCase,
-    required CancelToken cancelToken,
-    required NotificationService notificationService,
-    required IntentHandler intentHandler,
-    ConnectivityService? connectivity,
-  }) : _getTokenUseCase = getTokenUseCase,
-       _cancelToken = cancelToken,
-       _notificationService = notificationService,
-       _intentHandler = intentHandler,
-       _connectivity = connectivity ?? ConnectivityService(),
-       super(const HomeState()) {
+  void _init() {
     _notificationService.start();
+
     _intentSub = _intentHandler.stream.listen((uri) {
       if (state.status == DataStatus.success) {
         emit(state.copyWith(intentUri: uri));
@@ -48,55 +53,52 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> getToken() async {
     if (!await _connectivity.hasInternet) {
-      emit(
-        state.copyWith(
-          status: DataStatus.error,
-          emptyState: const EmptyState(
-            stateIcon: AppAssets.icNoNetwork,
-            title: noInternetError,
-            description: failedToConnectToServer,
-            buttonText: retry,
-          ),
-        ),
-      );
+      _emitError(noInternetError, failedToConnectToServer);
       return;
     }
 
     emit(state.copyWith(status: DataStatus.loading));
 
-    await _getTokenUseCase
-        .call(NoParams(), cancelToken: _cancelToken)
-        .then(
-          (response) => response.when(
-            success: (token) {
-              emit(state.copyWith(status: DataStatus.success));
-              if (_intentHandler.hasPendingUri) {
-                _intentHandler.processPendingUri();
-              }
-            },
-            failure: (error) => emit(
-              state.copyWith(
-                status: DataStatus.error,
-                emptyState: EmptyState(
-                  stateIcon: AppAssets.icNoNetwork,
-                  title: error.message,
-                  description: failedToConnectToServer,
-                  buttonText: retry,
-                ),
-              ),
-            ),
-          ),
-        );
+    final result = await _getTokenUseCase.call(
+      NoParams(),
+      cancelToken: _cancelToken,
+    );
+
+    result.when(
+      success: (_) {
+        emit(state.copyWith(status: DataStatus.success));
+        if (_intentHandler.hasPendingUri) {
+          _intentHandler.processPendingUri();
+        }
+      },
+      failure: (error) => _emitError(error.message, failedToConnectToServer),
+    );
+  }
+
+  void _emitError(String title, String description) {
+    emit(
+      state.copyWith(
+        status: DataStatus.error,
+        emptyState: EmptyState(
+          stateIcon: AppAssets.icNoNetwork,
+          title: title,
+          description: description,
+          buttonText: retry,
+        ),
+      ),
+    );
   }
 
   Future<void> checkNotificationPermission() async {
-    try {
-      await _notificationService.requestPermission();
-    } catch (_) {}
+    unawaited(
+      _notificationService.requestPermission().catchError((_) {
+        return false;
+      }),
+    );
   }
 
   @override
-  Future<void> close() async {
+  Future<void> close() {
     _intentSub?.cancel();
     _cancelToken.cancel();
     _notificationService.stop();

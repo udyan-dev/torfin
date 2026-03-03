@@ -38,11 +38,14 @@ import '../utils/string_constants.dart';
 
 final di = GetIt.instance;
 
-Future<void> get initDI async {
+Future<void> initDI() async {
+  // Core Utils
   di.registerLazySingleton(() => const Uuid());
   di.registerLazySingleton(() => StorageService());
   di.registerLazySingleton(() => ConnectivityService());
   di.registerFactory(() => CancelToken());
+
+  // Networking
   di.registerLazySingleton(
     () => Dio(
       BaseOptions(
@@ -54,18 +57,21 @@ Future<void> get initDI async {
   di.registerLazySingleton(() => DioService(dio: di()));
   di.registerLazySingleton(() => SessionService());
 
+  // Services
   di.registerLazySingleton(() => DeviceService(storageService: di()));
   di.registerLazySingleton(() => CoinsRemoteSource(connectivityService: di()));
 
+  // Repositories
   final storageRepo = StorageRepositoryImpl(storageService: di());
   di.registerSingleton<StorageRepository>(
     storageRepo,
-    dispose: (storageRepository) => storageRepository.dispose(),
+    dispose: (r) => r.dispose(),
   );
   di.registerLazySingleton<TorrentRepository>(
     () => TorrentRepositoryImpl(dioService: di()),
   );
 
+  // Coins Logic
   final coinsSyncService = CoinsSyncService(
     deviceService: di(),
     coinsRemoteSource: di(),
@@ -75,6 +81,7 @@ Future<void> get initDI async {
   di.registerSingleton(coinsSyncService);
   storageRepo.setCoinsSyncService(coinsSyncService);
 
+  // Engine & System Services
   final themeService = ThemeService(storageRepository: di());
   final engine = TransmissionEngine();
 
@@ -86,6 +93,7 @@ Future<void> get initDI async {
   di.registerSingleton<ThemeService>(themeService, dispose: (s) => s.dispose());
   di.registerSingleton<Engine>(engine, dispose: (e) => e.dispose());
 
+  // Use Cases
   final notificationService = NotificationService(engine);
   await notificationService.init();
   di.registerSingleton<NotificationService>(
@@ -113,6 +121,7 @@ Future<void> get initDI async {
   di.registerLazySingleton(() => FavoriteUseCase(storageRepository: di()));
   di.registerLazySingleton(() => AutoCompleteUseCase(torrentRepository: di()));
   di.registerLazySingleton(() => GetMagnetUseCase(torrentRepository: di()));
+
   final addTorrentUseCase = AddTorrentUseCase(
     engine: di(),
     storageRepository: di(),
@@ -120,14 +129,17 @@ Future<void> get initDI async {
   );
   di.registerSingleton(addTorrentUseCase);
   notificationService.setAddTorrentUseCase(addTorrentUseCase);
+
   di.registerLazySingleton(
     () => TrendingTorrentUseCase(
       torrentRepository: di(),
       storageRepository: di(),
+      uuid: di(),
     ),
   );
   di.registerLazySingleton(() => ShareTorrentUseCase(storageRepository: di()));
 
+  // Cubits
   final coinsCubit = CoinsCubit(
     storageRepository: di(),
     coinsSyncService: di(),
@@ -142,6 +154,7 @@ Future<void> get initDI async {
       cancelToken: di(),
       notificationService: di(),
       intentHandler: di(),
+      connectivity: di(),
     ),
   );
   di.registerFactory(

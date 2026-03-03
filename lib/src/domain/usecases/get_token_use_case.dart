@@ -20,12 +20,13 @@ class GetTokenUseCase extends BaseUseCase<void, NoParams> {
     NoParams params, {
     required CancelToken cancelToken,
   }) async {
-    return _torrentRepository
-        .getToken(cancelToken: cancelToken)
-        .then(
-          (response) => response.when(
-            success: (token) => _storageRepository.setToken(token),
-          ),
-        );
+    final response = await _torrentRepository.getToken(
+      cancelToken: cancelToken,
+    );
+
+    return response.when(
+      success: (token) => _storageRepository.setToken(token),
+      failure: (error) async => DataFailed(error),
+    );
   }
 }

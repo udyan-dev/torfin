@@ -1,6 +1,6 @@
-import 'dart:async' show runZonedGuarded, unawaited;
+import 'dart:async' show unawaited;
 
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -16,28 +16,31 @@ import 'core/theme/app_theme.dart';
 import 'src/data/engine/engine.dart';
 import 'src/presentation/home/home_screen.dart';
 
-void main() {
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      FlutterForegroundTask.initCommunicationPort();
-      await ConsentService.initialize();
-      unawaited(MobileAds.instance.initialize());
-      await Future.wait([
-        SystemChrome.setPreferredOrientations(const [
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
-        ]),
-        FirebaseService.init,
-        initDI,
-      ], eagerError: true);
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-      runApp(const MainApp());
-    },
-    (error, stack) => !kDebugMode
-        ? FirebaseService.recordError(error, stack, fatal: true)
-        : null,
-  );
+  FlutterForegroundTask.initCommunicationPort();
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (!kDebugMode) {
+      FirebaseService.recordError(error, stack, fatal: true);
+    }
+    return true;
+  };
+
+  await Future.wait([
+    ConsentService.initialize(),
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]),
+    FirebaseService.init,
+    initDI(),
+  ], eagerError: true);
+
+  unawaited(MobileAds.instance.initialize());
+
+  runApp(const MainApp());
 }
 
 class MainApp extends StatefulWidget {
@@ -47,33 +50,28 @@ class MainApp extends StatefulWidget {
   State<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
+class _MainAppState extends State<MainApp> {
+  late final AppLifecycleListener _lifecycleListener;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _lifecycleListener = AppLifecycleListener(
+      onPause: _handleBackgrounding,
+      onDetach: _handleBackgrounding,
+      onResume: () => di<NotificationService>().start(),
+    );
+  }
+
+  void _handleBackgrounding() {
+    BackgroundDownloadService.stopHeartbeat();
+    _saveStateBeforeExit();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _lifecycleListener.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-        BackgroundDownloadService.stopHeartbeat();
-        _saveStateBeforeExit();
-        break;
-      case AppLifecycleState.resumed:
-        di<NotificationService>().start();
-        break;
-      default:
-        break;
-    }
   }
 
   Future<void> _saveStateBeforeExit() async {
@@ -86,7 +84,7 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: di<ThemeService>().themeNotifier,
-      builder: (context, themeMode, child) {
+      builder: (context, themeMode, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           themeAnimationDuration: Duration.zero,

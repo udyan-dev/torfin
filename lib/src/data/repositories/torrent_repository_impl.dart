@@ -18,11 +18,14 @@ class TorrentRepositoryImpl extends BaseRepository
     : _dioService = dioService;
 
   final DioService _dioService;
+  String? _cachedToken;
 
   @override
   Future<DataState<String>> getToken({required CancelToken cancelToken}) =>
       getStateOf(
         request: () async {
+          if (_cachedToken != null) return _cachedToken!;
+
           final apiKey = await _fetchApiKey(cancelToken);
           if (apiKey.isEmpty) {
             throw const BaseException(
@@ -39,6 +42,7 @@ class TorrentRepositoryImpl extends BaseRepository
             );
           }
 
+          _cachedToken = token;
           return token;
         },
       );
@@ -49,16 +53,15 @@ class TorrentRepositoryImpl extends BaseRepository
         endpoint: Env.baseUrl,
         cancelToken: cancelToken,
       );
-      final match = regexForJs.firstMatch(data);
-      return match?.group(0) ?? emptyString;
-    } on BaseException {
-      rethrow;
+      return regexForJs.firstMatch(data)?.group(0) ?? emptyString;
     } catch (e) {
-      throw BaseException(
-        type: BaseExceptionType.unknown,
-        message: apiKeyFetchError,
-        error: e,
-      );
+      throw e is BaseException
+          ? e
+          : BaseException(
+              type: BaseExceptionType.unknown,
+              message: apiKeyFetchError,
+              error: e,
+            );
     }
   }
 
@@ -68,16 +71,15 @@ class TorrentRepositoryImpl extends BaseRepository
         endpoint: '${Env.baseUrl}$apiKey',
         cancelToken: cancelToken,
       );
-      final match = regexForKey.firstMatch(data);
-      return match?.group(1) ?? emptyString;
-    } on BaseException {
-      rethrow;
+      return regexForKey.firstMatch(data)?.group(1) ?? emptyString;
     } catch (e) {
-      throw BaseException(
-        type: BaseExceptionType.unknown,
-        message: tokenFetchError,
-        error: e,
-      );
+      throw e is BaseException
+          ? e
+          : BaseException(
+              type: BaseExceptionType.unknown,
+              message: tokenFetchError,
+              error: e,
+            );
     }
   }
 
@@ -86,7 +88,7 @@ class TorrentRepositoryImpl extends BaseRepository
     required SearchReq searchReq,
     required CancelToken cancelToken,
   }) => getStateOf(
-    request: () async => await _dioService.getCollection<TorrentRes>(
+    request: () => _dioService.getCollection<TorrentRes>(
       endpoint: Routes.search(searchReq: searchReq),
       queryParams: queryTimeStamp,
       cancelToken: cancelToken,
@@ -94,11 +96,11 @@ class TorrentRepositoryImpl extends BaseRepository
   );
 
   @override
-  Future<DataState> autoComplete({
+  Future<DataState<String>> autoComplete({
     required String search,
     required CancelToken cancelToken,
   }) => getStateOf(
-    request: () async => await _dioService.getString(
+    request: () => _dioService.getString(
       endpoint: Routes.autoComplete(search: search),
       cancelToken: cancelToken,
     ),
@@ -109,7 +111,7 @@ class TorrentRepositoryImpl extends BaseRepository
     required TrendingReq trendingReq,
     required CancelToken cancelToken,
   }) => getStateOf(
-    request: () async => await _dioService.getCollection<TorrentRes>(
+    request: () => _dioService.getCollection<TorrentRes>(
       endpoint: Routes.trending(trendingReq: trendingReq),
       queryParams: queryTimeStamp,
       cancelToken: cancelToken,
@@ -121,9 +123,7 @@ class TorrentRepositoryImpl extends BaseRepository
     required String site,
     required CancelToken cancelToken,
   }) => getStateOf(
-    request: () async => await _dioService.getMagnetLinks(
-      endpoint: site,
-      cancelToken: cancelToken,
-    ),
+    request: () =>
+        _dioService.getMagnetLinks(endpoint: site, cancelToken: cancelToken),
   );
 }

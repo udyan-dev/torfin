@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart'; // Optimization: Added missing dependency
 
 import '../../../core/helpers/base_exception.dart';
 import '../../../core/helpers/base_usecase.dart';
@@ -14,42 +15,44 @@ class TrendingTorrentUseCase
   TrendingTorrentUseCase({
     required TorrentRepository torrentRepository,
     required StorageRepository storageRepository,
+    required this.uuid,
   }) : _torrentRepository = torrentRepository,
        _storageRepository = storageRepository;
 
   final TorrentRepository _torrentRepository;
   final StorageRepository _storageRepository;
+  final Uuid uuid;
 
   @override
   Future<DataState<List<TorrentRes>>> call(
     TrendingTorrentUseCaseParams params, {
     required CancelToken cancelToken,
-  }) {
-    return Future.wait([
+  }) async {
+    final values = await Future.wait([
       _storageRepository.getToken(),
       _storageRepository.getNsfw(),
-    ]).then((values) {
-      final token = values.first.data ?? emptyString;
-      if (token.isEmpty) {
-        return const DataFailed<List<TorrentRes>>(
-          BaseException(
-            type: BaseExceptionType.parseError,
-            message: getTokenError,
-          ),
-        );
-      }
+    ]);
 
-      return _torrentRepository.trending(
-        trendingReq: TrendingReq(
-          token: token,
-          uuid: uuid.v4().substring(0, 8),
-          sort: params.sort,
-          top: params.top,
-          nsfw: values.last.data ?? emptyString,
+    final token = values[0].data ?? emptyString;
+    if (token.isEmpty) {
+      return const DataFailed(
+        BaseException(
+          type: BaseExceptionType.parseError,
+          message: getTokenError,
         ),
-        cancelToken: cancelToken,
       );
-    });
+    }
+
+    return _torrentRepository.trending(
+      trendingReq: TrendingReq(
+        token: token,
+        uuid: uuid.v4().substring(0, 8),
+        sort: params.sort,
+        top: params.top,
+        nsfw: values[1].data ?? emptyString,
+      ),
+      cancelToken: cancelToken,
+    );
   }
 }
 

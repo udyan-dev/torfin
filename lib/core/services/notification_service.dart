@@ -42,7 +42,7 @@ class NotificationService {
 
   Future<void> init() async {
     await _notifications.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
       onDidReceiveNotificationResponse: _handleAction,
@@ -85,7 +85,7 @@ class NotificationService {
   void stop() {
     _timer?.cancel();
     _timer = null;
-    _notifications.cancel(_kNotificationId);
+    _notifications.cancel(id: _kNotificationId);
   }
 
   void dispose() {
@@ -124,7 +124,7 @@ class NotificationService {
             t.stop();
           }
           await BackgroundDownloadService.stop();
-          _notifications.cancel(_kNotificationId);
+          _notifications.cancel(id: _kNotificationId);
       }
       _update();
     } catch (_) {}
@@ -144,7 +144,7 @@ class NotificationService {
           )
           .toList();
       if (active.isEmpty) {
-        _notifications.cancel(_kNotificationId);
+        _notifications.cancel(id: _kNotificationId);
         await BackgroundDownloadService.stop();
       } else {
         await BackgroundDownloadService.start();
@@ -206,10 +206,10 @@ class NotificationService {
     final hasError = t.errorString.isNotEmpty || title == insufficientCoins;
 
     _notifications.show(
-      _kNotificationId,
-      title,
-      emptyString,
-      NotificationDetails(
+      id: _kNotificationId,
+      title: title,
+      body: emptyString,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
@@ -289,10 +289,10 @@ class NotificationService {
     }
 
     _notifications.show(
-      _kNotificationId,
-      title,
-      eta,
-      NotificationDetails(
+      id: _kNotificationId,
+      title: title,
+      body: eta,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           notificationChannelId,
           notificationChannelName,
@@ -335,7 +335,7 @@ class NotificationService {
         t.stop();
       }
       await BackgroundDownloadService.stop();
-      _notifications.cancel(_kNotificationId);
+      _notifications.cancel(id: _kNotificationId);
       return;
     }
     try {
