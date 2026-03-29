@@ -7,10 +7,12 @@ class TorrentGetResponse {
   TorrentGetResponse(this.arguments, this.result);
 
   TorrentGetResponse.fromJson(Map<String, dynamic> json)
-    : arguments = TorrentGetResponseArguments.fromJson(
-        json['arguments'] as Map<String, dynamic>,
-      ),
-      result = json['result'] as String;
+    : arguments = json['arguments'] != null
+          ? TorrentGetResponseArguments.fromJson(
+              json['arguments'] as Map<String, dynamic>,
+            )
+          : TorrentGetResponseArguments(const <TransmissionTorrentModel>[]),
+      result = json['result'] as String? ?? '';
 }
 
 class TorrentGetResponseArguments {
@@ -19,9 +21,13 @@ class TorrentGetResponseArguments {
   TorrentGetResponseArguments(this.torrents);
 
   TorrentGetResponseArguments.fromJson(Map<String, dynamic> json)
-    : torrents = ((json['torrents'] as List))
-          .map<TransmissionTorrentModel>(
-            (j) => TransmissionTorrentModel.fromJson(j as Map<String, dynamic>),
-          )
-          .toList();
+    : torrents =
+          (json['torrents'] as List?)
+              ?.map<TransmissionTorrentModel>(
+                (j) => TransmissionTorrentModel.fromJson(
+                  j as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const <TransmissionTorrentModel>[];
 }

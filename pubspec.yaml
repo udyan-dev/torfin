@@ -1,10 +1,10 @@
 name: torfin
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.2.8+23
+version: 2.2.9+24
 
 environment:
-  sdk: ^3.11.1
+  sdk: ^3.11.5
 
 dependencies:
   flutter:
@@ -25,6 +25,7 @@ dependencies:
   flutter_torrent:
     git:
       url: https://github.com/udyan-dev/flutter_torrent.git
+      ref: 61f3035f9c1bcfd967487e747a4d0d33cf8c8661
   path: ^1.9.1
   open_filex: ^4.7.0
   path_provider: ^2.1.5
@@ -37,10 +38,10 @@ dependencies:
   pretty_bytes: ^6.3.0
   duration: ^4.0.3
   in_app_review: ^2.0.11
-  flutter_local_notifications: ^20.1.0
+  flutter_local_notifications: ^21.0.0
   url_launcher: ^6.3.2
   lottie: ^3.3.2
-  google_mobile_ads: ^7.0.0
+  google_mobile_ads: ^8.0.0
   flutter_secure_storage: ^10.0.0
   cloud_firestore: ^6.0.3
   image_picker: ^1.2.1
@@ -52,6 +53,8 @@ dependencies:
     git:
       url: https://github.com/udyan-dev/flutter_foreground_task.git
       ref: fix/native-service-shutdown
+  upgrader: ^13.1.0
+  vector_graphics: ^1.1.20
 
 dev_dependencies:
   flutter_test:

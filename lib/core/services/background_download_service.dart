@@ -26,6 +26,12 @@ const _kInsufficientCoinsDuration = 3000; // 3 seconds in milliseconds
 const _kTorrentGetRequest =
     '{"method":"torrent-get","arguments":{"fields":["id","name","status","percentDone","rateDownload","eta","files","errorString","magnetLink"]}}';
 
+class _InsufficientCoinsMarker {
+  const _InsufficientCoinsMarker(this.id);
+
+  final int id;
+}
+
 class BackgroundDownloadService {
   static bool _initialized = false;
   static Timer? _heartbeatTimer;
@@ -85,6 +91,23 @@ class BackgroundDownloadService {
   }
 }
 
+Future<String> _safeTorrentRequestString(String req) async {
+  try {
+    return await torrent.requestAsync(req);
+  } catch (_) {
+    try {
+      final dir = p.join(
+        (await getApplicationSupportDirectory()).path,
+        'transmission',
+      );
+      torrent.initSession(dir);
+      return await torrent.requestAsync(req);
+    } catch (e) {
+      rethrow;
+    }
+  }
+}
+
 @pragma('vm:entry-point')
 void _taskCallback() => FlutterForegroundTask.setTaskHandler(_TaskHandler());
 
@@ -94,7 +117,7 @@ Future<void> _onNotificationAction(NotificationResponse response) async {
   if (action == null) return;
 
   if (action == 'cancel') {
-    torrent.request('{"method":"torrent-stop","arguments":{}}');
+    await _safeTorrentRequestString('{"method":"torrent-stop","arguments":{}}');
     FlutterForegroundTask.sendDataToTask('stop_task');
     FlutterForegroundTask.stopService();
   } else if (action.startsWith('retry_')) {
@@ -106,7 +129,9 @@ Future<void> _onNotificationAction(NotificationResponse response) async {
         : <String, Object>{
             'ids': [id],
           };
-    torrent.request(jsonEncode({'method': 'torrent-stop', 'arguments': args}));
+    await _safeTorrentRequestString(
+      jsonEncode({'method': 'torrent-stop', 'arguments': args}),
+    );
   } else if (action.startsWith('resume')) {
     final id = action == 'resume_all'
         ? null
@@ -116,7 +141,9 @@ Future<void> _onNotificationAction(NotificationResponse response) async {
         : <String, Object>{
             'ids': [id],
           };
-    torrent.request(jsonEncode({'method': 'torrent-start', 'arguments': args}));
+    await _safeTorrentRequestString(
+      jsonEncode({'method': 'torrent-start', 'arguments': args}),
+    );
   }
 }
 
@@ -136,7 +163,7 @@ Future<void> _handleRetry(String action) async {
     return;
   }
   // Get magnetLink before removing
-  final res = torrent.request(
+  final res = await _safeTorrentRequestString(
     '{"method":"torrent-get","arguments":{"ids":[$id],"fields":["magnetLink"]}}',
   );
   final data = jsonDecode(res) as Map<String, dynamic>;
@@ -147,10 +174,10 @@ Future<void> _handleRetry(String action) async {
   final magnetLink = firstTorrent['magnetLink'] as String?;
   if (magnetLink == null || magnetLink.isEmpty) return;
   // Remove and re-add
-  torrent.request(
+  await _safeTorrentRequestString(
     '{"method":"torrent-remove","arguments":{"ids":[$id],"delete-local-data":true}}',
   );
-  final addRes = torrent.request(
+  final addRes = await _safeTorrentRequestString(
     jsonEncode({
       'method': 'torrent-add',
       'arguments': {'filename': magnetLink},
@@ -180,7 +207,8 @@ class _TaskHandler extends TaskHandler {
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _lastHeartbeat = DateTime.now();
     _notifications = FlutterLocalNotificationsPlugin();
-    await _notifications.initialize(settings: const InitializationSettings(
+    await _notifications.initialize(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
       onDidReceiveNotificationResponse: _onNotificationAction,
@@ -191,7 +219,9 @@ class _TaskHandler extends TaskHandler {
         (await getApplicationSupportDirectory()).path,
         'transmission',
       );
-      torrent.initSession(dir, 'transmission');
+      try {
+        torrent.initSession(dir);
+      } catch (_) {}
     }
   }
 
@@ -211,7 +241,7 @@ class _TaskHandler extends TaskHandler {
   }
 
   Future<void> _updateNotification() async {
-    final response = torrent.request(_kTorrentGetRequest);
+    final response = await torrent.requestAsync(_kTorrentGetRequest);
     final data = jsonDecode(response) as Map<String, dynamic>;
     if (data['result'] != 'success') return;
 
@@ -228,9 +258,10 @@ class _TaskHandler extends TaskHandler {
       return;
     }
 
+    final marker = await _readInsufficientCoinsMarker();
     torrents.length == 1
-        ? await _showSingle(torrents.first)
-        : await _showMultiple(torrents);
+        ? await _showSingle(torrents.first, marker)
+        : await _showMultiple(torrents, marker);
   }
 
   String _formatEta(int eta) => eta < 0 || eta == _kMaxEta
@@ -240,26 +271,30 @@ class _TaskHandler extends TaskHandler {
   String _formatSubText(int progress, String speed, String eta) =>
       '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta';
 
-  Future<String> _torrentTitle(Map<String, dynamic> t) async {
-    final id = t['id'] as int;
+  Future<_InsufficientCoinsMarker?> _readInsufficientCoinsMarker() async {
     const storage = FlutterSecureStorage();
     final insufficientIdStr = await storage.read(key: _kInsufficientCoinsIdKey);
     final insufficientTimeStr = await storage.read(
       key: _kInsufficientCoinsTimeKey,
     );
-    if (insufficientIdStr != null && insufficientTimeStr != null) {
-      final insufficientId = int.tryParse(insufficientIdStr);
-      final insufficientTime = int.tryParse(insufficientTimeStr);
-      if (insufficientId == id && insufficientTime != null) {
-        final elapsed =
-            DateTime.now().millisecondsSinceEpoch - insufficientTime;
-        if (elapsed < _kInsufficientCoinsDuration) {
-          return insufficientCoins;
-        }
-        await storage.delete(key: _kInsufficientCoinsIdKey);
-        await storage.delete(key: _kInsufficientCoinsTimeKey);
-      }
+    if (insufficientIdStr == null || insufficientTimeStr == null) return null;
+    final insufficientId = int.tryParse(insufficientIdStr);
+    final insufficientTime = int.tryParse(insufficientTimeStr);
+    if (insufficientId == null || insufficientTime == null) return null;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - insufficientTime;
+    if (elapsed >= _kInsufficientCoinsDuration) {
+      await storage.delete(key: _kInsufficientCoinsIdKey);
+      await storage.delete(key: _kInsufficientCoinsTimeKey);
+      return null;
     }
+    return _InsufficientCoinsMarker(insufficientId);
+  }
+
+  String _torrentTitle(
+    Map<String, dynamic> t,
+    _InsufficientCoinsMarker? marker,
+  ) {
+    if (marker?.id == t['id']) return insufficientCoins;
     final errorString = t['errorString'] as String? ?? '';
     if (errorString.isNotEmpty) return errorString;
     final files = t['files'] as List<dynamic>?;
@@ -268,7 +303,10 @@ class _TaskHandler extends TaskHandler {
         : t['name'] as String;
   }
 
-  Future<void> _showSingle(Map<String, dynamic> t) async {
+  Future<void> _showSingle(
+    Map<String, dynamic> t,
+    _InsufficientCoinsMarker? marker,
+  ) async {
     final progress = ((t['percentDone'] as num) * 100).clamp(0, 100).toInt();
     final isActive = t['status'] == 4 || t['status'] == 2;
     final speed = prettyBytes((t['rateDownload'] as int).toDouble());
@@ -278,7 +316,7 @@ class _TaskHandler extends TaskHandler {
     );
     final id = t['id'] as int;
     final errorString = t['errorString'] as String? ?? '';
-    final title = await _torrentTitle(t);
+    final title = _torrentTitle(t, marker);
     final hasError = errorString.isNotEmpty || title == insufficientCoins;
 
     _notifications.show(
@@ -321,7 +359,10 @@ class _TaskHandler extends TaskHandler {
     );
   }
 
-  Future<void> _showMultiple(List<Map<String, dynamic>> torrents) async {
+  Future<void> _showMultiple(
+    List<Map<String, dynamic>> torrents,
+    _InsufficientCoinsMarker? marker,
+  ) async {
     final progress =
         ((torrents.fold<double>(0, (s, t) => s + (t['percentDone'] as num)) /
                     torrents.length) *
@@ -355,7 +396,7 @@ class _TaskHandler extends TaskHandler {
 
     final inboxLines = <String>[];
     for (final t in torrents) {
-      final tTitle = await _torrentTitle(t);
+      final tTitle = _torrentTitle(t, marker);
       final tProgress = ((t['percentDone'] as num) * 100).toInt();
       final tSpeed = prettyBytes((t['rateDownload'] as int).toDouble());
       inboxLines.add(

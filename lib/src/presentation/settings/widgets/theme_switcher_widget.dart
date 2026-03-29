@@ -21,7 +21,7 @@ class ThemeSwitcherWidget extends StatelessWidget {
           spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (child != null) child,
+            ?child,
             ContentSwitcherWidget<ThemeEnum>(
               enableBgColor: false,
               padding: const EdgeInsets.symmetric(horizontal: 16.0),

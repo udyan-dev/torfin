@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -76,8 +77,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             textInputAction: TextInputAction.search,
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0),
-              child: SvgPicture.asset(
-                AppAssets.icSearch,
+              child: SvgPicture(AssetBytesLoader(AppAssets.icSearch),
                 width: 22,
                 height: 22,
                 colorFilter: context.colors.iconSecondary.colorFilter,
@@ -88,8 +88,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 valueListenable: controller,
                 builder: (_, value, _) => value.text.isNotEmpty
                     ? IconButton(
-                        icon: SvgPicture.asset(
-                          AppAssets.icClose,
+                        icon: SvgPicture(AssetBytesLoader(AppAssets.icClose),
                           width: 22,
                           height: 22,
                           colorFilter: context.colors.iconPrimary.colorFilter,

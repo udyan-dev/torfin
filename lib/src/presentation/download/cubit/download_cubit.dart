@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -25,6 +26,7 @@ class DownloadCubit extends Cubit<DownloadState> {
   final ShareTorrentUseCase _shareTorrentUseCase;
   Timer? _refreshTimer;
   bool _isFetching = false;
+  int _torrentsSignature = 0;
 
   List<Torrent> _allTorrents = const <Torrent>[];
   TorrentDownloadStatus _filterStatus = TorrentDownloadStatus.all;
@@ -51,6 +53,7 @@ class DownloadCubit extends Cubit<DownloadState> {
         _engine.fetchTorrents(),
       ]).then((r) => (r[0] as Session?, r[1] as List<Torrent>));
       _allTorrents = torrents;
+      _torrentsSignature = _signatureOf(torrents);
       emit(
         state.copyWith(
           status: DownloadStatus.success,
@@ -61,6 +64,7 @@ class DownloadCubit extends Cubit<DownloadState> {
       );
       startAutoRefresh();
     } catch (e) {
+      if (kDebugMode) debugPrint('ERROR $e');
       emit(state.copyWith(status: DownloadStatus.error));
     }
   }
@@ -73,6 +77,9 @@ class DownloadCubit extends Cubit<DownloadState> {
       try {
         final torrents = await _engine.fetchTorrents();
         if (isClosed) return;
+        final signature = _signatureOf(torrents);
+        if (signature == _torrentsSignature) return;
+        _torrentsSignature = signature;
         _allTorrents = torrents;
         emit(
           state.copyWith(
@@ -106,6 +113,7 @@ class DownloadCubit extends Cubit<DownloadState> {
         try {
           final torrents = await _engine.fetchTorrents();
           _allTorrents = torrents;
+          _torrentsSignature = _signatureOf(torrents);
           emit(
             state.copyWith(
               torrents: _filterByStatus(_allTorrents, _filterStatus),
@@ -121,6 +129,8 @@ class DownloadCubit extends Cubit<DownloadState> {
     );
     return result;
   }
+
+  Future<Torrent> fetchTorrent(int id) => _engine.fetchTorrent(id);
 
   /// Retries a torrent with an error. Checks for coins first.
   /// Returns true if retry was successful, false if insufficient coins.
@@ -208,12 +218,13 @@ class DownloadCubit extends Cubit<DownloadState> {
 
     try {
       final withData = !keepFiles;
-      for (int i = 0; i < torrentsToRemove.length; i++) {
-        await torrentsToRemove[i].remove(withData);
-      }
+      await _engine.removeTorrents(ids, withData);
 
-      final torrents = await _engine.fetchTorrents();
+      final torrents = await _engine.fetchTorrents(
+        mode: TorrentFetchMode.list,
+      );
       _allTorrents = torrents;
+      _torrentsSignature = _signatureOf(torrents);
 
       emit(
         state.copyWith(
@@ -264,5 +275,24 @@ class DownloadCubit extends Cubit<DownloadState> {
         }
       },
     );
+  }
+
+  int _signatureOf(List<Torrent> torrents) {
+    var hash = torrents.length;
+    for (var i = 0; i < torrents.length; i++) {
+      final t = torrents[i];
+      hash = Object.hash(
+        hash,
+        t.id,
+        t.status,
+        t.progress,
+        t.rateDownload,
+        t.rateUpload,
+        t.eta,
+        t.errorString,
+        t.files.length,
+      );
+    }
+    return hash;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,8 +42,7 @@ class DownloadButtonWidget extends StatelessWidget {
           ? FloatingActionButton(
               backgroundColor: context.colors.buttonPrimary,
               shape: LinearBorder.none,
-              child: SvgPicture.asset(
-                AppAssets.icAddLarge,
+              child: SvgPicture(AssetBytesLoader(AppAssets.icAddLarge),
                 width: 20,
                 height: 20,
                 colorFilter: context.colors.iconOnColor.colorFilter,

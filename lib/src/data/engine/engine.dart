@@ -13,6 +13,8 @@ enum TorrentAddedResponse { added, duplicated }
 
 class TorrentAddError extends Error {}
 
+enum TorrentFetchMode { full, list }
+
 Future<String> getTorrentsStatusFilePath() async {
   return path.join(
     (await getApplicationSupportDirectory()).path,
@@ -28,10 +30,21 @@ abstract class Engine {
     String? metainfo,
     String? downloadDir,
   );
-  Future<List<Torrent>> fetchTorrents();
+  Future<List<Torrent>> fetchTorrents({
+    TorrentFetchMode mode = TorrentFetchMode.full,
+  });
   Future<Torrent> fetchTorrent(int id);
   Future<Session> fetchSession();
   Future resetSettings();
+  Future<void> removeTorrents(Set<int> ids, bool withData) async {
+    if (ids.isEmpty) return;
+    final torrents = await fetchTorrents();
+    for (final torrent in torrents) {
+      if (ids.contains(torrent.id)) {
+        await torrent.remove(withData);
+      }
+    }
+  }
 
   Future saveTorrentsResumeStatus() async {
     final torrents = await fetchTorrents();
@@ -55,11 +68,11 @@ abstract class Engine {
       );
 
       final torrents = await fetchTorrents();
+      final torrentsByName = <String, Torrent>{
+        for (final torrent in torrents) torrent.name: torrent,
+      };
       for (final torrentResumeStatus in torrentResumeStatus.torrents) {
-        final torrentInstance = torrents.cast<Torrent?>().firstWhere(
-          (t) => t?.name == torrentResumeStatus.name,
-          orElse: () => null,
-        );
+        final torrentInstance = torrentsByName[torrentResumeStatus.name];
         if (torrentInstance == null) continue;
 
         if (torrentResumeStatus.status == TorrentResumeState.started) {
@@ -67,8 +80,8 @@ abstract class Engine {
         }
 
         if (torrentInstance.sequentialDownload) {
-          torrentInstance.setSequentialDownloadFromPiece(0);
-          torrentInstance.setSequentialDownload(false);
+          await torrentInstance.setSequentialDownloadFromPiece(0);
+          await torrentInstance.setSequentialDownload(false);
         }
 
         for (final (index, fileResumeStatus)
@@ -76,7 +89,7 @@ abstract class Engine {
           if (fileResumeStatus &&
               index < torrentInstance.files.length &&
               torrentInstance.files[index].wanted == false) {
-            torrentInstance.toggleFileWanted(index, true);
+            await torrentInstance.toggleFileWanted(index, true);
           }
         }
       }

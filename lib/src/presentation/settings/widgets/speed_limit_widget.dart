@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -101,8 +102,7 @@ class _SpeedLimitTile extends StatelessWidget {
       dense: true,
       visualDensity: const VisualDensity(vertical: -4),
       horizontalTitleGap: 8,
-      leading: SvgPicture.asset(
-        icon,
+      leading: SvgPicture(AssetBytesLoader(icon),
         width: 20,
         height: 20,
         colorFilter: context.colors.iconPrimary.colorFilter,
@@ -110,8 +110,7 @@ class _SpeedLimitTile extends StatelessWidget {
       title: AppText.label02(title),
       subtitle: AppText.label01('$value $speedUnitKBps'),
       trailing: enabled
-          ? SvgPicture.asset(
-              AppAssets.icEdit,
+          ? SvgPicture(AssetBytesLoader(AppAssets.icEdit),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

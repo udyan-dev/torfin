@@ -62,6 +62,25 @@ const torrentGetFields = [
   TorrentField.doneDate,
 ];
 
+const torrentListFields = [
+  TorrentField.id,
+  TorrentField.name,
+  TorrentField.percentDone,
+  TorrentField.status,
+  TorrentField.totalSize,
+  TorrentField.rateDownload,
+  TorrentField.rateUpload,
+  TorrentField.errorString,
+  TorrentField.downloadDir,
+  TorrentField.files,
+  TorrentField.fileStats,
+  TorrentField.downloadedEver,
+  TorrentField.uploadedEver,
+  TorrentField.eta,
+  TorrentField.magnetLink,
+  TorrentField.sequentialDownload,
+];
+
 TransmissionTorrent createTransmissionTorrentFromJson(
   TransmissionTorrentModel torrent,
 ) {
@@ -270,7 +289,9 @@ class TransmissionEngine extends Engine {
         Platform.isAndroid && await FlutterForegroundTask.isRunningService;
     if (!serviceRunning) {
       final configDir = await getConfigDir();
-      flutter_torrent.initSession(configDir.path, 'transmission');
+      try {
+        flutter_torrent.initSession(configDir.path);
+      } catch (_) {}
     }
     if (Platform.isAndroid) {
       await android.initDefaultDownloadDir(this);
@@ -314,11 +335,17 @@ class TransmissionEngine extends Engine {
   }
 
   @override
-  Future<List<Torrent>> fetchTorrents() async {
+  Future<List<Torrent>> fetchTorrents({
+    TorrentFetchMode mode = TorrentFetchMode.full,
+  }) async {
     final String res = await flutter_torrent.requestAsync(
       jsonEncode(
         TorrentGetRequest(
-          arguments: TorrentGetRequestArguments(fields: torrentGetFields),
+          arguments: TorrentGetRequestArguments(
+            fields: mode == TorrentFetchMode.full
+                ? torrentGetFields
+                : torrentListFields,
+          ),
         ),
       ),
     );
@@ -330,6 +357,18 @@ class TransmissionEngine extends Engine {
     return decodedRes.arguments.torrents
         .map((torrent) => createTransmissionTorrentFromJson(torrent))
         .toList();
+  }
+
+  @override
+  Future<void> removeTorrents(Set<int> ids, bool withData) async {
+    if (ids.isEmpty) return;
+    final request = TorrentRemoveRequest(
+      arguments: TorrentRemoveRequestArguments(
+        ids: ids.toList(growable: false),
+        deleteLocalData: withData,
+      ),
+    );
+    await flutter_torrent.requestAsync(jsonEncode(request));
   }
 
   @override

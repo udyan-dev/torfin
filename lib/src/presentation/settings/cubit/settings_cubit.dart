@@ -117,7 +117,6 @@ class SettingsCubit extends Cubit<SettingsState> {
       await Future.wait([
         _engine.resetSettings(),
         _sessionService.fetchSession(),
-        _storageRepository.clearAll(),
       ]);
 
       final session = _sessionService.session;

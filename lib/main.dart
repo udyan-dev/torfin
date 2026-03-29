@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'core/bindings/di.dart';
 import 'core/services/background_download_service.dart';
@@ -64,6 +65,7 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleBackgrounding() {
+    di<NotificationService>().stop(cancelNotification: false);
     BackgroundDownloadService.stopHeartbeat();
     _saveStateBeforeExit();
   }
@@ -91,7 +93,12 @@ class _MainAppState extends State<MainApp> {
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
-          home: const WithForegroundTask(child: HomeScreen()),
+          home: UpgradeAlert(
+            showLater: false,
+            showIgnore: false,
+            upgrader: Upgrader(durationUntilAlertAgain: Duration.zero),
+            child: const WithForegroundTask(child: HomeScreen()),
+          ),
         );
       },
     );

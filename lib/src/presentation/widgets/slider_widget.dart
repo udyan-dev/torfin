@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:torfin/core/utils/extensions.dart';
@@ -62,8 +63,7 @@ class SliderWidget extends StatelessWidget {
       spacing: 16,
       children: [
         if (icon != null)
-          SvgPicture.asset(
-            icon!,
+          SvgPicture(AssetBytesLoader(icon!),
             width: 20,
             height: 20,
             colorFilter: colors.iconOnColor.colorFilter,

@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -50,8 +51,7 @@ class TagWidget extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: SvgPicture.asset(
-                  tagIcon,
+                child: SvgPicture(AssetBytesLoader(tagIcon),
                   width: 16,
                   height: 16,
                   colorFilter: tagColor.colorFilter,

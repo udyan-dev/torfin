@@ -77,7 +77,7 @@ class DialogWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (content != null) content!,
+          ?content,
           actions,
         ],
       ),

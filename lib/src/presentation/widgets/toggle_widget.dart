@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -32,8 +33,7 @@ class ToggleWidget extends StatelessWidget {
       child: Row(
         children: [
           if (leadingIcon != null) ...[
-            SvgPicture.asset(
-              leadingIcon!,
+            SvgPicture(AssetBytesLoader(leadingIcon!),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

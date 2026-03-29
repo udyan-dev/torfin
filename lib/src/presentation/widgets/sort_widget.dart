@@ -32,29 +32,31 @@ class _SortWidgetState extends State<SortWidget> {
         showAppBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) => ActionSheetWidget(
-            actions: [
-              ActionModel(
-                actionTitle: sortBy,
-                actionItems: SortType.values
-                    .map(
-                      (sort) => ActionItem(
-                        title: sort.title,
-                        value: sort.value,
-                        isSelected: sort == _selectedSort,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-            onTap: (action) {
-              setState(() {
-                _selectedSort = SortType.values.firstWhere(
-                  (sort) => sort.value == action.value,
-                );
-                widget.onSort.call(_selectedSort);
-              });
-            },
+          builder: (context) => SafeArea(
+            child: ActionSheetWidget(
+              actions: [
+                ActionModel(
+                  actionTitle: sortBy,
+                  actionItems: SortType.values
+                      .map(
+                        (sort) => ActionItem(
+                          title: sort.title,
+                          value: sort.value,
+                          isSelected: sort == _selectedSort,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+              onTap: (action) {
+                setState(() {
+                  _selectedSort = SortType.values.firstWhere(
+                    (sort) => sort.value == action.value,
+                  );
+                  widget.onSort.call(_selectedSort);
+                });
+              },
+            ),
           ),
         );
       },

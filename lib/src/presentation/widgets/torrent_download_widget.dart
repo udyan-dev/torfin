@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -39,12 +40,18 @@ class TorrentDownloadWidget extends StatelessWidget {
       child: InkWell(
         onTap:
             onTap ??
-            () {
+            () async {
+              final cubit = context.read<DownloadCubit>();
+              var detailsTorrent = torrent;
+              try {
+                detailsTorrent = await cubit.fetchTorrent(torrent.id);
+              } catch (_) {}
+              if (!context.mounted) return;
               showAppBottomSheet(
                 context: context,
                 builder: (_) => BlocProvider.value(
-                  value: context.read<DownloadCubit>(),
-                  child: TorrentDetailsWidget(torrent: torrent),
+                  value: cubit,
+                  child: TorrentDetailsWidget(torrent: detailsTorrent),
                 ),
               );
             },
@@ -99,8 +106,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                           colors.interactive,
                         ),
                       ),
-                      SvgPicture.asset(
-                        torrent.errorString.isNotEmpty
+                      SvgPicture(AssetBytesLoader(torrent.errorString.isNotEmpty
                             ? AppAssets.icReset
                             : torrent.status == TorrentStatus.stopped
                             ? AppAssets.icContinue
@@ -110,7 +116,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                             : (torrent.status == TorrentStatus.downloading ||
                                   torrent.status == TorrentStatus.checking)
                             ? AppAssets.icStop
-                            : AppAssets.icQueue,
+                            : AppAssets.icQueue),
                         width: 20,
                         height: 20,
                         colorFilter: colors.iconPrimary.colorFilter,
@@ -142,8 +148,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture.asset(
-                                AppAssets.icSize,
+                              SvgPicture(AssetBytesLoader(AppAssets.icSize),
                                 width: 16,
                                 height: 16,
                                 colorFilter: colors.tagColorMagenta.colorFilter,
@@ -157,8 +162,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture.asset(
-                                AppAssets.icChevronDown,
+                              SvgPicture(AssetBytesLoader(AppAssets.icChevronDown),
                                 width: 16,
                                 height: 16,
                                 colorFilter: colors.supportSuccess.colorFilter,
@@ -172,8 +176,7 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture.asset(
-                                AppAssets.icChevronUp,
+                              SvgPicture(AssetBytesLoader(AppAssets.icChevronUp),
                                 width: 16,
                                 height: 16,
                                 colorFilter:

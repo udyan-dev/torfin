@@ -21,7 +21,10 @@ class PrivacyPolicyWidget extends StatelessWidget {
 
   Future<void> _launchPrivacyPolicy(BuildContext context) async {
     try {
-      await launchUrlString(privacyPolicyUrl);
+      await launchUrlString(
+        privacyPolicyUrl,
+        mode: LaunchMode.externalApplication,
+      );
     } catch (e) {
       if (context.mounted) {
         NotificationWidget.notify(

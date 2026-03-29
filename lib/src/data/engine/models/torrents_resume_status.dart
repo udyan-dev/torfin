@@ -7,11 +7,13 @@ class TorrentsResumeStatus {
   const TorrentsResumeStatus(this.torrents);
 
   TorrentsResumeStatus.fromJson(Map<String, dynamic> json)
-    : torrents = (json['torrents'] as List)
-          .map<TorrentResumeStatus>(
-            (e) => TorrentResumeStatus.fromJson(e as Map<String, dynamic>),
-          )
-          .toList();
+    : torrents =
+          (json['torrents'] as List?)
+              ?.map<TorrentResumeStatus>(
+                (e) => TorrentResumeStatus.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const <TorrentResumeStatus>[];
 
   Map<String, dynamic> toJson() => {
     'torrents': torrents
@@ -49,11 +51,13 @@ class TorrentResumeStatus {
   const TorrentResumeStatus(this.name, this.status, this.files);
 
   TorrentResumeStatus.fromJson(Map<String, dynamic> json)
-    : name = json['name'] as String,
+    : name = json['name'] as String? ?? '',
       status = json['status'] == TorrentResumeState.started.name
           ? TorrentResumeState.started
           : TorrentResumeState.stopped,
-      files = (json['files'] as List)
-          .map<bool>((wanted) => wanted as bool)
-          .toList();
+      files =
+          (json['files'] as List?)
+              ?.map<bool>((wanted) => wanted as bool)
+              .toList() ??
+          const <bool>[];
 }

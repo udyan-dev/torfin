@@ -119,8 +119,9 @@ class BatchFavoriteResult {
 
   String get title {
     if (error != null) return failedToAddFavorites;
-    if (alreadyExistsCount > 0 && successCount == 0)
+    if (alreadyExistsCount > 0 && successCount == 0) {
       return '$alreadyExistsCount $torrentsWereAlreadyInFavorites';
+    }
     return successCount > 0
         ? '$successCount $torrentsWereAddedToFavorites'
         : failedToAddFavorites;

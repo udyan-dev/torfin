@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -44,8 +45,7 @@ class StatusWidget extends StatelessWidget {
         children: [
           type == StatusType.loading
               ? const LoadingWidget()
-              : SvgPicture.asset(
-                  type.icon,
+              : SvgPicture(AssetBytesLoader(type.icon),
                   width: 16.0,
                   height: 16.0,
                   colorFilter: type.getStatusColor(context.colors).colorFilter,

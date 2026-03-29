@@ -24,6 +24,10 @@ import '../widgets/selection_notifier.dart';
 import '../widgets/torrent_download_widget.dart';
 import 'cubit/download_cubit.dart';
 
+final _downloadCategories = TorrentDownloadStatus.values
+    .map((e) => e.title)
+    .toList(growable: false);
+
 class DownloadScreen extends StatefulWidget {
   const DownloadScreen({super.key});
 
@@ -234,14 +238,13 @@ class _DownloadScreenState extends State<DownloadScreen> {
           _selection.clear();
         },
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const AppBarWidget(title: downloads),
             BlocBuilder<DownloadCubit, DownloadState>(
               builder: (context, state) {
                 return CategoryWidget(
-                  categories: TorrentDownloadStatus.values
-                      .map((e) => e.title)
-                      .toList(),
+                  categories: _downloadCategories,
                   selectedRaw: state.selectedCategoryRaw,
                   onCategoryChange: (String? raw) {
                     context.read<DownloadCubit>().setFilterRaw(raw);

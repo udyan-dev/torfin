@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/extensions.dart';
@@ -28,10 +29,10 @@ class EmptyStateWidget extends StatelessWidget {
         mainAxisAlignment: center
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SvgPicture.asset(
-            emptyState.stateIcon,
+          SvgPicture(
+            AssetBytesLoader(emptyState.stateIcon),
             alignment: Alignment.centerLeft,
             colorFilter:
                 iconColor?.colorFilter ??

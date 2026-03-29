@@ -24,6 +24,12 @@ const _kInsufficientCoinsIdKey = 'insufficientCoinsId';
 const _kInsufficientCoinsTimeKey = 'insufficientCoinsTime';
 const _kInsufficientCoinsDuration = 3000;
 
+class _InsufficientCoinsMarker {
+  const _InsufficientCoinsMarker(this.id);
+
+  final int id;
+}
+
 class NotificationService {
   final Engine _engine;
   AddTorrentUseCase? _addTorrentUseCase;
@@ -31,6 +37,7 @@ class NotificationService {
   final _storage = const FlutterSecureStorage();
   Timer? _timer;
   bool _isUpdating = false;
+  bool _isListeningTaskData = false;
   int? initialTabIndex;
   void Function(int)? onNavigateToTab;
 
@@ -77,20 +84,29 @@ class NotificationService {
   }
 
   void start() {
-    if (_timer?.isActive ?? false) return;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
-    FlutterForegroundTask.addTaskDataCallback(_onTaskData);
+    if (!(_timer?.isActive ?? false)) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
+    }
+    if (!_isListeningTaskData) {
+      FlutterForegroundTask.addTaskDataCallback(_onTaskData);
+      _isListeningTaskData = true;
+    }
   }
 
-  void stop() {
+  void stop({bool cancelNotification = true}) {
     _timer?.cancel();
     _timer = null;
-    _notifications.cancel(id: _kNotificationId);
+    if (cancelNotification) {
+      _notifications.cancel(id: _kNotificationId);
+    }
   }
 
   void dispose() {
     stop();
-    FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
+    if (_isListeningTaskData) {
+      FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
+      _isListeningTaskData = false;
+    }
   }
 
   void _onTaskData(Object data) {
@@ -104,7 +120,9 @@ class NotificationService {
 
   Future<void> _processAction(String action) async {
     try {
-      final torrents = await _engine.fetchTorrents();
+      final torrents = await _engine.fetchTorrents(
+        mode: TorrentFetchMode.list,
+      );
       switch (action) {
         case 'pause':
           for (final t in torrents) {
@@ -134,7 +152,7 @@ class NotificationService {
     if (_isUpdating) return;
     _isUpdating = true;
     try {
-      final active = (await _engine.fetchTorrents())
+      final active = (await _engine.fetchTorrents(mode: TorrentFetchMode.list))
           .where(
             (t) =>
                 t.status == TorrentStatus.downloading ||
@@ -165,26 +183,24 @@ class NotificationService {
   String _formatSubText(int progress, String speed, String eta) =>
       '$progress$notificationPercentSuffix$notificationSeparator$speed$notificationSpeedSuffix$notificationSeparator$eta';
 
-  Future<String> _torrentTitle(Torrent t) async {
-    final insufficientIdStr = await _storage.read(
-      key: _kInsufficientCoinsIdKey,
-    );
-    final insufficientTimeStr = await _storage.read(
-      key: _kInsufficientCoinsTimeKey,
-    );
-    if (insufficientIdStr != null && insufficientTimeStr != null) {
-      final insufficientId = int.tryParse(insufficientIdStr);
-      final insufficientTime = int.tryParse(insufficientTimeStr);
-      if (insufficientId == t.id && insufficientTime != null) {
-        final elapsed =
-            DateTime.now().millisecondsSinceEpoch - insufficientTime;
-        if (elapsed < _kInsufficientCoinsDuration) {
-          return insufficientCoins;
-        }
-        await _storage.delete(key: _kInsufficientCoinsIdKey);
-        await _storage.delete(key: _kInsufficientCoinsTimeKey);
-      }
+  Future<_InsufficientCoinsMarker?> _readInsufficientCoinsMarker() async {
+    final idStr = await _storage.read(key: _kInsufficientCoinsIdKey);
+    final timeStr = await _storage.read(key: _kInsufficientCoinsTimeKey);
+    if (idStr == null || timeStr == null) return null;
+    final id = int.tryParse(idStr);
+    final time = int.tryParse(timeStr);
+    if (id == null || time == null) return null;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - time;
+    if (elapsed >= _kInsufficientCoinsDuration) {
+      await _storage.delete(key: _kInsufficientCoinsIdKey);
+      await _storage.delete(key: _kInsufficientCoinsTimeKey);
+      return null;
     }
+    return _InsufficientCoinsMarker(id);
+  }
+
+  String _torrentTitle(Torrent t, _InsufficientCoinsMarker? marker) {
+    if (marker?.id == t.id) return insufficientCoins;
     return t.errorString.isNotEmpty
         ? t.errorString
         : t.files.isEmpty
@@ -202,7 +218,8 @@ class NotificationService {
     final colors = AppColors.fromBrightness(
       PlatformDispatcher.instance.platformBrightness,
     );
-    final title = await _torrentTitle(t);
+    final marker = await _readInsufficientCoinsMarker();
+    final title = _torrentTitle(t, marker);
     final hasError = t.errorString.isNotEmpty || title == insufficientCoins;
 
     _notifications.show(
@@ -279,8 +296,9 @@ class NotificationService {
     ].join(notificationSeparator);
 
     final inboxLines = <String>[];
+    final marker = await _readInsufficientCoinsMarker();
     for (final t in torrents) {
-      final tTitle = await _torrentTitle(t);
+      final tTitle = _torrentTitle(t, marker);
       final tProgress = (t.progress * 100).toInt();
       final tSpeed = prettyBytes(t.rateDownload.toDouble());
       inboxLines.add(
@@ -330,7 +348,9 @@ class NotificationService {
       return;
     }
     if (actionId == 'cancel') {
-      final torrents = await _engine.fetchTorrents();
+      final torrents = await _engine.fetchTorrents(
+        mode: TorrentFetchMode.list,
+      );
       for (final t in torrents) {
         t.stop();
       }

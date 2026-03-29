@@ -52,8 +52,8 @@ class TransmissionTorrentFileStats {
   const TransmissionTorrentFileStats(this.wanted, this.piecesRange);
 
   TransmissionTorrentFileStats.fromJson(Map<String, dynamic> json)
-    : wanted = json['wanted'],
-      piecesRange = List<int>.from(json['piecesRange']);
+    : wanted = json['wanted'] as bool? ?? true,
+      piecesRange = List<int>.from(json['piecesRange'] ?? const <int>[]);
 }
 
 class TransmissionTorrentModel {
@@ -114,30 +114,34 @@ class TransmissionTorrentModel {
   );
 
   TransmissionTorrentModel.fromJson(Map<String, dynamic> json)
-    : id = json['id'] as int,
-      name = json['name'] as String,
+    : id = json['id'] as int? ?? 0,
+      name = json['name'] as String? ?? '',
       percentDone = json['percentDone'] is int
           ? (json['percentDone'] as int).toDouble()
-          : json['percentDone'] as double,
-      status = TorrentStatus.values[json['status'] as int],
-      totalSize = json['totalSize'] as int,
-      rateDownload = json['rateDownload'] as int,
-      rateUpload = json['rateUpload'] as int,
-      downloadedEver = json['downloadedEver'] as int,
-      uploadedEver = json['uploadedEver'] as int,
-      eta = json['eta'] as int,
-      pieces = convertBitfieldToBoolList(
-        base64Decode(json['pieces'] as String),
-        json['pieceCount'] as int,
-      ),
-      pieceCount = json['pieceCount'] as int,
-      pieceSize = json['pieceSize'] as int,
-      errorString = json['errorString'] as String,
-      location = json['downloadDir'] as String,
-      isPrivate = json['isPrivate'] as bool,
-      addedDate = json['addedDate'] as int,
-      creator = json['creator'] as String,
-      comment = json['comment'] as String,
+          : (json['percentDone'] as double? ?? 0.0),
+      status = (json['status'] is int)
+          ? TorrentStatus.values[json['status'] as int]
+          : TorrentStatus.stopped,
+      totalSize = json['totalSize'] as int? ?? 0,
+      rateDownload = json['rateDownload'] as int? ?? 0,
+      rateUpload = json['rateUpload'] as int? ?? 0,
+      downloadedEver = json['downloadedEver'] as int? ?? 0,
+      uploadedEver = json['uploadedEver'] as int? ?? 0,
+      eta = json['eta'] as int? ?? 0,
+      pieces = (json['pieces'] != null && json['pieceCount'] != null)
+          ? convertBitfieldToBoolList(
+              base64Decode(json['pieces'] as String),
+              json['pieceCount'] as int,
+            )
+          : List<bool>.filled(json['pieceCount'] as int? ?? 0, false),
+      pieceCount = json['pieceCount'] as int? ?? 0,
+      pieceSize = json['pieceSize'] as int? ?? 0,
+      errorString = json['errorString'] as String? ?? '',
+      location = json['downloadDir'] as String? ?? '',
+      isPrivate = json['isPrivate'] as bool? ?? false,
+      addedDate = json['addedDate'] as int? ?? 0,
+      creator = json['creator'] as String? ?? '',
+      comment = json['comment'] as String? ?? '',
       files =
           (json['files'] as List?)
               ?.map<TransmissionTorrentFile>(
@@ -155,11 +159,11 @@ class TransmissionTorrentModel {
               )
               .toList() ??
           const <TransmissionTorrentFileStats>[],
-      labels = List<String>.from(json['labels'] as List),
-      peersConnected = json['peersConnected'] as int,
-      magnetLink = json['magnetLink'] as String,
-      sequentialDownload = json['sequentialDownload'] as bool,
+      labels = List<String>.from(json['labels'] ?? const <String>[]),
+      peersConnected = json['peersConnected'] as int? ?? 0,
+      magnetLink = json['magnetLink'] as String? ?? '',
+      sequentialDownload = json['sequentialDownload'] as bool? ?? false,
       doneDate = DateTime.fromMillisecondsSinceEpoch(
-        (json['doneDate'] as int) * 1000,
+        ((json['doneDate'] as int?) ?? 0) * 1000,
       );
 }

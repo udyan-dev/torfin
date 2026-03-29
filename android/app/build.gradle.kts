@@ -22,7 +22,7 @@ val keystoreProperties = Properties().apply {
 android {
     namespace = "com.ironfist.torfin"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.3.13750724"
+    ndkVersion = "28.2.13676358"
 
     lint {
         checkReleaseBuilds = false

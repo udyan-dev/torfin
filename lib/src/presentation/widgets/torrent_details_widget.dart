@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:collection/collection.dart';
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
@@ -445,8 +446,7 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
                 onTap: () async {
                   status == TorrentStatus.stopped ? t.start() : t.stop();
                 },
-                child: SvgPicture.asset(
-                  asset,
+                child: SvgPicture(AssetBytesLoader(asset),
                   width: 20,
                   height: 20,
                   colorFilter: context.colors.iconPrimary.colorFilter,
@@ -465,8 +465,7 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
                 context,
               );
             },
-            child: SvgPicture.asset(
-              AppAssets.icShare,
+            child: SvgPicture(AssetBytesLoader(AppAssets.icShare),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,
@@ -486,8 +485,7 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
                 Navigator.of(context).pop();
               }
             },
-            child: SvgPicture.asset(
-              AppAssets.icDelete,
+            child: SvgPicture(AssetBytesLoader(AppAssets.icDelete),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

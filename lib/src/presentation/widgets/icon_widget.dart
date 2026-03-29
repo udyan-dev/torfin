@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:torfin/core/utils/extensions.dart';
@@ -16,8 +17,7 @@ class IconWidget extends StatelessWidget {
       customBorder: const CircleBorder(),
       child: Padding(
         padding: const EdgeInsets.all(8),
-        child: SvgPicture.asset(
-          icon,
+        child: SvgPicture(AssetBytesLoader(icon),
           width: 20,
           height: 20,
           colorFilter:

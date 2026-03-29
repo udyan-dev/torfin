@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -191,8 +192,7 @@ class _InfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = SvgPicture.asset(
-      iconAsset,
+    final icon = SvgPicture(AssetBytesLoader(iconAsset),
       colorFilter: textColor.colorFilter,
     );
     final label = AppText.label01(

@@ -1,3 +1,4 @@
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -183,8 +184,7 @@ class _CoinsWidgetState extends State<CoinsWidget> {
                   child: Row(
                     children: [
                       if (showPlus)
-                        SvgPicture.asset(
-                          AppAssets.icAdd,
+                        SvgPicture(AssetBytesLoader(AppAssets.icAdd),
                           width: 20,
                           height: 20,
                           colorFilter:
