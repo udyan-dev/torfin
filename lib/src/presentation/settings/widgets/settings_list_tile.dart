@@ -1,6 +1,6 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../../core/theme/app_styles.dart';
 import '../../../../core/utils/app_assets.dart';
@@ -28,7 +28,8 @@ class SettingsListTile extends StatelessWidget {
       dense: true,
       visualDensity: const VisualDensity(vertical: -4),
       horizontalTitleGap: 8,
-      leading: SvgPicture(AssetBytesLoader(icon),
+      leading: SvgPicture(
+        AssetBytesLoader(icon),
         width: 20,
         height: 20,
         colorFilter: context.colors.iconPrimary.colorFilter,
@@ -36,7 +37,8 @@ class SettingsListTile extends StatelessWidget {
       title: AppText.bodyCompact02(title),
       subtitle: subtitle != null ? AppText.label02(subtitle!) : null,
       trailing: showEditIcon
-          ? SvgPicture(AssetBytesLoader(AppAssets.icEdit),
+          ? SvgPicture(
+              const AssetBytesLoader(AppAssets.icEdit),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

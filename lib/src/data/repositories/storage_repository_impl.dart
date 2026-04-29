@@ -124,8 +124,9 @@ class StorageRepositoryImpl extends BaseRepository
 
   @override
   Future<DataState<String>> getTorrentFolder() => getStateOf(
-    request: () => _storageService.get<String>(downloadLocationKey).then((
-        v) => v ?? emptyString),
+    request: () => _storageService
+        .get<String>(downloadLocationKey)
+        .then((v) => v ?? emptyString),
   );
 
   @override

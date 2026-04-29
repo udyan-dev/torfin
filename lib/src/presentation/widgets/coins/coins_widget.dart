@@ -1,9 +1,9 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../../core/bindings/env.dart';
 import '../../../../core/services/consent_service.dart';
@@ -184,7 +184,8 @@ class _CoinsWidgetState extends State<CoinsWidget> {
                   child: Row(
                     children: [
                       if (showPlus)
-                        SvgPicture(AssetBytesLoader(AppAssets.icAdd),
+                        SvgPicture(
+                          const AssetBytesLoader(AppAssets.icAdd),
                           width: 20,
                           height: 20,
                           colorFilter:

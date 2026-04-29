@@ -1,8 +1,10 @@
-import 'package:vector_graphics/vector_graphics.dart';
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pretty_bytes/pretty_bytes.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
@@ -40,20 +42,8 @@ class TorrentDownloadWidget extends StatelessWidget {
       child: InkWell(
         onTap:
             onTap ??
-            () async {
-              final cubit = context.read<DownloadCubit>();
-              var detailsTorrent = torrent;
-              try {
-                detailsTorrent = await cubit.fetchTorrent(torrent.id);
-              } catch (_) {}
-              if (!context.mounted) return;
-              showAppBottomSheet(
-                context: context,
-                builder: (_) => BlocProvider.value(
-                  value: cubit,
-                  child: TorrentDetailsWidget(torrent: detailsTorrent),
-                ),
-              );
+            () {
+              unawaited(_showDetails(context, torrent));
             },
         onLongPress: onLongPress,
         child: IgnorePointer(
@@ -78,12 +68,14 @@ class TorrentDownloadWidget extends StatelessWidget {
                   ),
                 InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () async {
+                  onTap: () {
                     if (torrent.errorString.isNotEmpty) {
                       if (context.mounted) {
-                        context.read<DownloadCubit>().retryTorrent(
-                          torrent,
-                          context,
+                        unawaited(
+                          context.read<DownloadCubit>().retryTorrent(
+                            torrent,
+                            context,
+                          ),
                         );
                       }
                     } else {
@@ -106,17 +98,20 @@ class TorrentDownloadWidget extends StatelessWidget {
                           colors.interactive,
                         ),
                       ),
-                      SvgPicture(AssetBytesLoader(torrent.errorString.isNotEmpty
-                            ? AppAssets.icReset
-                            : torrent.status == TorrentStatus.stopped
-                            ? AppAssets.icContinue
-                            : (torrent.status == TorrentStatus.seeding ||
-                                  torrent.progress == 1)
-                            ? AppAssets.icComplete
-                            : (torrent.status == TorrentStatus.downloading ||
-                                  torrent.status == TorrentStatus.checking)
-                            ? AppAssets.icStop
-                            : AppAssets.icQueue),
+                      SvgPicture(
+                        AssetBytesLoader(
+                          torrent.errorString.isNotEmpty
+                              ? AppAssets.icReset
+                              : torrent.status == TorrentStatus.stopped
+                              ? AppAssets.icContinue
+                              : (torrent.status == TorrentStatus.seeding ||
+                                    torrent.progress == 1)
+                              ? AppAssets.icComplete
+                              : (torrent.status == TorrentStatus.downloading ||
+                                    torrent.status == TorrentStatus.checking)
+                              ? AppAssets.icStop
+                              : AppAssets.icQueue,
+                        ),
                         width: 20,
                         height: 20,
                         colorFilter: colors.iconPrimary.colorFilter,
@@ -148,7 +143,8 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture(AssetBytesLoader(AppAssets.icSize),
+                              SvgPicture(
+                                const AssetBytesLoader(AppAssets.icSize),
                                 width: 16,
                                 height: 16,
                                 colorFilter: colors.tagColorMagenta.colorFilter,
@@ -162,7 +158,8 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture(AssetBytesLoader(AppAssets.icChevronDown),
+                              SvgPicture(
+                                const AssetBytesLoader(AppAssets.icChevronDown),
                                 width: 16,
                                 height: 16,
                                 colorFilter: colors.supportSuccess.colorFilter,
@@ -176,7 +173,8 @@ class TorrentDownloadWidget extends StatelessWidget {
                           Row(
                             spacing: 4,
                             children: [
-                              SvgPicture(AssetBytesLoader(AppAssets.icChevronUp),
+                              SvgPicture(
+                                const AssetBytesLoader(AppAssets.icChevronUp),
                                 width: 16,
                                 height: 16,
                                 colorFilter:
@@ -205,4 +203,20 @@ class TorrentDownloadWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _showDetails(BuildContext context, Torrent torrent) async {
+  final cubit = context.read<DownloadCubit>();
+  var detailsTorrent = torrent;
+  try {
+    detailsTorrent = await cubit.fetchTorrent(torrent.id);
+  } catch (_) {}
+  if (!context.mounted) return;
+  showAppBottomSheet(
+    context: context,
+    builder: (_) => BlocProvider.value(
+      value: cubit,
+      child: TorrentDetailsWidget(torrent: detailsTorrent),
+    ),
+  );
 }

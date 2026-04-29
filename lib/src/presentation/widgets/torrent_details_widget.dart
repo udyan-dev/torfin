@@ -1,4 +1,5 @@
-import 'package:vector_graphics/vector_graphics.dart';
+import 'dart:async' show unawaited;
+
 import 'package:collection/collection.dart';
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as path;
 import 'package:pretty_bytes/pretty_bytes.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
@@ -86,8 +88,8 @@ class _FilesTabWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: InkWell(
-                onTap: () async {
-                  await t.toggleAllFilesWanted(!areAllFilesWanted);
+                onTap: () {
+                  unawaited(t.toggleAllFilesWanted(!areAllFilesWanted));
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,8 +100,8 @@ class _FilesTabWidget extends StatelessWidget {
                       side: BorderSide(color: context.colors.iconPrimary),
                       activeColor: context.colors.iconPrimary,
                       tristate: true,
-                      onChanged: (value) async {
-                        await t.toggleAllFilesWanted(value ?? false);
+                      onChanged: (value) {
+                        unawaited(t.toggleAllFilesWanted(value ?? false));
                       },
                     ),
                   ],
@@ -131,33 +133,19 @@ class _FilesTabWidget extends StatelessWidget {
                         IconWidget(
                           icon: AppAssets.icOpen,
                           iconColor: context.colors.iconPrimary,
-                          onTap: () async {
-                            final result = await OpenFilex.open(
-                              path.join(torrent.location, file.name),
-                              type: lookupMimeType(file.name),
-                            );
-                            if (result.type != ResultType.done &&
-                                context.mounted) {
-                              Navigator.of(context).pop();
-                              if (context.mounted) {
-                                NotificationWidget.notify(
-                                  context,
-                                  errorNotification(
-                                    failedToOpenFile,
-                                    result.message,
-                                  ),
-                                );
-                              }
-                            }
+                          onTap: () {
+                            unawaited(_openFile(context, torrent, file.name));
                           },
                         ),
                         CheckBoxWidget(
                           value: file.wanted,
                           side: BorderSide(color: context.colors.iconPrimary),
                           activeColor: context.colors.iconPrimary,
-                          onChanged: (value) async {
+                          onChanged: (value) {
                             if (file.bytesCompleted != file.length) {
-                              await t.toggleFileWanted(index, !file.wanted);
+                              unawaited(
+                                t.toggleFileWanted(index, !file.wanted),
+                              );
                             }
                           },
                         ),
@@ -339,6 +327,38 @@ Widget _buildKeepFilesCheckbox(
   );
 }
 
+Future<void> _openFile(
+  BuildContext context,
+  Torrent torrent,
+  String fileName,
+) async {
+  final result = await OpenFilex.open(
+    path.join(torrent.location, fileName),
+    type: lookupMimeType(fileName),
+  );
+  if (result.type != ResultType.done && context.mounted) {
+    Navigator.of(context).pop();
+    if (context.mounted) {
+      NotificationWidget.notify(
+        context,
+        errorNotification(failedToOpenFile, result.message),
+      );
+    }
+  }
+}
+
+Future<void> _removeTorrent(
+  BuildContext context,
+  Torrent torrent,
+  ValueNotifier<bool> keepFiles,
+) async {
+  final withData = !keepFiles.value;
+  await torrent.remove(withData);
+  if (context.mounted) {
+    Navigator.of(context).pop(true);
+  }
+}
+
 Future<bool?> _showTorrentDeleteDialog(
   BuildContext context,
   Torrent torrent,
@@ -364,12 +384,8 @@ Future<bool?> _showTorrentDeleteDialog(
             child: ButtonWidget(
               backgroundColor: dialogContext.colors.buttonPrimary,
               buttonText: delete,
-              onTap: () async {
-                final withData = !keepFiles.value;
-                await torrent.remove(withData);
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop(true);
-                }
+              onTap: () {
+                unawaited(_removeTorrent(dialogContext, torrent, keepFiles));
               },
             ),
           ),
@@ -379,6 +395,16 @@ Future<bool?> _showTorrentDeleteDialog(
   );
   keepFiles.dispose();
   return result;
+}
+
+Future<void> _confirmDeleteTorrent(
+  BuildContext context,
+  Torrent torrent,
+) async {
+  final confirmed = await _showTorrentDeleteDialog(context, torrent);
+  if (context.mounted && confirmed == true) {
+    Navigator.of(context).pop();
+  }
 }
 
 class _TorrentDetailsHeaderWidget extends StatelessWidget {
@@ -443,10 +469,11 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
                   ? AppAssets.icStop
                   : AppAssets.icQueue;
               return InkWell(
-                onTap: () async {
+                onTap: () {
                   status == TorrentStatus.stopped ? t.start() : t.stop();
                 },
-                child: SvgPicture(AssetBytesLoader(asset),
+                child: SvgPicture(
+                  AssetBytesLoader(asset),
                   width: 20,
                   height: 20,
                   colorFilter: context.colors.iconPrimary.colorFilter,
@@ -459,13 +486,13 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
           right: 56,
           top: 14,
           child: InkWell(
-            onTap: () async {
-              await context.read<DownloadCubit>().shareTorrent(
-                torrent,
-                context,
+            onTap: () {
+              unawaited(
+                context.read<DownloadCubit>().shareTorrent(torrent, context),
               );
             },
-            child: SvgPicture(AssetBytesLoader(AppAssets.icShare),
+            child: SvgPicture(
+              const AssetBytesLoader(AppAssets.icShare),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,
@@ -476,16 +503,11 @@ class _TorrentDetailsHeaderWidget extends StatelessWidget {
           right: 16,
           top: 14,
           child: InkWell(
-            onTap: () async {
-              final confirmed = await _showTorrentDeleteDialog(
-                context,
-                torrent,
-              );
-              if (context.mounted && confirmed == true) {
-                Navigator.of(context).pop();
-              }
+            onTap: () {
+              unawaited(_confirmDeleteTorrent(context, torrent));
             },
-            child: SvgPicture(AssetBytesLoader(AppAssets.icDelete),
+            child: SvgPicture(
+              const AssetBytesLoader(AppAssets.icDelete),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

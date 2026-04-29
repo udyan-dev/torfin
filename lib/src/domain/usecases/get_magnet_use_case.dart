@@ -11,7 +11,8 @@ class GetMagnetUseCase extends BaseUseCase<List<String>, String> {
   final TorrentRepository _torrentRepository;
 
   @override
-  Future<DataState<List<String>>> call(String params, {
+  Future<DataState<List<String>>> call(
+    String params, {
     required CancelToken cancelToken,
   }) {
     return _torrentRepository.getMagnetLinks(

@@ -220,9 +220,7 @@ class DownloadCubit extends Cubit<DownloadState> {
       final withData = !keepFiles;
       await _engine.removeTorrents(ids, withData);
 
-      final torrents = await _engine.fetchTorrents(
-        mode: TorrentFetchMode.list,
-      );
+      final torrents = await _engine.fetchTorrents(mode: TorrentFetchMode.list);
       _allTorrents = torrents;
       _torrentsSignature = _signatureOf(torrents);
 

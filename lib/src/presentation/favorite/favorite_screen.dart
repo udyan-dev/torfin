@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,7 +49,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     super.initState();
     _cubit = di<FavoriteCubit>();
     _selection = SelectionNotifier();
-    _cubit.load();
+    unawaited(_cubit.load());
   }
 
   @override
@@ -61,8 +63,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     return TorrentListRefreshIndicator(
       selection: _selection,
       onRefresh: () {
-        _cubit.load(query: state.query);
-        return Future.value();
+        return _cubit.load(query: state.query);
       },
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -89,8 +90,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
     return TorrentItemBuilder(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
-      onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent, context),
+      onSave: () => unawaited(_cubit.toggleFavorite(torrent)),
+      onDownload: () => unawaited(_cubit.downloadTorrent(torrent, context)),
       onDialogClosed: _cubit.cancelMagnetFetch,
       selection: _selection,
       dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
@@ -99,11 +100,13 @@ class _FavoriteScreenState extends State<FavoriteScreen>
           torrent: t,
           dialogContext: dialogContext,
           isFavorite: state.isFavorite,
-          onToggleFavorite: _cubit.toggleFavorite,
+          onToggleFavorite: (torrent) {
+            unawaited(_cubit.toggleFavorite(torrent));
+          },
           onDownload: (torrent) =>
-              _cubit.downloadTorrent(torrent, dialogContext),
+              unawaited(_cubit.downloadTorrent(torrent, dialogContext)),
           onShare: (torrent, dialogContext) =>
-              _cubit.shareTorrent(torrent, dialogContext),
+              unawaited(_cubit.shareTorrent(torrent, dialogContext)),
           fetchingMagnetKey: () => state.fetchingMagnetForKey,
           coinsInfo: oneCoinRequiredToDownload,
           loadingIndicator: () => BlocBuilder<FavoriteCubit, FavoriteState>(
@@ -146,7 +149,7 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               children: [
                 const AppBarWidget(title: favorite),
                 SearchBarWidget(
-                  onSearch: (q) => _cubit.load(query: q),
+                  onSearch: (q) => unawaited(_cubit.load(query: q)),
                   onFetchSuggestions: (q) async {
                     await _cubit.load(query: q);
                     return const <String>[];
@@ -172,8 +175,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                                           ? context.colors.tagColorPurple
                                           : context.colors.supportCautionMajor,
                                       emptyState: state.emptyState,
-                                      onTap: () =>
-                                          _cubit.load(query: state.query),
+                                      onTap: () => unawaited(
+                                        _cubit.load(query: state.query),
+                                      ),
                                     )
                                   : ListWithMultiSelectLayout(
                                       selection: _selection,
@@ -185,7 +189,8 @@ class _FavoriteScreenState extends State<FavoriteScreen>
                             FavoriteStatus.error => EmptyStateWidget(
                               emptyState: state.emptyState,
                               iconColor: context.colors.supportError,
-                              onTap: () => _cubit.load(query: state.query),
+                              onTap: () =>
+                                  unawaited(_cubit.load(query: state.query)),
                             ),
                           };
                           return AnimatedSwitcherWidget(child: child);
@@ -239,7 +244,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               confirmButtonText: removeAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.removeMultipleFromFavorites(_selection.keys),
+                  : () => unawaited(
+                      _cubit.removeMultipleFromFavorites(_selection.keys),
+                    ),
               trailing: state.isBulkOperationInProgress
                   ? const LoadingWidget()
                   : null,
@@ -272,7 +279,9 @@ class _FavoriteScreenState extends State<FavoriteScreen>
               confirmButtonText: downloadAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.downloadMultipleTorrents(_selection.keys),
+                  : () => unawaited(
+                      _cubit.downloadMultipleTorrents(_selection.keys),
+                    ),
               onCancel: state.isBulkOperationInProgress
                   ? () {
                       _cubit.cancelMagnetFetch();

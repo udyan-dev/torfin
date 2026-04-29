@@ -52,11 +52,11 @@ class TorrentsModel extends ChangeNotifier {
 
   Future<void> _init() async {
     await _loadSettings();
-    fetchTorrents();
+    unawaited(fetchTorrents());
     // Indefinitely refresh
     _timer = Timer.periodic(
       const Duration(seconds: refreshIntervalSeconds),
-      (timer) => fetchTorrents(),
+      (timer) => unawaited(fetchTorrents()),
     );
   }
 
@@ -170,8 +170,8 @@ class TorrentsModel extends ChangeNotifier {
 
   Future<void> setSort(Sort value, bool reverse) async {
     final storage = di<StorageService>();
-    storage.set(sortKey, value.name);
-    storage.set(reverseSortKey, reverse);
+    unawaited(storage.set(sortKey, value.name));
+    unawaited(storage.set(reverseSortKey, reverse));
     sort = value;
     reverseSort = reverse;
     processDisplayedTorrents();

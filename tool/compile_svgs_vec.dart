@@ -21,8 +21,10 @@ Future<void> main() async {
 
   final futures = svgFiles.map((file) async {
     final relativePath = file.path.substring(sourceDir.path.length + 1);
-    final targetFile = File('${targetDir.path}${Platform.pathSeparator}$relativePath.vec');
-    
+    final targetFile = File(
+      '${targetDir.path}${Platform.pathSeparator}$relativePath.vec',
+    );
+
     if (!targetFile.parent.existsSync()) {
       targetFile.parent.createSync(recursive: true);
     }
@@ -39,7 +41,7 @@ Future<void> main() async {
       '--no-optimize-overdraw',
       '--no-tessellate',
     ]);
-    
+
     return {
       'exitCode': result.exitCode,
       'stdout': result.stdout,
@@ -53,8 +55,8 @@ Future<void> main() async {
     if (res['exitCode'] != 0) {
       final output = (res['stdout'] as String).trim();
       final err = (res['stderr'] as String).trim();
-      if (output.isNotEmpty) print(output);
-      if (err.isNotEmpty) print(err);
+      if (output.isNotEmpty) {}
+      if (err.isNotEmpty) {}
       errorCount++;
     }
   }

@@ -15,7 +15,10 @@ class SessionService {
 
   void startPeriodicFetch() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => fetchSession());
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => unawaited(fetchSession()),
+    );
   }
 
   void stopPeriodicFetch() {

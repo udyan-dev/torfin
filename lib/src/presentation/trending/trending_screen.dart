@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -54,7 +56,7 @@ class _TrendingScreenState extends State<TrendingScreen>
     super.initState();
     _cubit = di<TrendingCubit>();
     _selection = SelectionNotifier();
-    _cubit.trending(type: TrendingType.day, isRefresh: true);
+    unawaited(_cubit.trending(type: TrendingType.day, isRefresh: true));
   }
 
   @override
@@ -68,8 +70,7 @@ class _TrendingScreenState extends State<TrendingScreen>
     return TorrentListRefreshIndicator(
       selection: _selection,
       onRefresh: () {
-        _cubit.trending(isRefresh: true);
-        return Future.value();
+        return _cubit.trending(isRefresh: true);
       },
       child: ListView.separated(
         key: ValueKey(state.selectedCategoryRaw),
@@ -97,8 +98,8 @@ class _TrendingScreenState extends State<TrendingScreen>
     return TorrentItemBuilder(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
-      onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent, context),
+      onSave: () => unawaited(_cubit.toggleFavorite(torrent)),
+      onDownload: () => unawaited(_cubit.downloadTorrent(torrent, context)),
       onDialogClosed: _cubit.cancelMagnetFetch,
       selection: _selection,
       dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
@@ -107,11 +108,13 @@ class _TrendingScreenState extends State<TrendingScreen>
           torrent: t,
           dialogContext: dialogContext,
           isFavorite: state.isFavorite,
-          onToggleFavorite: _cubit.toggleFavorite,
+          onToggleFavorite: (torrent) {
+            unawaited(_cubit.toggleFavorite(torrent));
+          },
           onDownload: (torrent) =>
-              _cubit.downloadTorrent(torrent, dialogContext),
+              unawaited(_cubit.downloadTorrent(torrent, dialogContext)),
           onShare: (torrent, dialogContext) =>
-              _cubit.shareTorrent(torrent, dialogContext),
+              unawaited(_cubit.shareTorrent(torrent, dialogContext)),
           fetchingMagnetKey: () => state.fetchingMagnetForKey,
           coinsInfo: oneCoinRequiredToDownload,
           loadingIndicator: () => BlocBuilder<TrendingCubit, TrendingState>(
@@ -157,7 +160,9 @@ class _TrendingScreenState extends State<TrendingScreen>
                   title: trending,
                   actions: [
                     SortWidget(
-                      onSort: (sortType) => _cubit.trending(sortType: sortType),
+                      onSort: (sortType) {
+                        unawaited(_cubit.trending(sortType: sortType));
+                      },
                     ),
                   ],
                 ),
@@ -166,7 +171,7 @@ class _TrendingScreenState extends State<TrendingScreen>
                   getItemLabel: (item) => item.title,
                   onChanged: (item) {
                     _selection.clear();
-                    _cubit.trending(type: item);
+                    unawaited(_cubit.trending(type: item));
                   },
                 ),
                 BlocBuilder<TrendingCubit, TrendingState>(
@@ -186,7 +191,7 @@ class _TrendingScreenState extends State<TrendingScreen>
                       selectedRaw: state.selectedCategoryRaw,
                       onCategoryChange: (raw) {
                         _selection.clear();
-                        _cubit.trending(category: raw);
+                        unawaited(_cubit.trending(category: raw));
                       },
                     );
                   },
@@ -217,8 +222,9 @@ class _TrendingScreenState extends State<TrendingScreen>
                                         description: noResultsFoundDescription,
                                         buttonText: retry,
                                       ),
-                                      onTap: () =>
-                                          _cubit.trending(isRefresh: true),
+                                      onTap: () => unawaited(
+                                        _cubit.trending(isRefresh: true),
+                                      ),
                                     )
                                   : ListWithMultiSelectLayout(
                                       selection: _selection,
@@ -230,7 +236,8 @@ class _TrendingScreenState extends State<TrendingScreen>
                             TrendingStatus.error => EmptyStateWidget(
                               emptyState: state.emptyState,
                               iconColor: context.colors.supportError,
-                              onTap: () => _cubit.trending(isRefresh: true),
+                              onTap: () =>
+                                  unawaited(_cubit.trending(isRefresh: true)),
                             ),
                           };
                           return AnimatedSwitcherWidget(child: child);
@@ -284,7 +291,9 @@ class _TrendingScreenState extends State<TrendingScreen>
               confirmButtonText: saveAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.addMultipleToFavorites(_selection.keys),
+                  : () => unawaited(
+                      _cubit.addMultipleToFavorites(_selection.keys),
+                    ),
               trailing: state.isBulkOperationInProgress
                   ? const LoadingWidget()
                   : null,
@@ -317,7 +326,9 @@ class _TrendingScreenState extends State<TrendingScreen>
               confirmButtonText: downloadAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.downloadMultipleTorrents(_selection.keys),
+                  : () => unawaited(
+                      _cubit.downloadMultipleTorrents(_selection.keys),
+                    ),
               onCancel: state.isBulkOperationInProgress
                   ? () {
                       _cubit.cancelMagnetFetch();

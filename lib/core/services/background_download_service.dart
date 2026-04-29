@@ -112,6 +112,11 @@ Future<String> _safeTorrentRequestString(String req) async {
 void _taskCallback() => FlutterForegroundTask.setTaskHandler(_TaskHandler());
 
 @pragma('vm:entry-point')
+void _onNotificationActionCallback(NotificationResponse response) {
+  unawaited(_onNotificationAction(response));
+}
+
+@pragma('vm:entry-point')
 Future<void> _onNotificationAction(NotificationResponse response) async {
   final action = response.actionId;
   if (action == null) return;
@@ -211,8 +216,8 @@ class _TaskHandler extends TaskHandler {
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
-      onDidReceiveNotificationResponse: _onNotificationAction,
-      onDidReceiveBackgroundNotificationResponse: _onNotificationAction,
+      onDidReceiveNotificationResponse: _onNotificationActionCallback,
+      onDidReceiveBackgroundNotificationResponse: _onNotificationActionCallback,
     );
     if (starter == TaskStarter.system) {
       final dir = p.join(
@@ -237,7 +242,7 @@ class _TaskHandler extends TaskHandler {
   @override
   void onRepeatEvent(DateTime timestamp) {
     if (_isStopping) return;
-    if (!_isMainAlive) _updateNotification();
+    if (!_isMainAlive) unawaited(_updateNotification());
   }
 
   Future<void> _updateNotification() async {

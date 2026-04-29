@@ -1,4 +1,3 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/extensions.dart';
@@ -33,7 +33,8 @@ class ToggleWidget extends StatelessWidget {
       child: Row(
         children: [
           if (leadingIcon != null) ...[
-            SvgPicture(AssetBytesLoader(leadingIcon!),
+            SvgPicture(
+              AssetBytesLoader(leadingIcon!),
               width: 20,
               height: 20,
               colorFilter: context.colors.iconPrimary.colorFilter,

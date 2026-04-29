@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -80,7 +82,7 @@ class _SearchScreenState extends State<SearchScreen>
 
     final state = _cubit.state;
     if (state.canLoadMore && !state.isPaginating && !state.isAutoLoadingMore) {
-      _cubit.loadMore();
+      unawaited(_cubit.loadMore());
     }
   }
 
@@ -97,7 +99,7 @@ class _SearchScreenState extends State<SearchScreen>
 
       final position = _scrollController.position;
       if (position.maxScrollExtent <= 0 && state.canLoadMore) {
-        _cubit.loadMore();
+        unawaited(_cubit.loadMore());
       }
     });
   }
@@ -116,7 +118,7 @@ class _SearchScreenState extends State<SearchScreen>
           description: noResultsFoundDescription,
           buttonText: retry,
         ),
-        onTap: _cubit.onRetry,
+        onTap: () => unawaited(_cubit.onRetry()),
       );
     }
 
@@ -134,8 +136,7 @@ class _SearchScreenState extends State<SearchScreen>
     return TorrentListRefreshIndicator(
       selection: _selection,
       onRefresh: () {
-        _cubit.search(search: state.search, isRefresh: true);
-        return Future.value();
+        return _cubit.search(search: state.search, isRefresh: true);
       },
       child: _buildActualList(context, state),
     );
@@ -149,8 +150,8 @@ class _SearchScreenState extends State<SearchScreen>
     return TorrentItemBuilder(
       torrent: torrent,
       isFavorite: state.isFavorite(torrent),
-      onSave: () => _cubit.toggleFavorite(torrent),
-      onDownload: () => _cubit.downloadTorrent(torrent, context),
+      onSave: () => unawaited(_cubit.toggleFavorite(torrent)),
+      onDownload: () => unawaited(_cubit.downloadTorrent(torrent, context)),
       onDialogClosed: _cubit.cancelMagnetFetch,
       selection: _selection,
       dialogBuilder: (parentContext, dialogContext, t) => BlocProvider.value(
@@ -159,11 +160,13 @@ class _SearchScreenState extends State<SearchScreen>
           torrent: t,
           dialogContext: dialogContext,
           isFavorite: state.isFavorite,
-          onToggleFavorite: _cubit.toggleFavorite,
+          onToggleFavorite: (torrent) {
+            unawaited(_cubit.toggleFavorite(torrent));
+          },
           onDownload: (torrent) =>
-              _cubit.downloadTorrent(torrent, dialogContext),
+              unawaited(_cubit.downloadTorrent(torrent, dialogContext)),
           onShare: (torrent, dialogContext) =>
-              _cubit.shareTorrent(torrent, dialogContext),
+              unawaited(_cubit.shareTorrent(torrent, dialogContext)),
           fetchingMagnetKey: () => state.fetchingMagnetForKey,
           coinsInfo: oneCoinRequiredToDownload,
           loadingIndicator: () => BlocBuilder<SearchCubit, SearchState>(
@@ -243,12 +246,16 @@ class _SearchScreenState extends State<SearchScreen>
                   title: search,
                   actions: [
                     SortWidget(
-                      onSort: (sortType) => _cubit.search(sortType: sortType),
+                      onSort: (sortType) {
+                        unawaited(_cubit.search(sortType: sortType));
+                      },
                     ),
                   ],
                 ),
                 SearchBarWidget(
-                  onSearch: (searchText) => _cubit.search(search: searchText),
+                  onSearch: (searchText) {
+                    unawaited(_cubit.search(search: searchText));
+                  },
                   onFetchSuggestions: (query) => _cubit.fetchSuggestions(query),
                 ),
                 BlocBuilder<SearchCubit, SearchState>(
@@ -268,7 +275,7 @@ class _SearchScreenState extends State<SearchScreen>
                       selectedRaw: state.selectedCategoryRaw,
                       onCategoryChange: (raw) {
                         _selection.clear();
-                        _cubit.search(category: raw);
+                        unawaited(_cubit.search(category: raw));
                       },
                     );
                   },
@@ -320,7 +327,7 @@ class _SearchScreenState extends State<SearchScreen>
                             SearchStatus.error => EmptyStateWidget(
                               emptyState: state.emptyState,
                               iconColor: context.colors.supportError,
-                              onTap: _cubit.onRetry,
+                              onTap: () => unawaited(_cubit.onRetry()),
                             ),
                           },
                         ),
@@ -373,7 +380,9 @@ class _SearchScreenState extends State<SearchScreen>
               confirmButtonText: saveAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.addMultipleToFavorites(_selection.keys),
+                  : () => unawaited(
+                      _cubit.addMultipleToFavorites(_selection.keys),
+                    ),
               trailing: state.isBulkOperationInProgress
                   ? const LoadingWidget()
                   : null,
@@ -406,7 +415,9 @@ class _SearchScreenState extends State<SearchScreen>
               confirmButtonText: downloadAll,
               onConfirm: state.isBulkOperationInProgress
                   ? null
-                  : () => _cubit.downloadMultipleTorrents(_selection.keys),
+                  : () => unawaited(
+                      _cubit.downloadMultipleTorrents(_selection.keys),
+                    ),
               onCancel: state.isBulkOperationInProgress
                   ? () {
                       _cubit.cancelMagnetFetch();

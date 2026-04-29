@@ -5,8 +5,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart'
     show FirebaseCrashlytics;
 import 'package:firebase_performance/firebase_performance.dart'
     show FirebasePerformance;
-import 'package:flutter/cupertino.dart' show FlutterError;
 import 'package:flutter/foundation.dart' show PlatformDispatcher, kDebugMode;
+import 'package:flutter/material.dart';
 
 import '../../firebase_options.dart';
 
@@ -31,14 +31,23 @@ sealed class FirebaseService {
         })
         .then((_) {
           if (!kDebugMode) {
-            FlutterError.onError =
-                FirebaseCrashlytics.instance.recordFlutterError;
+            final previousFlutterOnError = FlutterError.onError;
+            FlutterError.onError = (FlutterErrorDetails details) {
+              previousFlutterOnError?.call(details);
+              try {
+                FirebaseCrashlytics.instance.recordFlutterError(details);
+              } catch (_) {}
+            };
+            final previousPlatformOnError = PlatformDispatcher.instance.onError;
             PlatformDispatcher.instance.onError = (error, stack) {
-              FirebaseCrashlytics.instance.recordError(
-                error,
-                stack,
-                fatal: true,
-              );
+              previousPlatformOnError?.call(error, stack);
+              try {
+                FirebaseCrashlytics.instance.recordError(
+                  error,
+                  stack,
+                  fatal: true,
+                );
+              } catch (_) {}
               return true;
             };
           }

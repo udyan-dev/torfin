@@ -1,6 +1,6 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
@@ -97,7 +97,8 @@ class NotificationWidget {
             Container(width: 3, color: notification.type.iconColor(context)),
             Padding(
               padding: const EdgeInsets.all(14.0),
-              child: SvgPicture(AssetBytesLoader(notification.type.icon),
+              child: SvgPicture(
+                AssetBytesLoader(notification.type.icon),
                 width: 20,
                 height: 20,
                 colorFilter: notification.type.iconColor(context).colorFilter,
@@ -132,7 +133,8 @@ class NotificationWidget {
                     onTap: ScaffoldMessenger.of(context).hideCurrentSnackBar,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
-                      child: SvgPicture(AssetBytesLoader(AppAssets.icClose),
+                      child: SvgPicture(
+                        const AssetBytesLoader(AppAssets.icClose),
                         width: 20,
                         height: 20,
                         colorFilter: context.colors.iconPrimary.colorFilter,

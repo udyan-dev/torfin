@@ -1,6 +1,6 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/theme/app_styles.dart';
 import '../../../core/utils/app_assets.dart';
@@ -51,7 +51,8 @@ class TagWidget extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: SvgPicture(AssetBytesLoader(tagIcon),
+                child: SvgPicture(
+                  AssetBytesLoader(tagIcon),
                   width: 16,
                   height: 16,
                   colorFilter: tagColor.colorFilter,

@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +50,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
 
   @override
   void dispose() {
-    _downloadCubit.close();
+    unawaited(_downloadCubit.close());
     _selection.dispose();
     super.dispose();
   }
@@ -181,9 +183,11 @@ class _DownloadScreenState extends State<DownloadScreen> {
                           .whereType<int>()
                           .toSet();
                       toDeleteCount = ids.length;
-                      _downloadCubit.removeMultipleTorrents(
-                        ids,
-                        keepFiles.value,
+                      unawaited(
+                        _downloadCubit.removeMultipleTorrents(
+                          ids,
+                          keepFiles.value,
+                        ),
                       );
                     },
               trailing: state.isBulkOperationInProgress
@@ -230,7 +234,10 @@ class _DownloadScreenState extends State<DownloadScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => _downloadCubit..initialize(),
+      create: (context) {
+        unawaited(_downloadCubit.initialize());
+        return _downloadCubit;
+      },
       child: BlocListener<DownloadCubit, DownloadState>(
         listenWhen: (p, c) =>
             p.isBulkOperationInProgress && !c.isBulkOperationInProgress,

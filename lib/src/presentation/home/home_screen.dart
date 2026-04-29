@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -52,7 +54,9 @@ class _HomeScreenState extends State<HomeScreen>
     _homeCubit = di<HomeCubit>()
       ..getToken()
       ..checkNotificationPermission();
-    _lifecycleListener = AppLifecycleListener(onResume: _coinsCubit.load);
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () => unawaited(_coinsCubit.load()),
+    );
   }
 
   @override
@@ -112,7 +116,8 @@ class _HomeScreenState extends State<HomeScreen>
                           center: true,
                           emptyState: state.emptyState,
                           iconColor: context.colors.supportError,
-                          onTap: () => context.read<HomeCubit>().getToken(),
+                          onTap: () =>
+                              unawaited(context.read<HomeCubit>().getToken()),
                         )
                       else
                         const SearchScreen(),
@@ -121,7 +126,8 @@ class _HomeScreenState extends State<HomeScreen>
                           center: true,
                           emptyState: state.emptyState,
                           iconColor: context.colors.supportError,
-                          onTap: () => context.read<HomeCubit>().getToken(),
+                          onTap: () =>
+                              unawaited(context.read<HomeCubit>().getToken()),
                         )
                       else
                         const TrendingScreen(),

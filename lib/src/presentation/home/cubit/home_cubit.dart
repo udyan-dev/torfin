@@ -89,7 +89,7 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
-  Future<void> checkNotificationPermission() async {
+  void checkNotificationPermission() {
     unawaited(
       _notificationService.requestPermission().catchError((_) {
         return false;

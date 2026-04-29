@@ -67,7 +67,7 @@ class _MainAppState extends State<MainApp> {
   void _handleBackgrounding() {
     di<NotificationService>().stop(cancelNotification: false);
     BackgroundDownloadService.stopHeartbeat();
-    _saveStateBeforeExit();
+    unawaited(_saveStateBeforeExit());
   }
 
   @override

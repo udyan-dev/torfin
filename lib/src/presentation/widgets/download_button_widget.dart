@@ -1,4 +1,3 @@
-import 'package:vector_graphics/vector_graphics.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../../../core/bindings/di.dart';
 import '../../../core/helpers/base_exception.dart';
@@ -42,7 +42,8 @@ class DownloadButtonWidget extends StatelessWidget {
           ? FloatingActionButton(
               backgroundColor: context.colors.buttonPrimary,
               shape: LinearBorder.none,
-              child: SvgPicture(AssetBytesLoader(AppAssets.icAddLarge),
+              child: SvgPicture(
+                const AssetBytesLoader(AppAssets.icAddLarge),
                 width: 20,
                 height: 20,
                 colorFilter: context.colors.iconOnColor.colorFilter,

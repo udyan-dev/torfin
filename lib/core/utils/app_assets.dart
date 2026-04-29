@@ -31,7 +31,8 @@ class AppAssets {
   static const icStop = '${icons}ic_stop.svg.vec';
   static const icQueue = '${icons}ic_queue.svg.vec';
   static const icDelete = '${icons}ic_delete.svg.vec';
-  static const icSearchSuggestion = '${icons}ic_search_suggestion_state.svg.vec';
+  static const icSearchSuggestion =
+      '${icons}ic_search_suggestion_state.svg.vec';
   static const icNSFW = '${icons}ic_nsfw.svg.vec';
   static const icMeter = '${icons}ic_meter.svg.vec';
   static const icEdit = '${icons}ic_edit.svg.vec';

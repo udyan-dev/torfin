@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,7 +16,7 @@ class InAppRatingWidget extends StatelessWidget {
     return SettingsListTile(
       icon: AppAssets.icRating,
       title: rateTheApp,
-      onTap: context.read<SettingsCubit>().rateTheApp,
+      onTap: () => unawaited(context.read<SettingsCubit>().rateTheApp()),
     );
   }
 }

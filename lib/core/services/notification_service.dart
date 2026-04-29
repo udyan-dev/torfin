@@ -1,4 +1,4 @@
-import 'dart:async' show Timer;
+import 'dart:async' show Timer, unawaited;
 import 'dart:io';
 import 'dart:ui';
 
@@ -52,7 +52,9 @@ class NotificationService {
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
-      onDidReceiveNotificationResponse: _handleAction,
+      onDidReceiveNotificationResponse: (response) {
+        unawaited(_handleAction(response));
+      },
     );
     final launchDetails = await _notifications
         .getNotificationAppLaunchDetails();
@@ -85,7 +87,10 @@ class NotificationService {
 
   void start() {
     if (!(_timer?.isActive ?? false)) {
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => unawaited(_update()),
+      );
     }
     if (!_isListeningTaskData) {
       FlutterForegroundTask.addTaskDataCallback(_onTaskData);
@@ -115,14 +120,12 @@ class NotificationService {
       onNavigateToTab?.call(2);
       return;
     }
-    _processAction(data);
+    unawaited(_processAction(data));
   }
 
   Future<void> _processAction(String action) async {
     try {
-      final torrents = await _engine.fetchTorrents(
-        mode: TorrentFetchMode.list,
-      );
+      final torrents = await _engine.fetchTorrents(mode: TorrentFetchMode.list);
       switch (action) {
         case 'pause':
           for (final t in torrents) {
@@ -142,9 +145,9 @@ class NotificationService {
             t.stop();
           }
           await BackgroundDownloadService.stop();
-          _notifications.cancel(id: _kNotificationId);
+          unawaited(_notifications.cancel(id: _kNotificationId));
       }
-      _update();
+      unawaited(_update());
     } catch (_) {}
   }
 
@@ -348,9 +351,7 @@ class NotificationService {
       return;
     }
     if (actionId == 'cancel') {
-      final torrents = await _engine.fetchTorrents(
-        mode: TorrentFetchMode.list,
-      );
+      final torrents = await _engine.fetchTorrents(mode: TorrentFetchMode.list);
       for (final t in torrents) {
         t.stop();
       }
@@ -377,7 +378,7 @@ class NotificationService {
             key: _kInsufficientCoinsTimeKey,
             value: '${DateTime.now().millisecondsSinceEpoch}',
           );
-          _update();
+          unawaited(_update());
           return;
         }
         await _storage.delete(key: _kInsufficientCoinsIdKey);
@@ -404,7 +405,7 @@ class NotificationService {
         if (t == null) return;
         isPause ? t.stop() : t.start();
       }
-      _update();
+      unawaited(_update());
     } catch (_) {}
   }
 }
